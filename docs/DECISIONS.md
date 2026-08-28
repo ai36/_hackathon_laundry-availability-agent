@@ -122,3 +122,49 @@ standing check against the rubric. The hook can produce a false block on an exot
 invocation; if that happens, adjust the matcher in `git-guard.mjs` rather than disabling the
 hook. CLAUDE.md "System rules" section and the `git-workflow` / `compliance-review` memory
 entries carry the same rules across sessions.
+
+---
+
+## D-0005 — Product scope and evaluation approach (laundry3)
+
+- **Date:** 2026-08-28
+- **Status:** Accepted (from the scoping interview; see `docs/PROBLEM.md`, `docs/EVALUATION.md`)
+
+**Context.** Solo build, hard deadline **2026-08-30 12:00 UTC-7**. The product is a
+laundry-room machine-availability agent; the full vision (calibration + runtime CV +
+temporal memory + timers + reservations + portal) is far more than fits the deadline.
+
+**Decision.**
+
+- **Core (P0):** an agent that turns a frame (+ prior state) into a **verified per-machine
+  status list** (state, confidence, rationale) via a multi-step graph with an explicit
+  verification pass, plus a **calibration** step that builds a per-site config (per-machine
+  ROIs, reference crops, few-shot exemplars, thresholds) from human-confirmed frames — **no
+  model fine-tuning**.
+- **Primary metric:** overall per-machine free/occupied accuracy on a labelled frame set.
+  Secondary: tokens/cost per frame.
+- **Baseline:** single Claude vision prompt on the whole frame, same metric, same frames.
+  Contextual baseline: the manual "walk over and check" process (narrative only).
+- **Vision engine:** Claude vision API, with a `--replay` mode that re-runs scoring from
+  cached responses (no key, no cost) so judges reproduce the number; a small `smoke` subset
+  runs live.
+- **Data:** the author's own real shared laundry room (multi-angle stills + a short
+  time-ordered series), shot with no people, tightly framed, identifying details removed;
+  the "person in frame" hard case uses a synthetic/augmented frame.
+- **Measured iterations inside P0:** the changelog needs at least two real iterations with
+  the same-metric evidence, so **Iteration 1 (per-machine ROI calibration config)** and
+  **Iteration 2 (explicit verification pass for low-confidence machines)** are part of P0,
+  not "if time". Iteration 3 (temporal memory / change-detection) stays P1.
+- **Deferred:** change-detection + cycle timers + abandoned-laundry (P1); reservation flow +
+  notifications (P2); hardware integration, fine-tuning, calibration-drift handling
+  (out of scope, documented as limitations).
+- **Runtime human review:** none for the hackathon — calibration-reviewed only. A wrong
+  "free" is low harm (reproduces today's wasted trip; no hardware/money). Portal shows
+  confidence + a "confirm on arrival" caveat. Runtime review queue is a documented
+  production path. (See `docs/PROBLEM.md` ground rule 05 section.)
+
+**Consequences.** The agentic contribution must be visible in the changelog as per-step
+experiments (add ROI calibration → add verification → add memory), each measured with the
+same metric, or the 30-point "Agent Solution & Engineering" criterion is at risk. Dataset
+size is the main threat to a stable metric; mitigated with a disjoint calibration/eval split
+and multiple angles × time points.

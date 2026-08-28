@@ -12,6 +12,50 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Problem scoping via the grillme skill
+
+- Ran the `grillme` Socratic-interview skill against the project to define the task.
+- Outcome (full detail in `docs/PROBLEM.md`, `docs/EVALUATION.md`, `docs/DECISIONS.md` D-0005):
+  - **User:** apartment-complex tenant using a shared laundry room (~20–30 machines, half
+    washers / half dryers).
+  - **Bottleneck:** no advance visibility of machine availability → wasted trips carrying
+    laundry back and forth.
+  - **MVP core (P0):** agent → verified per-machine status list (state + confidence +
+    rationale) via a multi-step graph with a verification pass; plus a calibration step that
+    builds a per-site config (ROIs, reference crops, few-shot, thresholds) — no fine-tuning.
+  - **Primary metric:** overall per-machine free/occupied accuracy on a labelled frame set.
+    Secondary: tokens/cost per frame.
+  - **Baseline:** single Claude vision prompt on the whole frame (same metric, same frames);
+    contextual baseline = the manual "walk over and check" process.
+  - **Vision engine:** Claude vision API + `--replay` from cached responses (reproducible
+    with no key) + a small live `smoke` subset.
+  - **Data:** author's own real laundry room — multi-angle stills + a short time-ordered
+    series; shot with no people, tightly framed, identifying details removed; "person in
+    frame" hard case is synthetic.
+  - **Deadline:** working by 2026-08-30 12:00 UTC-7; solo. P1 = change-detection + timers +
+    abandoned laundry; P2 = reservation flow + notifications.
+- Rewrote `docs/PROBLEM.md` and `docs/EVALUATION.md` with real content; added D-0005;
+  updated `docs/CHANGELOG.md` (evaluation method + progression rows); added `hackaton` to
+  `cspell.json` (the remote repo name is spelled that way).
+- Independent compliance review of the scoping diff: **PASS WITH RISKS — no blockers.**
+  Applied:
+  - Data plan (G6/G7): added an explicit rule to exclude/blur **other tenants' belongings**
+    (baskets, carts, clothing), prefer a clear room or crop to machine faces, and require
+    that the manager's authorization covers filming the common area for this purpose.
+  - Case 13 (person in frame): record the augmentation source (synthetic or licensed/own)
+    next to the frame.
+  - Closed the G5 open question: **calibration-reviewed only, no runtime human checkpoint**
+    for the hackathon (wrong "free" = today's wasted trip, low harm); portal shows
+    confidence + "confirm on arrival"; runtime review is a documented production path.
+  - `docs/EVALUATION.md`: tightened the "case" definition (one frame); split P1 sequence
+    cases (S1/S2) out of the P0 count; expanded P0 to 13 single-frame cases so "10+" holds
+    without P1.
+  - D-0005 / CHANGELOG: pinned **Iteration 1 (ROI calibration)** and **Iteration 2
+    (verification pass)** inside P0 so the changelog has ≥2 measured iterations.
+  - `docs/REPRODUCTION.md`: marked the baseline/eval/expected-output sections as a
+    pre-submission blocker (G10).
+- Next: build the labelled dataset + the single-prompt baseline + scoring harness.
+
 ### 2026-08-28 — Git workflow + compliance review as system rules
 
 - Added GitHub remote `origin` = `git@github.com:ai36/_hackaton_laundry3.git` (SSH auth verified).

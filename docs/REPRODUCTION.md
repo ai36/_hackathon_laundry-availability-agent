@@ -56,15 +56,22 @@ npx skills add jekudy/grillme-skill@grillme -g -y
 
 `find-skills` is part of the base Claude Code skill set (uses `npx skills find`).
 
+> **Pre-submission blocker (G10):** the three sections below must contain the exact
+> commands, expected output, runtime, and cost before the project is submitted. They are
+> TBD only while the harness does not yet exist.
+
 ## Baseline
 
-_TBD — exact command(s) to run the simple baseline on the evaluation cases._
+_TBD — exact command to run the single-prompt baseline on the evaluation cases
+(`--replay` for the cached, key-free run)._
 
 ## Evaluation
 
-_TBD — exact command to score baseline and final on the shared cases. See
-`docs/EVALUATION.md`. Record expected output, approximate runtime, and cost._
+_TBD — exact command to score baseline and agent on the shared P0 cases. See
+`docs/EVALUATION.md`. Record expected output, approximate runtime, and cost;
+`--replay` runs offline with no `ANTHROPIC_API_KEY`, the `smoke` subset runs live._
 
 ## Expected output
 
-_TBD — what a successful run prints / produces._
+_TBD — what a successful run prints / produces (per-machine accuracy for baseline vs agent,
+tokens/cost per frame)._

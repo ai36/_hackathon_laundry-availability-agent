@@ -4,6 +4,7 @@
   "words": [
     "laundry3",
     "hackathon",
+    "hackaton",
     "micro1",
     "worklog",
     "grillme",
@@ -13,7 +14,11 @@
     "typecheck",
     "tailwindcss",
     "autoBind",
-    "Geist"
+    "Geist",
+    "Turbopack",
+    "prerendered",
+    "VLM",
+    "few-shot"
   ],
   "ignorePaths": ["node_modules/**", ".next/**", "package-lock.json"]
 }

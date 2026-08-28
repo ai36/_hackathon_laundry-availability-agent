@@ -3,13 +3,23 @@
 A project for the **micro1 Agentic Workflows Hackathon** — pick a real problem, solve it
 with agents, and show the improvement over a fair baseline with evidence.
 
-> Status: **infrastructure bootstrap.** The problem statement, baseline, and evaluation are
-> not defined yet — see `docs/PROBLEM.md`.
+> Status: **problem scoped, implementation starting.** See `docs/PROBLEM.md` and
+> `docs/EVALUATION.md`. Deadline for a working solution: 2026-08-30 12:00 UTC-7.
 
 ## The intended user & bottleneck
 
-_To be written in `docs/PROBLEM.md` and summarized here: who has the problem, what is slow
-or error-prone about how it is handled today, and why solving it is valuable._
+A tenant in an apartment complex with a **shared laundry room** (~20–30 machines) has no way
+to know if a machine is free before hauling a bag of laundry over — so they often carry it
+there, find everything occupied, and carry it back to wait and try again.
+
+**laundry3** reads laundry-room camera frames with an agent and publishes a per-machine
+free/occupied list to a portal, so the tenant checks availability first and can hold a
+machine for the few minutes it takes to walk over.
+
+The hackathon build focuses on the core: an agent that turns a frame (plus a per-site
+calibration config and prior state) into a **verified per-machine status list**, measured
+against a single-prompt baseline on per-machine accuracy. Full scope, phasing, and the
+data/privacy plan are in `docs/PROBLEM.md`.
 
 ## Tech stack
 
