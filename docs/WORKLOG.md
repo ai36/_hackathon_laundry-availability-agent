@@ -12,6 +12,26 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Frame redaction pipeline
+
+- User: the frames are of a laundry room that is **not theirs** → redact everything that
+  could identify the location, without hurting machine-status legibility.
+- `scripts/prepare-dataset.ts` extended: reads `data/raw/redactions.json` (git-ignored;
+  schema committed as `data/redactions.example.json`) and applies per-source rectangles via
+  ffmpeg — `boxblur` (default, strength 30) or solid `drawbox` fill (`mode: "fill"`, for
+  windows). Also `--blur-all=N` coarse fallback. Runs after downscale, before the metadata
+  strip. Coords are in produced-frame pixel space, keyed by source basename.
+- Wrote a best-effort `data/raw/redactions.json` for all 16 sources from a spot review of
+  ~7 frames. Verified: `img_1825` (close-up) — Coin Meter phone/email sticker fully blurred,
+  Speed Queen display + card readers still sharp. `img_8629` (angled side view) — phone
+  sticker + windows + wall art blurred, but the spec is heavy-handed there; the
+  `IMG_8629-8633` group is marked `TUNE` and still needs a careful per-frame pass.
+- Frames remain **git-ignored** — held until the redaction pass is verified frame-by-frame
+  and authorization is confirmed (`data/README.md` "Redaction" + "Held-out frames").
+- `docs/DECISIONS.md` D-0009 updated; `data/README.md` gains a "Redaction" tuning loop.
+- Verification: `npm run typecheck` pass; `npm run dataset:prepare` produces 45 redacted
+  frames (3.9 MB); `npm run check:data` passes.
+
 ### 2026-08-28 — 4th machine state, labelling workflow, .env
 
 - **`out_of_order` state added** (`неисправна/отключена`) — state space is now

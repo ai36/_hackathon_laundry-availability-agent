@@ -81,3 +81,11 @@ Record the result of each infra verification here (append, newest first).
 - `npm run typecheck` / `npm run lint` / `npm run build` — **pass**.
 - `npm test` — **23/23** (config 10, `score.test.ts` 8 incl. 3 `out_of_order`, `parse.test.ts` 5).
 - `npm run label:new` / `label:check` / `label:stats` — run (0 labels yet).
+
+### 2026-08-28 — frame redaction pipeline
+
+- `npm run typecheck` / `npm run lint` / `npm run build` — **pass**; `npm test` — **23/23**.
+- `npm run dataset:prepare -- --force` — 45 frames, redaction applied from
+  `data/raw/redactions.json` (16 source specs); `npm run check:data` passes.
+- Manual spot check: frontal frames clean (phone/email/QR blurred, displays sharp);
+  `IMG_8629-8633` group needs rectangle tuning — frames stay held out of git.

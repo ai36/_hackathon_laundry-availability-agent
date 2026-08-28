@@ -6,12 +6,25 @@
  *   data/raw/*.mov         ->  data/public/frames/<slug>_<nnn>.jpg    (frames at --fps, same treatment)
  *
  * Originals in data/raw/ are git-ignored and never leave the machine. Only the cleaned,
- * downscaled JPEGs under data/public/frames/ are committed. Requires ffmpeg on PATH.
+ * downscaled, redacted JPEGs under data/public/frames/ are committed. Requires ffmpeg on PATH.
  *
- *   npx tsx scripts/prepare-dataset.ts [--fps=1] [--max-still=1600] [--max-video=1280] [--force]
+ * Redaction: `data/raw/redactions.json` (see data/redactions.example.json) blurs/fills
+ * per-source rectangles — vendor phone/email, QR codes, notices, window views. Without that
+ * file NOTHING is redacted; `--blur-all=N` is a coarse fallback that blurs every frame.
+ *
+ *   npx tsx scripts/prepare-dataset.ts [--fps=1] [--max-still=1600] [--max-video=1280]
+ *                                      [--blur-all=0] [--force]
  */
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { join, parse } from "node:path";
 
 const RAW_DIR = "data/raw";
@@ -27,6 +40,10 @@ const FPS = Number(args.get("fps") ?? 1);
 const MAX_STILL = Number(args.get("max-still") ?? 1600);
 const MAX_VIDEO = Number(args.get("max-video") ?? 1280);
 const FORCE = args.has("force");
+// Global light blur applied to every frame — makes fine print (phone numbers, QR codes,
+// notices) unreadable while leaving door state / display digits / indicator lights legible.
+// Tune per dataset; 0 disables. Per-source rectangles (redactions.json) handle the rest.
+const BLUR_ALL = Number(args.get("blur-all") ?? 0);
 
 function ffmpeg(inArgs: string[]): void {
   execFileSync("ffmpeg", ["-y", "-hide_banner", "-loglevel", "error", ...inArgs], {
@@ -73,6 +90,63 @@ function cleanOutputs(): void {
   }
 }
 
+/**
+ * Redaction spec (git-ignored, in data/raw/). Rectangles are in OUTPUT (post-downscale)
+ * pixel space. A produced frame gets the rectangle list of its SOURCE basename (without
+ * extension), so one spec covers every frame from a fixed camera.
+ *
+ *   { "defaults": { "mode": "blur", "strength": 30 },
+ *     "sources": { "IMG_1823": [ { "x":200,"y":350,"w":1400,"h":130,"note":"sticker band" } ],
+ *                  "IMG_8629": [ { "x":300,"y":0,"w":520,"h":240,"mode":"fill" } ] } }
+ */
+type Rect = { x: number; y: number; w: number; h: number; mode?: "blur" | "fill"; note?: string };
+type RedactionSpec = {
+  defaults?: { mode?: "blur" | "fill"; strength?: number };
+  sources?: Record<string, Rect[]>;
+};
+
+function loadRedactions(): RedactionSpec {
+  const p = join(RAW_DIR, "redactions.json");
+  return existsSync(p) ? (JSON.parse(readFileSync(p, "utf8")) as RedactionSpec) : {};
+}
+
+/** Apply one rectangle in place (blur or solid fill) using ffmpeg. */
+function applyRect(file: string, r: Rect, spec: RedactionSpec): void {
+  const mode = r.mode ?? spec.defaults?.mode ?? "blur";
+  const strength = spec.defaults?.strength ?? 30;
+  const tmp = `${file}.red.jpg`;
+  const vf =
+    mode === "fill"
+      ? `drawbox=x=${r.x}:y=${r.y}:w=${r.w}:h=${r.h}:color=gray:t=fill`
+      : `split[a][b];[b]crop=${r.w}:${r.h}:${r.x}:${r.y},boxblur=${strength}:2[bl];` +
+        `[a][bl]overlay=${r.x}:${r.y}`;
+  ffmpeg(["-i", file, "-vf", vf, "-map_metadata", "-1", "-q:v", "3", tmp]);
+  rmSync(file);
+  renameSync(tmp, file);
+}
+
+function redactOutputs(manifest: Entry[]): number {
+  const spec = loadRedactions();
+  if (!spec.sources || Object.keys(spec.sources).length === 0) {
+    console.log(
+      "no data/raw/redactions.json — frames are NOT redacted. " +
+        "Copy data/redactions.example.json and tune before committing frames (see data/README.md).",
+    );
+    return 0;
+  }
+  let n = 0;
+  for (const entry of manifest) {
+    const srcKey = parse(entry.source).name;
+    const rects = spec.sources[srcKey];
+    if (!rects?.length) continue;
+    const p = join(OUT_DIR, entry.frame);
+    for (const r of rects) applyRect(p, r, spec);
+    n++;
+  }
+  console.log(`redacted ${n} frame(s) from ${Object.keys(spec.sources).length} source spec(s)`);
+  return n;
+}
+
 if (!existsSync(RAW_DIR)) {
   console.error(`${RAW_DIR}/ not found — put the original photos/videos there first.`);
   process.exit(1);
@@ -94,6 +168,8 @@ const videos = raw.filter((f) => /\.(mov|mp4|m4v)$/i.test(f));
 type Entry = { frame: string; source: string; kind: "still" | "video"; approxSeconds?: number };
 const manifest: Entry[] = [];
 
+const blurChain = BLUR_ALL > 0 ? `,boxblur=${BLUR_ALL}:1` : "";
+
 for (const file of stills) {
   const out = `${slug(parse(file).name)}.jpg`;
   ffmpeg([
@@ -102,7 +178,7 @@ for (const file of stills) {
     "-map_metadata",
     "-1",
     "-vf",
-    `scale='min(${MAX_STILL},iw)':-2`,
+    `scale='min(${MAX_STILL},iw)':-2${blurChain}`,
     "-q:v",
     "3",
     join(OUT_DIR, out),
@@ -138,6 +214,7 @@ for (const file of videos) {
   console.log(`video  ${file} -> ${produced.length} frames @ ${FPS} fps`);
 }
 
+redactOutputs(manifest);
 cleanOutputs();
 
 manifest.sort((a, b) => a.frame.localeCompare(b.frame));

@@ -1,0 +1,19 @@
+{
+  "_comment": "Copy to data/raw/redactions.json (git-ignored) and tune. Rectangles are in OUTPUT (post-downscale) pixel space — open a produced frame in data/public/frames/, read pixel coords, adjust, re-run `npm run dataset:prepare -- --force`. Keyed by SOURCE basename (no extension); every frame derived from that source gets the list. mode: \"blur\" (default) or \"fill\" (solid gray — use for windows / anything that could geolocate). Goal: no vendor phone/email, QR code, notice text, or outdoor view legible; machine doors, displays and indicator lights stay sharp.",
+  "defaults": { "mode": "blur", "strength": 30 },
+  "sources": {
+    "IMG_1234": [
+      {
+        "x": 0,
+        "y": 380,
+        "w": 1600,
+        "h": 300,
+        "note": "service-sticker + QR band above the displays"
+      }
+    ],
+    "IMG_5678": [
+      { "x": 0, "y": 0, "w": 780, "h": 320, "mode": "fill", "note": "window / outdoor view" },
+      { "x": 1080, "y": 640, "w": 460, "h": 320, "note": "sticker with phone number" }
+    ]
+  }
+}

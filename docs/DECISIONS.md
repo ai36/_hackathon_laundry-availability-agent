@@ -306,14 +306,12 @@ code needs a place for the scoring harness, the baseline, and the agent pipeline
 - **Dataset pipeline.** Originals live in git-ignored `data/raw/`. `scripts/prepare-dataset.ts`
   (ffmpeg) produces `data/public/frames/`: stills downscaled ≤1600px, video frames at a
   configurable `--fps` ≤1280px, every output run through `-map_metadata -1` **and** a JPEG
-  JPEG marker stripper that drops every APPn segment (EXIF/XMP/IPTC/ICC/Adobe) and the COM
+  marker stripper that drops every APPn segment (EXIF/XMP/IPTC/ICC/Adobe) and the COM
   comment ffmpeg writes, keeping a plain JFIF APP0 if present. The privacy gate
   (`scripts/check-data-privacy.mjs`) now also rejects any video staged under `data/`.
 - **The produced frames are held out of git** (`/data/public/frames/` is git-ignored) until
-  the laundry-room manager's authorization to publish is confirmed and identifying details
-  (a vendor service phone-number sticker, outdoor window views, any apartment numbers) are
-  redacted. Only the pipeline, the splits/labels scaffolding, and `manifest.json`'s
-  description ship for now. This keeps a real-photo publish behind an explicit human check.
+  identifying details are removed and publish authorization is confirmed. Only the pipeline
+  + scaffolding ship for now — a real-photo publish stays behind an explicit human check.
 - **Splits.** `data/splits/{calibration,evaluation,smoke}.txt` — plain frame-id lists, must
   be disjoint. Labels: one `data/labels/<frameId>.json` per frame, shape-checked on load.
 - **Code layout.**
@@ -333,6 +331,18 @@ code needs a place for the scoring harness, the baseline, and the agent pipeline
 Fake client. The real `AnthropicVisionClient` and actual labels are the remaining gap before
 a first baseline number. Keeping the vision layer behind an interface is what makes
 `--replay` (key-free reproduction) and offline tests possible.
+
+**Amendment (2026-08-28) — redaction step + raised publish bar.** Added a redaction stage to
+`prepare-dataset.ts`: `data/raw/redactions.json` (git-ignored; schema
+`data/redactions.example.json`) lists per-source rectangles applied via ffmpeg — `boxblur`
+(default strength 30) for fine print (vendor phone/email, QR, notices), solid `drawbox`
+`fill` for windows; `--blur-all=N` is a coarse fallback. Applied after downscale, before the
+metadata strip. Design bias: redact anything location-identifying, keep machine faces sharp
+so the classification task stays realistic. **The frames were of a laundry room the author
+does not own**, so the publish bar was raised from "identifying details removed" to
+"**every frame verified clear one-by-one, and publish authorization confirmed**". Current
+best-effort spec covers the frontal frames; the angled `IMG_8629-8633` group still needs its
+rectangles tuned. Frames remain git-ignored until then.
 
 ---
 

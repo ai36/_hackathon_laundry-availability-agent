@@ -35,11 +35,29 @@ data/
   out of the repo; its existence is noted in `docs/PROBLEM.md`.
 - No credentials or personal data anywhere in `data/`.
 
+## Redaction
+
+`npm run dataset:prepare` reads `data/raw/redactions.json` (git-ignored; schema in
+`data/redactions.example.json`) and blurs / fills per-source rectangles — vendor phone
+numbers and email, QR codes, notice text, window/outdoor views — while leaving machine
+doors, displays, and indicator lights sharp.
+
+Tuning loop:
+
+1. `npm run dataset:prepare -- --force`
+2. Open every file in `data/public/frames/`. Anything location-identifying still legible?
+3. Adjust the rectangles in `data/raw/redactions.json` (coords are in the produced frame's
+   pixel space; `mode: "fill"` for windows). Repeat from 1.
+
+`--blur-all=N` is a coarse fallback that blurs whole frames.
+
 ## Held-out frames
 
 The 45 frames produced from the current originals are **git-ignored** pending (a) confirmed
-authorization to publish and (b) redaction of a vendor service sticker (phone number) and
-outdoor window views. Re-enable by deleting the `/data/public/frames/` line in `.gitignore`.
+authorization to publish and (b) a completed redaction pass verified frame-by-frame. A
+best-effort `data/raw/redactions.json` exists; the angled side-view frames (IMG_8629-8633)
+still need their rectangles tightened. Re-enable by deleting the `/data/public/frames/` line
+in `.gitignore` once every frame is clear.
 
 ## Enforcement
 
