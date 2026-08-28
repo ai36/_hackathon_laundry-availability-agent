@@ -121,7 +121,7 @@ src/agent/          Vision client (+ cache/replay), reply parser, baseline, agen
 src/portal/         room-status: fuse the eval report into a per-machine room view
 src/app/, src/stores/, src/components/   Next.js portal page + MobX MachinesStore
 scripts/            prepare-dataset · run-eval · label · gen-initial-labels · check-data-privacy
-data/               raw/ (ignored) · public/frames/ (held out) · labels/ · splits/ · cache/ — see data/README.md
+data/               raw/ (ignored) · public/frames/ (9 labelled eval stills, redacted) · labels/ · splits/ · cache/ — see data/README.md
 docs/               Hackathon deliverables (see the table below)
 .claude/            Claude Code config: hackathon-compliance subagent, git-guard hook, /worklog
 ```

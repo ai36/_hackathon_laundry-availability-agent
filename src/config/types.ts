@@ -64,6 +64,21 @@ export interface Laundry3Config {
     };
   };
 
+  frames: {
+    /**
+     * Target width (px) for downscaled **still** frames. This is the single source of truth
+     * for frame resolution: the dataset pipeline downscales to it, per-camera redaction
+     * masks are authored at it, and the runtime feeds the agent frames at it — mask and
+     * camera frame must share one resolution. Width, not longest edge (the source frames
+     * are landscape); height follows by aspect ratio (kept even). Only scales down.
+     */
+    maxStillPx: number;
+    /** Target width (px) for downscaled frames extracted from source **video**. */
+    maxVideoPx: number;
+    /** Frames per second sampled from each source video. */
+    videoFps: number;
+  };
+
   runtime: {
     /** How often (seconds) the runtime re-derives machine state from new frames. */
     stateRefreshSeconds: number;

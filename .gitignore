@@ -50,10 +50,20 @@ next-env.d.ts
 # data/public: only the processed frame set + its README are committed
 /data/public/*
 !/data/public/README.md
-# frames/ is HELD OUT of git pending: (a) laundry-room manager authorization to publish,
-# (b) redaction of the vendor service sticker (phone number) + window views. Re-enable by
-# deleting the next line once cleared.
-/data/public/frames/
+!/data/public/frames/
+# frames/: only the 9 labelled P0 evaluation stills are committed, each with the author's
+# hand-drawn redaction boxes burned in (vendor service sticker / phone number, window and
+# TV views). Video-derived frames and unlabelled stills stay local.
+/data/public/frames/*
+!/data/public/frames/img_1819.jpg
+!/data/public/frames/img_1821.jpg
+!/data/public/frames/img_1822.jpg
+!/data/public/frames/img_1823.jpg
+!/data/public/frames/img_1824.jpg
+!/data/public/frames/img_1825.jpg
+!/data/public/frames/img_1826.jpg
+!/data/public/frames/img_8629.jpg
+!/data/public/frames/img_8633.jpg
 # never commit video
 *.mov
 *.MOV

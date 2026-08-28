@@ -8,11 +8,21 @@
  * Originals in data/raw/ are git-ignored and never leave the machine. Only the cleaned,
  * downscaled, redacted JPEGs under data/public/frames/ are committed. Requires ffmpeg on PATH.
  *
- * Redaction: `data/raw/redactions.json` (see data/redactions.example.json) blurs/fills
- * per-source rectangles — vendor phone/email, QR codes, notices, window views. Without that
- * file NOTHING is redacted; `--blur-all=N` is a coarse fallback that blurs every frame.
+ * Redaction, two ways (both keyed by SOURCE basename, so one spec covers every frame from a
+ * fixed camera):
+ *   1. `data/raw/masks/<source>.png` — a raster mask painted once per camera angle. Opaque
+ *      pixels become a solid gray patch on the frame; transparent pixels pass through. Any
+ *      shape. This is the recommended path for a real integrator (paint once, reuse).
+ *   2. `data/raw/redactions.json` (see data/redactions.example.json) — per-source
+ *      rectangles, blur or fill. Used when no mask exists for that source.
+ * A mask wins over rectangles for the same source. Without either, NOTHING is redacted;
+ * `--blur-all=N` is a coarse fallback that blurs every frame.
  *
- *   npx tsx scripts/prepare-dataset.ts [--fps=1] [--max-still=1600] [--max-video=1280]
+ * Resolution and fps default to `frames.*` in laundry3.config.ts; the flags below override
+ * per-run. The still-frame width (`frames.maxStillPx`) is the resolution a per-camera mask
+ * must be authored at and the resolution the runtime feeds the agent.
+ *
+ *   npx tsx scripts/prepare-dataset.ts [--fps=N] [--max-still=PX] [--max-video=PX]
  *                                      [--blur-all=0] [--force]
  */
 import { execFileSync } from "node:child_process";
@@ -27,8 +37,11 @@ import {
 } from "node:fs";
 import { join, parse } from "node:path";
 
+import { config } from "@/config";
+
 const RAW_DIR = "data/raw";
 const OUT_DIR = "data/public/frames";
+const MASK_DIR = "data/raw/masks";
 
 const args = new Map(
   process.argv.slice(2).map((a) => {
@@ -36,9 +49,10 @@ const args = new Map(
     return [k, v ?? "true"] as const;
   }),
 );
-const FPS = Number(args.get("fps") ?? 1);
-const MAX_STILL = Number(args.get("max-still") ?? 1600);
-const MAX_VIDEO = Number(args.get("max-video") ?? 1280);
+// Defaults come from laundry3.config.ts (`frames.*`); CLI flags override per-run.
+const FPS = Number(args.get("fps") ?? config.frames.videoFps);
+const MAX_STILL = Number(args.get("max-still") ?? config.frames.maxStillPx);
+const MAX_VIDEO = Number(args.get("max-video") ?? config.frames.maxVideoPx);
 const FORCE = args.has("force");
 // Global light blur applied to every frame — makes fine print (phone numbers, QR codes,
 // notices) unreadable while leaving door state / display digits / indicator lights legible.
@@ -125,26 +139,78 @@ function applyRect(file: string, r: Rect, spec: RedactionSpec): void {
   renameSync(tmp, file);
 }
 
+/** Resolve a per-source raster mask (`data/raw/masks/<source>.png`), if one exists. */
+function maskFor(source: string): string | null {
+  const p = join(MASK_DIR, `${parse(source).name}.png`);
+  return existsSync(p) ? p : null;
+}
+
+/**
+ * Composite a per-angle raster mask onto a frame in place. The mask is scaled to the frame,
+ * its RGB forced to gray, its own alpha kept — so opaque paint becomes a solid gray patch
+ * and transparent areas are untouched. Shape-agnostic; authored once per fixed camera.
+ */
+function applyMask(file: string, maskPath: string): void {
+  const tmp = `${file}.red.jpg`;
+  const filter =
+    "[1:v][0:v]scale2ref=w=iw:h=ih[m][base];" +
+    "[m]format=rgba,geq=r=128:g=128:b=128:a='alpha(X,Y)'[mg];" +
+    "[base][mg]overlay=0:0";
+  ffmpeg([
+    "-i",
+    file,
+    "-i",
+    maskPath,
+    "-filter_complex",
+    filter,
+    "-map_metadata",
+    "-1",
+    "-q:v",
+    "3",
+    tmp,
+  ]);
+  rmSync(file);
+  renameSync(tmp, file);
+}
+
 function redactOutputs(manifest: Entry[]): number {
   const spec = loadRedactions();
-  if (!spec.sources || Object.keys(spec.sources).length === 0) {
+  const sourcesWithMask = new Set(
+    existsSync(MASK_DIR)
+      ? readdirSync(MASK_DIR)
+          .filter((f) => f.toLowerCase().endsWith(".png"))
+          .map((f) => parse(f).name)
+      : [],
+  );
+  const specSources = spec.sources ? Object.keys(spec.sources).length : 0;
+  if (specSources === 0 && sourcesWithMask.size === 0) {
     console.log(
-      "no data/raw/redactions.json — frames are NOT redacted. " +
-        "Copy data/redactions.example.json and tune before committing frames (see data/README.md).",
+      "no data/raw/masks/*.png and no data/raw/redactions.json — frames are NOT redacted. " +
+        "Add a per-angle mask or copy data/redactions.example.json before committing (see data/README.md).",
     );
     return 0;
   }
-  let n = 0;
+  let masked = 0;
+  let boxed = 0;
   for (const entry of manifest) {
     const srcKey = parse(entry.source).name;
-    const rects = spec.sources[srcKey];
-    if (!rects?.length) continue;
     const p = join(OUT_DIR, entry.frame);
+    const mask = maskFor(entry.source);
+    if (mask) {
+      applyMask(p, mask);
+      masked++;
+      continue; // a mask supersedes rectangles for this source
+    }
+    const rects = spec.sources?.[srcKey];
+    if (!rects?.length) continue;
     for (const r of rects) applyRect(p, r, spec);
-    n++;
+    boxed++;
   }
-  console.log(`redacted ${n} frame(s) from ${Object.keys(spec.sources).length} source spec(s)`);
-  return n;
+  console.log(
+    `redacted ${masked + boxed} frame(s): ${masked} via per-angle mask (${sourcesWithMask.size} mask` +
+      `${sourcesWithMask.size === 1 ? "" : "s"}), ${boxed} via ${specSources} rectangle spec(s)`,
+  );
+  return masked + boxed;
 }
 
 if (!existsSync(RAW_DIR)) {

@@ -80,6 +80,34 @@ the user, encode that in the metric, and let it tell you which agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-28 — 9 eval frames committed (author-drawn redactions)
+
+- New `scripts/derive-redactions.ts`: recovers the frame author's hand-drawn black
+  redaction boxes from `data/raw/_reference/*.jpg` (connected-component analysis) and writes
+  `data/raw/redactions.json` as `mode:"fill"` rectangles in produced-frame pixel space.
+- `npx tsx scripts/derive-redactions.ts` → 9 sources, 3–12 boxes each;
+  `npm run dataset:prepare -- --force` → 45 frames, `npm run check:data` **pass**.
+- Visually verified all 9 committed stills box-by-box against reference + label file:
+  décor-free identifying content covered (vendor sticker/phone, windows, wall TV); every
+  **determinate** machine's status display still legible; no colored annotation leaked in.
+- `.gitignore` now allows the 9 labelled eval stills by name; committed under
+  `data/public/frames/`. Video-derived + unlabelled frames stay local.
+- Compliance subagent: **PASS (with risks)**, no blockers —
+  `docs/trajectories/compliance/2026-08-28-commit-eval-frames.md`. Risk fixes applied:
+  inline caveat on the EVALUATION Results header; publish-authorization clause restored in
+  D-0009; cache-refresh tracked as an open item.
+- Integrator-feedback follow-ups (same change set):
+  - per-camera **raster mask** redaction (`data/raw/masks/<source>.png`) in
+    `prepare-dataset.ts` — paint once per fixed camera, opaque → gray patch; supersedes
+    rectangles. Rectangle path unchanged (9 frame hashes identical).
+  - frame resolution is now a **config knob** — `frames.{maxStillPx,maxVideoPx,videoFps}` in
+    `laundry3.config.ts`, validated on load; both scripts read it as defaults.
+    `frames.maxStillPx` is the shared resolution for pipeline + mask + runtime.
+- `npm run typecheck` / `npm run lint` / `npm run build` — **pass**; `npm test` — **30/30**.
+- **Known gap:** committed replay cache + recorded results predate these heavier boxes.
+  `--replay` reproduces the recorded numbers exactly (image-independent hash); a fresh
+  `--live` on the committed frames will differ slightly. Cache refresh pending (budget-gated).
+
 ### 2026-08-28 — infra bootstrap
 
 - `npm run typecheck` — **pass**, no errors.

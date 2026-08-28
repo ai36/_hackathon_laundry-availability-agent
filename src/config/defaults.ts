@@ -35,6 +35,11 @@ export const DEFAULT_CONFIG: Laundry3Config = {
       minChangedFraction: 0.02,
     },
   },
+  frames: {
+    maxStillPx: 1600,
+    maxVideoPx: 1280,
+    videoFps: 1,
+  },
   runtime: {
     stateRefreshSeconds: 30,
     staleAfterSeconds: 120,

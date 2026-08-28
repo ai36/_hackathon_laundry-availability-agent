@@ -12,6 +12,58 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — 9 evaluation frames committed (author-drawn redactions)
+
+- The frames are of a laundry room the author does not own, so redaction is author-authored,
+  not eyeballed: the author painted solid black boxes over identifying content on pristine
+  copies kept in the local `data/raw/_reference/`.
+- New **`scripts/derive-redactions.ts`** — decodes each reference to raw rgb24 (ffmpeg),
+  masks near-black pixels, finds connected components (4-neighbour BFS, min-area filter),
+  and writes `data/raw/redactions.json` with each bounding box scaled to produced-frame
+  pixel space, `mode:"fill"`. Re-run + `dataset:prepare --force` if references change.
+- `npx tsx scripts/derive-redactions.ts` → 9 sources (IMG_1819/1821–1826/8629/8633),
+  3–12 boxes each. `npm run dataset:prepare -- --force` burns them in (solid gray, after
+  the metadata strip). `npm run check:data` — **pass**.
+- The author had overwritten the pristine `data/raw/IMG_1826.JPG` with an annotated copy;
+  they supplied the original again and it was re-processed.
+- Verified all 9 committed stills box-by-box (Read tool) against the reference image and the
+  label file: vendor service sticker / phone, window views and the wall-mounted TV are
+  covered; generic décor is intentionally left visible; **every determinate machine's status
+  display stays legible**, so labels remain valid; no colored annotation overlay leaked in.
+- `.gitignore`: replaced the blanket `/data/public/frames/` hold-out with an allow-list of
+  the 9 stills by name. Committed under `data/public/frames/`. Video-derived frames,
+  unlabelled stills, and `manifest.json` stay local.
+- Docs updated: `data/README.md` (Redaction + Committed frames), `data/public/README.md`,
+  `README.md` layout line, `docs/DECISIONS.md` D-0009 (2nd amendment),
+  `docs/EVALUATION.md` + `docs/REPRODUCTION.md` limitations, `docs/CHANGELOG.md`.
+- **Known gap:** the committed replay cache and the recorded baseline/agent results were
+  produced against the earlier lightly-blurred frames. `--replay` still reproduces those
+  numbers exactly (cache key = semantic request, not image bytes); a fresh `--live` run on
+  the committed frames would land a few points lower where a box clips a display. Refreshing
+  the cache with a `--live` pass on the committed frames is pending (API-budget-gated).
+- Verification: `npm run typecheck` / `npm run lint` / `npm run build` / `npm run format:check`
+  — **pass**; `npm test` — **30/30**; `npm run check:data` — **pass**.
+- **Compliance review** (`hackathon-compliance` subagent):
+  `docs/trajectories/compliance/2026-08-28-commit-eval-frames.md` — **PASS (with risks)**,
+  no eligibility blockers. Risks handled: (1) headline numbers predate these frames →
+  disclosed in D-0009 + EVALUATION + REPRODUCTION + CHANGELOG, open item to refresh the
+  cache with a `--live` pass before any final results claim; (2) added an inline
+  "Caveat (read first)" under `docs/EVALUATION.md` `## Results`; (3) restored the publish-
+  authorization clause in D-0009's amendment (redaction ≠ substitute for authorization;
+  explicit yes/no open item).
+- **Follow-up (integrator feedback):** added per-camera **raster-mask** redaction to
+  `scripts/prepare-dataset.ts` — `data/raw/masks/<source>.png`, opaque pixels → solid gray
+  patch, painted once per fixed camera and reused (ffmpeg `scale2ref` + `geq` alpha overlay).
+  Supersedes rectangles for that source; rectangle path unchanged (9 committed frame hashes
+  identical after re-run). Documented in `data/README.md` + D-0009 integrator note.
+- **Follow-up (integrator feedback):** frame resolution is now a config knob —
+  new `frames` section in `laundry3.config.ts` (`maxStillPx` 1600 / `maxVideoPx` 1280 /
+  `videoFps` 1), validated in `src/config/load.ts` (+3 tests, 30 total).
+  `scripts/prepare-dataset.ts` and `scripts/derive-redactions.ts` read
+  `config.frames.*` as defaults (CLI flags still override). `frames.maxStillPx` is the one
+  resolution the pipeline, the per-camera mask, and the runtime all share. Documented in
+  `docs/CONFIGURATION.md`.
+
 ### 2026-08-28 — Portal page (End-to-End)
 
 - `src/portal/room-status.ts` — `buildRoomStatus()` fuses the committed eval report

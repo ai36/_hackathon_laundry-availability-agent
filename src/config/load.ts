@@ -75,6 +75,16 @@ export function validateConfig(c: Laundry3Config): void {
     "agent.changeDetection.minChangedFraction must be between 0 and 1",
   );
 
+  assert(
+    Number.isInteger(c.frames.maxStillPx) && c.frames.maxStillPx >= 64,
+    "frames.maxStillPx must be an integer >= 64",
+  );
+  assert(
+    Number.isInteger(c.frames.maxVideoPx) && c.frames.maxVideoPx >= 64,
+    "frames.maxVideoPx must be an integer >= 64",
+  );
+  assert(isPositive(c.frames.videoFps), "frames.videoFps must be > 0");
+
   assert(isPositive(c.runtime.stateRefreshSeconds), "runtime.stateRefreshSeconds must be > 0");
   assert(isPositive(c.runtime.staleAfterSeconds), "runtime.staleAfterSeconds must be > 0");
   assert(

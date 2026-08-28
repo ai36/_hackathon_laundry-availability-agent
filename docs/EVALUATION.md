@@ -156,15 +156,29 @@ decides during dataset construction and the decision is recorded next to the fra
   to `out_of_order` (author-confirmed not usable, not merely "available and idle"). This
   drives the `out_of_order` results and some harmful errors; applied identically to both
   sides.
-- **Redaction over displays.** Some privacy blur bands sit over machine status displays,
-  making a few machines harder to read than a well-placed camera would. Same handicap for
-  both sides.
+- **Redaction over displays.** Redaction rectangles (author-drawn, see D-0009) sit over some
+  machine tops and consoles, making a few machines harder to read than a well-placed camera
+  would. Same handicap for both sides. Every *determinate* machine's status display was
+  verified still legible before the frame was committed.
+- **Committed frames ≠ cached run.** The committed replay cache and the results below were
+  produced against the earlier lightly-blurred frames; the 9 frames committed to
+  `data/public/frames/` carry heavier author-drawn `fill` boxes. `--replay` still reproduces
+  the recorded numbers exactly (the cache key is the semantic request, not image bytes), but
+  a fresh `--live` run on the committed frames will land a few points lower where a box
+  clips a display. Re-running `--live` on the committed frames to refresh the cache is
+  pending (budget-gated).
 - **9 frames.** Below the "10+ cases" guideline (45 per-machine determinate observations is
   the effective N); video-derived frames are being added.
 
 ## Results
 
 _Populated as runs happen. Raw outputs under `docs/artifacts/`._
+
+> **Caveat (read first).** These numbers were recorded against the earlier lightly-blurred
+> frames, not the heavier author-redacted frames now in `data/public/frames/`. `--replay`
+> reproduces them exactly (image-independent cache key); a fresh `--live` run on the
+> committed frames will differ slightly. See "Committed frames ≠ cached run" above. A
+> cache-refresh `--live` pass is pending.
 
 ### Baseline — 2026-08-28 (`data/cache/baseline/`, `--replay`-reproducible)
 

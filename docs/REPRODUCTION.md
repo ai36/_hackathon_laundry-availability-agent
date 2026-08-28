@@ -91,8 +91,12 @@ npm run eval -- --mode=baseline --split=evaluation --live     # re-sample: paid 
 npm run eval -- --mode=baseline --split=evaluation --fake     # offline wiring check, no cache (empty predictions)
 ```
 
-`--replay` works from a clean checkout **without `data/public/frames/`** (the frames are
-held out of git) — the cache key is the semantic request, not the image bytes.
+`--replay` works from a clean checkout even **without `data/public/frames/`** — the cache key
+is the semantic request, not the image bytes. The 9 labelled eval stills *are* committed, but
+they now carry heavier author-drawn redaction boxes than the frames the cache was recorded
+against, so a fresh `--live` run will differ from the recorded numbers by a few points where
+a box clips a display; `--replay` stays exact. Refreshing the cache with a `--live` pass on
+the committed frames is pending.
 
 **Recorded baseline run** (`data/cache/baseline/`, model `claude-sonnet-5`):
 

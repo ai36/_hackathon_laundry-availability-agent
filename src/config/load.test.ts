@@ -52,3 +52,18 @@ test("accepts a washers-only site", () => {
   assert.equal(c.site.machines.washers, 8);
   assert.equal(c.site.machines.dryers, 0);
 });
+
+test("overrides the still-frame target width", () => {
+  const c = loadConfig({ frames: { maxStillPx: 2048 } });
+  assert.equal(c.frames.maxStillPx, 2048);
+  assert.equal(c.frames.maxVideoPx, DEFAULT_CONFIG.frames.maxVideoPx);
+});
+
+test("rejects a non-integer or tiny frame width", () => {
+  assert.throws(() => loadConfig({ frames: { maxStillPx: 1600.5 } }), ConfigError);
+  assert.throws(() => loadConfig({ frames: { maxVideoPx: 32 } }), ConfigError);
+});
+
+test("rejects a non-positive video fps", () => {
+  assert.throws(() => loadConfig({ frames: { videoFps: 0 } }), ConfigError);
+});

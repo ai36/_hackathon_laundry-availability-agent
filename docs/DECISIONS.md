@@ -352,9 +352,36 @@ a first baseline number. Keeping the vision layer behind an interface is what ma
 metadata strip. Design bias: redact anything location-identifying, keep machine faces sharp
 so the classification task stays realistic. **The frames were of a laundry room the author
 does not own**, so the publish bar was raised from "identifying details removed" to
-"**every frame verified clear one-by-one, and publish authorization confirmed**". Current
-best-effort spec covers the frontal frames; the angled `IMG_8629-8633` group still needs its
-rectangles tuned. Frames remain git-ignored until then.
+"**every frame verified clear one-by-one, and publish authorization confirmed**".
+
+**Amendment (2026-08-28) — author-drawn redactions; 9 eval stills committed.** The
+by-eye rectangle-tuning loop was replaced with an author-authored one: the frame author
+paints solid black boxes over identifying content on pristine copies kept in
+`data/raw/_reference/` (local), and `scripts/derive-redactions.ts` recovers those boxes by
+connected-component analysis and writes `redactions.json` in produced-frame pixel space as
+`mode: "fill"`. `prepare-dataset.ts` burns the same boxes (solid gray) into the cleaned
+frames. Each of the 9 labelled P0 evaluation stills was then checked box-by-box against its
+reference and its label file — every determinate machine's status display stays legible — and
+the 9 are now committed under `data/public/frames/` (`.gitignore` allows them by name).
+Video-derived and unlabelled frames stay local.
+
+**Publish basis unchanged.** This amendment changes *how* the boxes are authored, not the
+bar for publishing. Both still apply: (a) every committed frame verified clear one-by-one
+(done — box-by-box against reference + label), and (b) authorization to film/publish the
+common area per the plan in this decision's first amendment and `docs/PROBLEM.md`. Redaction
+is defence-in-depth, not a substitute for (b). **Open item:** confirm (b) is actually in
+hand (written, covers publishing) and record yes/no here; until then the committed frames
+rest on redaction + "author's own / a friend's room" only.
+
+**Known gap (measurement).** The committed replay cache and recorded results (D-0011/D-0013)
+were produced against the earlier lightly-blurred frames, so `--replay` reproduces the
+recorded numbers exactly (image-independent semantic hash) but a fresh `--live` run on the
+committed frames will differ — see `docs/EVALUATION.md` limitations. Refresh with a `--live`
+pass on the committed frames before any results claim is presented as final.
+
+**Integrator note.** For a real deployment the redaction geometry is better stored as one
+raster mask per camera angle (a PNG painted once per fixed camera and reused for every
+frame from it) than as per-frame rectangles — see `data/README.md`.
 
 ---
 

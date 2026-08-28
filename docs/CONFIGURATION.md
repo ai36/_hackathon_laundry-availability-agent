@@ -56,6 +56,22 @@ This page documents the **deployment config**.
 | `agent.changeDetection.enabled` | bool | `false` | P1: skip re-analysing an ROI that hasn't visibly changed. |
 | `agent.changeDetection.minChangedFraction` | 0..1 | `0.02` | Minimum changed fraction of an ROI to count as "changed". |
 
+### `frames`
+
+Frame resolution for the dataset pipeline and the runtime. `frames.maxStillPx` is the
+single source of truth: the dataset pipeline downscales stills to it, a per-camera redaction
+mask (`data/raw/masks/<source>.png`) is authored at it, and the runtime feeds the agent
+frames at it — mask and camera frame must share one resolution. It caps **width** (the
+source frames are landscape); height follows by aspect ratio. Only scales down.
+`scripts/prepare-dataset.ts` uses these as defaults; `--fps` / `--max-still` / `--max-video`
+override per run.
+
+| Key | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `frames.maxStillPx` | int ≥ 64 | `1600` | Target width for downscaled still frames. |
+| `frames.maxVideoPx` | int ≥ 64 | `1280` | Target width for frames extracted from source video. |
+| `frames.videoFps` | number > 0 | `1` | Frames per second sampled from each source video. |
+
 ### `runtime`
 
 | Key | Type | Default | Meaning |
