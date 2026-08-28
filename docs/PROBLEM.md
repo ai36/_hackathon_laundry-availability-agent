@@ -113,23 +113,82 @@ day, plus a short time-ordered series. Handling:
 1. **Who has this problem?** — Apartment-complex tenants using a shared laundry room.
 2. **What bottleneck makes it worth solving?** — No advance visibility of machine
    availability; wasted trips carrying laundry back and forth.
-3. **Does the agent solve it well?** — Measured by per-machine free/occupied accuracy on a
-   labelled frame set vs. a single-prompt baseline, including hard cases (angle, glare,
-   low light, partial indicator visibility, mixed washer/dryer indicator styles, person in
-   frame).
+3. **Does the agent solve it well?** — Measured on a labelled frame set vs. a single-prompt
+   baseline: primary = per-machine state accuracy (`free`/`occupied`/`unknown`) over
+   determinate ground truth; secondary = harmful-error rate (false `free`/`occupied`) and
+   coverage — the agent should make fewer harmful errors by abstaining (`unknown`) instead
+   of guessing. Includes hard cases (angle, glare, low light, `lights_off_no_motion`,
+   partial indicator, mixed washer/dryer indicator styles, person in frame).
 4. **Can another person reproduce the result?** — Dataset, labels, cached model responses,
    agent trajectories, and the scoring script are in the repo; `--replay` reproduces the
    scored number with no API key.
 
+## Machine state space
+
+Per machine, per frame: **`free` | `occupied` | `unknown`**. `unknown` = the agent cannot
+determine the state from the available evidence (indicator blocked by a person, lights off,
+severe glare). Abstaining with `unknown` is the correct behaviour when the evidence is not
+there — the portal shows "unknown — check on arrival", which is honest and strictly better
+than a false "free". (`out_of_order` may be added later; out of scope now.)
+
+`unknown` is a property of the **observation**, not the machine. Transient real-world
+conditions (a person blocking one machine's indicator, evening light, a motion-sensing lamp
+switching the room dark) are recorded per frame / per machine-observation, never baked into
+a machine's identity — see the label format below.
+
 ## Primary metric
 
-**Overall per-machine state accuracy** (free vs occupied) across the labelled evaluation
-frames. Secondary: tokens / cost per frame; human time per task (context only).
+**Overall per-machine state accuracy** across the labelled evaluation frames: correct
+predictions ÷ machine-observations whose ground truth is determinate (`free`/`occupied`). An
+agent `unknown` on a determinate ground truth counts as **incorrect** (no answer given).
+
+Secondary:
+
+- **Harmful-error rate** — (false `free` + false `occupied`) ÷ total. Abstaining is *not*
+  harmful. The agentic layers should push this down by abstaining instead of guessing.
+- **Coverage** — determinate predictions ÷ total; plus accuracy-on-covered.
+- Tokens / cost per frame; human time per task (context only).
+
+## Label format
+
+One JSON object per frame:
+
+```json
+{
+  "frame_id": "2026-08-28T18-40-00_camA",
+  "timestamp": "2026-08-28T18:40:00-07:00",
+  "camera": "A",
+  "frame_conditions": ["low_light", "lights_off_no_motion"],
+  "machines": [
+    {
+      "machine_id": "W-03",
+      "type": "washer",
+      "bbox": [x, y, w, h],
+      "state": "occupied",
+      "gt_determinate": true,
+      "observation_notes": ["indicator_occluded_by_person"]
+    }
+  ]
+}
+```
+
+- `frame_conditions` — frame-wide, list, may be empty. Vocabulary (extensible): `low_light`,
+  `lights_off_no_motion`, `glare`, `backlit`, `motion_blur`, `person_in_frame`,
+  `partial_view`.
+- `state` — the **ground-truth** state, decided by the human labeller using whatever context
+  they have (adjacent frames, knowledge of the room).
+- `gt_determinate` — `false` only when even a human cannot tell from the available evidence;
+  those observations are excluded from the primary-accuracy denominator and reported
+  separately.
+- `observation_notes` — per-machine, optional, list. Vocabulary (extensible):
+  `indicator_occluded_by_person`, `indicator_occluded_by_object`, `indicator_partial`,
+  `glare_on_door`, `door_open`, `ambiguous`.
+
+You can hand the labels over in any form (even prose per frame); they get normalised to this
+schema.
 
 ## Open questions
 
-- Exact label format (per-machine bbox + state + condition tag?) and how the author hands it
-  over.
 - Number of time-ordered frames and the interval between them.
 - Where the portal is hosted for the demo (is local `next start` enough?).
 - Format of the 5-minute video (decided closer to the deadline).

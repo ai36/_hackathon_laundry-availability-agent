@@ -12,7 +12,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "check:data": "node scripts/check-data-privacy.mjs"
   },
   "dependencies": {
     "mobx": "^7.0.3",

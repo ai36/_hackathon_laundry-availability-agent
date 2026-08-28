@@ -15,6 +15,7 @@ Written for someone starting from a clean environment.
 ```bash
 # from the project root
 npm ci
+git config core.hooksPath .githooks   # enables the dataset privacy pre-commit gate
 ```
 
 `npm ci` installs the exact versions in `package-lock.json`. Do not use `npm install` for

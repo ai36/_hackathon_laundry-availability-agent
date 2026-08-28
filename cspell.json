@@ -18,7 +18,17 @@
     "Turbopack",
     "prerendered",
     "VLM",
-    "few-shot"
+    "few-shot",
+    "EXIF",
+    "IPTC",
+    "exiftool",
+    "magick",
+    "mogrify",
+    "recognisable",
+    "behaviour",
+    "labeller",
+    "normalised",
+    "hooksPath"
   ],
   "ignorePaths": ["node_modules/**", ".next/**", "package-lock.json"]
 }

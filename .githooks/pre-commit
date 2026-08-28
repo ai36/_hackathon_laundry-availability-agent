@@ -1,0 +1,4 @@
+#!/bin/sh
+# laundry3 pre-commit: dataset privacy gate. Enable with:
+#   git config core.hooksPath .githooks
+exec node scripts/check-data-privacy.mjs

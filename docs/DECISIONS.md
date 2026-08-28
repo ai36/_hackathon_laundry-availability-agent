@@ -128,7 +128,10 @@ entries carry the same rules across sessions.
 ## D-0005 — Product scope and evaluation approach (laundry3)
 
 - **Date:** 2026-08-28
-- **Status:** Accepted (from the scoping interview; see `docs/PROBLEM.md`, `docs/EVALUATION.md`)
+- **Status:** Accepted (from the scoping interview; see `docs/PROBLEM.md`,
+  `docs/EVALUATION.md`). **Primary-metric portion superseded by D-0006** — the state space
+  is `free`/`occupied`/`unknown`, not a binary, and the metric now includes harmful-error
+  rate and coverage.
 
 **Context.** Solo build, hard deadline **2026-08-30 12:00 UTC-7**. The product is a
 laundry-room machine-availability agent; the full vision (calibration + runtime CV +
@@ -168,3 +171,41 @@ experiments (add ROI calibration → add verification → add memory), each meas
 same metric, or the 30-point "Agent Solution & Engineering" criterion is at risk. Dataset
 size is the main threat to a stable metric; mitigated with a disjoint calibration/eval split
 and multiple angles × time points.
+
+---
+
+## D-0006 — Machine state space, label schema, and abstention scoring
+
+- **Date:** 2026-08-28
+- **Status:** Accepted (supersedes the "free vs occupied" binary in D-0005)
+
+**Context.** Real frames carry transient conditions — a person blocking one machine's
+indicator, evening light, a motion-sensing lamp cutting the room dark. These are properties
+of the *observation at a moment*, not of a machine. A binary `free`/`occupied` label forces
+the agent (and the labeller) to guess when the evidence isn't there, and a wrong `free` is
+exactly the failure the product exists to prevent.
+
+**Decision.**
+
+- **State space:** `free` | `occupied` | **`unknown`** per machine per frame. `unknown` =
+  not determinable from this evidence. The portal renders `unknown` as "unknown — check on
+  arrival". (`out_of_order` deferred.)
+- **Conditions are per-observation, not per-machine.** Label schema (full form in
+  `docs/PROBLEM.md`): a frame object with `frame_conditions` (frame-wide list) and a
+  `machines[]` array where each entry has `state`, `gt_determinate`, and optional
+  `observation_notes` (per-machine list). Vocabularies are extensible.
+- **Scoring:**
+  - Primary = accuracy over observations with `gt_determinate: true`; an agent `unknown`
+    there is incorrect.
+  - Secondary = **harmful-error rate** (false `free` + false `occupied`); abstaining is not
+    harmful.
+  - Secondary = **coverage** and accuracy-on-covered.
+  - `gt_determinate: false` observations are excluded from primary accuracy, counted
+    separately.
+- **Baseline** uses the same 3-way enum and the same scoring.
+
+**Consequences.** The measurable agentic win is reframed: not just higher accuracy, but
+**fewer harmful errors at comparable coverage** — verification and memory earn their place
+by converting confident-but-wrong into an honest `unknown`. Reporting must always show
+accuracy + harmful-error + coverage together so a high-abstention method can't look good on
+accuracy-on-covered alone.

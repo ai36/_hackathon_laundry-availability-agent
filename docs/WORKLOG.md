@@ -12,6 +12,43 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — 3-way machine state + per-observation conditions + label schema
+
+- Feedback: `condition` is a property of the observation (person blocks an indicator,
+  evening light, motion-lamp turns the room dark), not of a machine; and `state` needs an
+  "unrecognised" value.
+- **State space** is now `free` / `occupied` / **`unknown`** per machine per frame
+  (`docs/DECISIONS.md` D-0006, supersedes the binary in D-0005). Portal shows `unknown` as
+  "unknown — check on arrival".
+- **Label schema** defined in `docs/PROBLEM.md`: frame object with `frame_conditions`
+  (frame-wide list) + `machines[]` each with `state`, `gt_determinate`, optional
+  `observation_notes` (per-machine list). Extensible vocabularies.
+- **Metric** updated (`docs/PROBLEM.md`, `docs/EVALUATION.md`): primary = accuracy over
+  determinate ground truth (agent `unknown` there = incorrect); secondary = **harmful-error
+  rate** (false free/occupied; abstaining is not harmful), **coverage**, accuracy-on-covered.
+  Report the three together.
+- **Cases** reworked to 14 P0 single-frame cases with a `condition | scope` column mapping
+  to the schema; added a `lights_off_no_motion` case where abstaining is the expected
+  behaviour. Rubric section updated for 3-way scoring.
+- Added `data/` scaffold (`data/README.md`, layout, privacy rules) and `.gitignore` rules:
+  `data/raw/` + `data/frames/` never ship, only `data/public/` + `data/labels/` +
+  `data/splits/` + curated `data/cache/`.
+- `docs/CHANGELOG.md` evaluation-method section updated.
+- Independent compliance review of this change: **PASS WITH RISKS — no blockers.** Applied:
+  - **EXIF/metadata**: added a "strip all embedded metadata from every committed frame" rule
+    to `data/README.md` (GPS / device serial / timestamps identify the building + author).
+  - **Enforcement is now more than prose**: `scripts/check-data-privacy.mjs` +
+    `npm run check:data` + committed `.githooks/pre-commit` (enable with
+    `git config core.hooksPath .githooks`). Dependency-free; refuses a commit that stages
+    anything under `data/raw//data/frames/`, an image outside `data/public/`, or an image
+    carrying EXIF / XMP / IPTC / PNG-text metadata. Tested: EXIF JPEG rejected, `data/raw/`
+    path rejected, clean JPEG in `data/public/` passes.
+  - D-0005 now carries a "primary-metric portion superseded by D-0006" note.
+  - Aligned `lights_off` → `lights_off_no_motion` in `docs/CHANGELOG.md`.
+  - Updated the four-questions summary in `docs/PROBLEM.md` for the 3-way state / harmful-error
+    framing.
+- `docs/REPRODUCTION.md` setup now includes `git config core.hooksPath .githooks`.
+
 ### 2026-08-28 — Trajectory logging convention
 
 - Added `docs/trajectories/` (README + `compliance/`, `calibration/`, `runtime/`,

@@ -6,11 +6,15 @@ decision it led to. Include experiments that were later removed and what they ta
 
 ## Evaluation method
 
-- **Primary metric:** overall per-machine state accuracy (free vs occupied) on a labelled
-  laundry-room frame set. Secondary: tokens / cost per frame. Full plan in
-  `docs/EVALUATION.md`.
-- **Cases:** 10+ (frame, expected per-machine status) pairs spanning machine × state ×
-  condition, including a hard "person in frame" case.
+- **State space:** `free` / `occupied` / `unknown` per machine per frame (`unknown` =
+  not determinable). Conditions (person blocking indicator, low light, lamp off) are
+  per-observation, not per-machine — see `docs/DECISIONS.md` D-0006.
+- **Primary metric:** overall per-machine state accuracy over determinate ground truth on a
+  labelled laundry-room frame set. Secondary: **harmful-error rate** (false free/occupied),
+  **coverage**, tokens / cost per frame. Full plan in `docs/EVALUATION.md`.
+- **Cases:** 14 P0 single-frame cases spanning states × conditions (incl.
+  `lights_off_no_motion`, occlusion, and a synthetic "person in frame" hard case) + 2 P1
+  sequence cases.
 - **Baseline:** single Claude vision prompt on the whole frame (same metric, same frames);
   contextual baseline = the manual "walk over and check" process.
 - **Harness:** offline scoring script with a `--replay` mode (re-scores from cached model

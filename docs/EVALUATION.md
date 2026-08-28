@@ -2,19 +2,33 @@
 
 Status: **v1, from the 2026-08-28 scoping interview.** Defined before running anything.
 
+## Machine state space
+
+Per machine, per frame: **`free` | `occupied` | `unknown`**. `unknown` = "not determinable
+from this evidence" (indicator blocked, lights off, severe glare). See `docs/PROBLEM.md`
+for the rationale — abstaining beats a false `free`.
+
 ## Primary metric
 
-**Overall per-machine state accuracy** — the fraction of (machine, frame) pairs where the
-predicted state (`free` / `occupied`) matches the ground-truth label, across the whole
-evaluation set.
+**Overall per-machine state accuracy** — correct predictions ÷ machine-observations whose
+ground truth is **determinate** (`gt_determinate: true`), across the whole evaluation set.
+An agent `unknown` on a determinate ground truth counts as **incorrect**.
 
 ## Secondary metrics
 
+- **Harmful-error rate** — (false `free` + false `occupied`) ÷ total observations. Abstaining
+  (`unknown`) is not harmful. This is where the agentic layers (verification, memory) should
+  show a win: same-or-better accuracy with fewer harmful errors.
+- **Coverage** — determinate predictions ÷ total; plus **accuracy-on-covered**.
 - **Tokens / cost per frame** — the agent should reach the same accuracy at lower cost than
   the baseline by cropping to ROIs and skipping unchanged regions (P1).
 - **Cost per full eval run** — reported in the reproduction guide.
 - **Human time per task** — context only: the manual "walk over and check" process cannot be
   scored on the frame set; used for the narrative comparison.
+
+Report all of primary accuracy, harmful-error rate, and coverage for baseline vs agent — a
+method that abstains a lot can inflate accuracy-on-covered while leaving the user with no
+answer, so the three are read together.
 
 ## Cases
 
@@ -25,24 +39,28 @@ below; they are not counted toward the P0 "10+ cases".
 
 ### P0 cases (single-frame, ≥10, same set for baseline and agent)
 
-| # | Frame condition | What it tests |
-| --- | --- | --- |
-| 1 | Clean wide shot, good light, all machines visible | Nominal accuracy |
-| 2 | Different camera angle of the same room, room clear | Viewpoint invariance / ROI mapping |
-| 3 | Many washers occupied, dryers mostly free | Washer indicator styles |
-| 4 | Many dryers occupied, washers mostly free | Dryer indicator styles |
-| 5 | Partial occlusion — a cart/basket in front of one machine (author's own, no personal items) | Robustness to occlusion |
-| 6 | Glare / reflection on machine doors | Lighting artefacts |
-| 7 | Low / evening light, indicator lights dominant | Low-light handling |
-| 8 | Indicator only partially visible for one machine | Low-confidence → verification path |
-| 9 | One machine door open, drum empty (idle) next to a closed running machine | free/occupied disambiguation |
-| 10 | Mixed cycle phases — machines mid-cycle vs just-finished (door closed, light off) | "finished but not emptied" vs "free" |
-| 11 | Near-empty room, 1–2 machines running | Low-occupancy accuracy (few positives) |
-| 12 | Near-full room, 1–2 machines free | High-occupancy accuracy (few negatives) |
-| 13 (hard) | Person standing in front of the machine bank — **synthetic/augmented**; augmentation source (fully synthetic or licensed/own) recorded next to the frame | Transient obstruction: agent should hold the prior state, not guess, and must not leak identity |
+Each case's `condition` maps to `frame_conditions` (frame-wide) and/or `observation_notes`
+(one machine) in the label schema — a real transient situation, not a machine attribute.
 
-Case 13 reveals whether the agent holds the previous state under a transient obstruction
-instead of guessing.
+| # | Condition | Scope | Expected states include | What it tests |
+| --- | --- | --- | --- | --- |
+| 1 | Clean wide shot, good light, all machines visible | frame | free + occupied | Nominal accuracy |
+| 2 | Different camera angle of the same room, room clear | frame | free + occupied | Viewpoint invariance / ROI mapping |
+| 3 | Many washers occupied, dryers mostly free | frame | mixed | Washer indicator styles |
+| 4 | Many dryers occupied, washers mostly free | frame | mixed | Dryer indicator styles |
+| 5 | Cart/basket in front of one machine (author's own, no personal items) | one machine | that machine `unknown` or occluded | Occlusion → abstain vs guess |
+| 6 | Glare / reflection on machine doors | frame or per-machine | some may be `unknown` | Lighting artefacts |
+| 7 | Low / evening light, indicator lights dominant | frame (`low_light`) | free + occupied | Low-light handling |
+| 8 | `lights_off_no_motion` — motion-sensing lamp cut the room dark | frame | mostly `unknown` expected | Agent should abstain, not hallucinate states |
+| 9 | Indicator only partially visible for one machine | one machine (`indicator_partial`) | that machine low-confidence | Low-confidence → verification path |
+| 10 | One machine door open, drum empty (idle) next to a closed running machine | per-machine | free + occupied | free/occupied disambiguation |
+| 11 | Mixed cycle phases — mid-cycle vs just-finished (door closed, light off) | per-machine | occupied ("not emptied") vs free | "finished but not emptied" |
+| 12 | Near-empty room, 1–2 machines running | frame | mostly free | Low-occupancy (few positives) |
+| 13 | Near-full room, 1–2 machines free | frame | mostly occupied | High-occupancy (few negatives) |
+| 14 (hard) | Person in front of the machine bank — **synthetic/augmented**; augmentation source (fully synthetic or licensed/own) recorded next to the frame | frame (`person_in_frame`) + blocked machines | blocked machines `unknown` (or prior state under P1) | Transient obstruction: abstain / hold prior, never guess, never leak identity |
+
+Case 14 reveals whether the agent abstains (or, under P1, holds the prior state) for the
+machines the person blocks, instead of guessing.
 
 ### P1 sequence cases (only if P1 is built)
 
@@ -51,7 +69,7 @@ instead of guessing.
 | S1 | Two time-ordered frames, machine N flips state between them | Change-detection: only N's ROI is re-analysed |
 | S2 | Series where a machine finishes and laundry is left inside | Abandoned-laundry detection + cycle timer |
 
-If P1 is not built, S1/S2 are dropped from the report and the P0 count (13 cases) stands.
+If P1 is not built, S1/S2 are dropped from the report and the P0 count (14 cases) stands.
 
 ## Baseline
 
@@ -84,9 +102,18 @@ If P1 is not built, S1/S2 are dropped from the report and the P0 count (13 cases
 
 ## Rubric
 
-Per-machine state is a binary label, so accuracy is the rubric. For cases where the
-ground-truth itself is ambiguous (e.g. door ajar, no laundry), the label is decided by the
-human reviewer during dataset construction and that decision is recorded next to the frame.
+Per-machine state is a 3-way label (`free` / `occupied` / `unknown`). Scoring:
+
+- Correct = predicted state equals ground-truth state, over observations with
+  `gt_determinate: true`.
+- Predicting `unknown` where the ground truth is determinate = incorrect (counts against
+  primary accuracy) but **not** a harmful error.
+- Predicting `free` or `occupied` wrongly = incorrect **and** a harmful error.
+- Observations with `gt_determinate: false` are excluded from primary accuracy and reported
+  as a separate "genuinely indeterminable" count.
+
+When the ground truth itself is borderline (door ajar, no laundry), the human labeller
+decides during dataset construction and the decision is recorded next to the frame.
 
 ## Results
 
