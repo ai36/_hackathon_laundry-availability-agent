@@ -12,6 +12,21 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Portal page (End-to-End)
+
+- `src/portal/room-status.ts` — `buildRoomStatus()` fuses the committed eval report
+  (`docs/artifacts/eval-agent-2026-08-28.json`) + the roster into a per-machine room view:
+  for each machine, the most confident *actionable* observation across all frames, else the
+  best `unknown`. No API call → `npm run build` prerenders the page. +4 tests (27 total).
+- MobX finally wired to real state: `ExampleStore`/`ExampleCounter` deleted;
+  `MachinesStore` (`washers` / `dryers` / `counts` / `freeIds` computeds) hydrated from the
+  server component via `RootStoreHydration.room`.
+- `src/app/page.tsx` (Server Component) → `<StoreProvider initialData={{ room }}>` →
+  `src/components/room-status.tsx` (`observer`): washers/dryers grids, colour by state,
+  "confirm on arrival" on free/unknown, provenance footer (model + report path).
+- Screenshots: `docs/assets/portal-top.jpg`, `portal-machines.jpg`. Wired into the README.
+- Verification: `typecheck` / `lint` / `build` pass; `npm test` **27/27**.
+
 ### 2026-08-28 — Packaging pass (deliverables)
 
 - **README** rewritten for the submission: intended user + bottleneck + why it matters, the

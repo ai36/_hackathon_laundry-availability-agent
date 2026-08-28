@@ -46,6 +46,16 @@ is more trustworthy when it does answer, and starts catching broken machines —
 and lower coverage. One sample per mode; both are reproducible offline with `--replay`.
 Full write-up with the removed dead-end: **`docs/CHANGELOG.md`**.
 
+### The portal
+
+`npm run dev` → a Next.js page that fuses the agent's per-machine assessments across every
+camera angle and shows the tenant a room view (`src/portal/room-status.ts` +
+`src/stores/machines-store.ts`, MobX). It reads the committed eval report — **no API call** —
+so `npm run build` prerenders it. Reservations and a live feed are P2, not wired.
+
+![laundry3 portal — summary + washers](docs/assets/portal-top.jpg)
+![laundry3 portal — machine grid, D-06 out of order](docs/assets/portal-machines.jpg)
+
 ### Main failure mode & hot take
 
 **Failure mode:** a verification step that re-asks "are you sure?" can *lose* a correct
@@ -92,7 +102,7 @@ npm run eval -- --mode=agent    --split=evaluation --replay   # reproduce the ag
 ```
 
 Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`,
-`npm test` (23), `npm run check:data`. Full clean-environment walkthrough (including a
+`npm test` (27), `npm run check:data`. Full clean-environment walkthrough (including a
 `--live` re-run and the dataset pipeline): **`docs/REPRODUCTION.md`**.
 
 ## Configuring for a real site
@@ -108,7 +118,8 @@ laundry3.config.ts  Deployment config (site-integration knobs)
 src/config/         Typed config: defaults, loader + validator, tests
 src/eval/           Label schema, dataset loaders, scoring (accuracy / harmful-error / coverage)
 src/agent/          Vision client (+ cache/replay), reply parser, baseline, agent pipeline
-src/app/, src/stores/, src/components/   Next.js portal shell + MobX (portal UI is P2)
+src/portal/         room-status: fuse the eval report into a per-machine room view
+src/app/, src/stores/, src/components/   Next.js portal page + MobX MachinesStore
 scripts/            prepare-dataset · run-eval · label · gen-initial-labels · check-data-privacy
 data/               raw/ (ignored) · public/frames/ (held out) · labels/ · splits/ · cache/ — see data/README.md
 docs/               Hackathon deliverables (see the table below)

@@ -124,6 +124,12 @@ Record the result of each infra verification here (append, newest first).
   27 free / 10 occupied / 8 out_of_order / 16 unknown).
 - Author spot-check of the 9 label files: **approved as correct** (2026-08-28).
 
+### 2026-08-28 — portal page
+
+- `npm run typecheck` / `npm run lint` / `npm run build` — **pass** (page prerenders from the
+  committed report, no API call); `npm test` — **27/27** (+4 for `room-status`).
+- `npm run dev` → the room view at `/`; screenshots in `docs/assets/`.
+
 ### 2026-08-28 — cost controls + Iter-1 review fixes
 
 - `typecheck` / `lint` pass; `npm test` **23/23**.

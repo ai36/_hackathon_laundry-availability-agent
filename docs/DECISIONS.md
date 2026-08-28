@@ -59,8 +59,10 @@ SSR would never be disposed.
   can seed the client store later without rework.
 
 **Consequences.** Server Components stay the default; anything that reads store state must
-be a Client Component wrapped in `observer`. The `ExampleStore` / `ExampleCounter` pair is
-scaffolding and should be deleted once real stores exist.
+be a Client Component wrapped in `observer`. The scaffolding `ExampleStore` / `ExampleCounter`
+were replaced by `MachinesStore` (2026-08-28): `src/app/page.tsx` (Server Component) builds
+the room view from the committed eval report and passes it as `RootStoreHydration.room` to
+`<StoreProvider>`; `src/components/room-status.tsx` reads it via `observer`.
 
 ---
 
