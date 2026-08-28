@@ -7,10 +7,13 @@ import type { VisionClient } from "./types";
 
 const BASELINE_PROMPT = [
   "You are looking at a photo of a shared laundry room.",
-  "List every washing machine and dryer you can see and whether each is free or occupied.",
-  'If you cannot tell for a machine, use state "unknown" rather than guessing.',
+  "List every washing machine and dryer you can see and classify each:",
+  '  "free"         — available to use now',
+  '  "occupied"     — running or holding someone\'s laundry',
+  '  "out_of_order" — visibly broken, taped off, or showing a hard error',
+  '  "unknown"      — you cannot tell from this image (say this rather than guessing)',
   "Reply with JSON only:",
-  '{"machines":[{"machineId":"<label>","state":"free|occupied|unknown","confidence":0..1,"rationale":"<short>"}]}',
+  '{"machines":[{"machineId":"<label>","state":"free|occupied|out_of_order|unknown","confidence":0..1,"rationale":"<short>"}]}',
   'Use the printed machine number where visible, otherwise a stable position label like "row1-3".',
 ].join("\n");
 

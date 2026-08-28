@@ -22,7 +22,7 @@ function assertFrameLabel(x: unknown, file: string): FrameLabel {
   for (const m of o.machines as Record<string, unknown>[]) {
     if (typeof m.machineId !== "string") throw new Error(`${file}: machine without machineId`);
     if (m.type !== "washer" && m.type !== "dryer") throw new Error(`${file}: bad machine.type`);
-    if (m.state !== "free" && m.state !== "occupied" && m.state !== "unknown") {
+    if (!["free", "occupied", "unknown", "out_of_order"].includes(m.state as string)) {
       throw new Error(`${file}: bad machine.state "${String(m.state)}"`);
     }
     if (typeof m.gtDeterminate !== "boolean")

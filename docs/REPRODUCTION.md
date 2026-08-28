@@ -16,6 +16,7 @@ Written for someone starting from a clean environment.
 # from the project root
 npm ci
 git config core.hooksPath .githooks   # enables the dataset privacy pre-commit gate
+cp .env.example .env                   # then put your ANTHROPIC_API_KEY in .env (not needed for --replay)
 ```
 
 `npm ci` installs the exact versions in `package-lock.json`. Do not use `npm install` for
@@ -70,8 +71,15 @@ npm run dataset:prepare -- --fps=1     # → data/public/frames/ + manifest.json
 npm run check:data                     # privacy gate (also runs pre-commit)
 ```
 
-Then label frames as `data/labels/<frameId>.json` (schema: `data/labels/README.md`) and
-list frame ids in `data/splits/{calibration,evaluation,smoke}.txt` (must be disjoint).
+Then label the frames — full step-by-step in **`docs/LABELING.md`**:
+
+```bash
+npm run label:new -- <frameId>            # scaffold data/labels/<frameId>.json from data/machines.json
+# ...edit each machine's state / bbox from the image...
+npm run label:check -- --split=evaluation # validate; npm run label:stats for coverage
+```
+
+List frame ids in `data/splits/{calibration,evaluation,smoke}.txt` (must be disjoint).
 
 > **Pre-submission blocker (G10):** the sections below need real numbers — a filled
 > evaluation split, the real vision client wired, and one cached run — before submission.

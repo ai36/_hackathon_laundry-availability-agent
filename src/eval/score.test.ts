@@ -68,6 +68,38 @@ test("indeterminable GT is excluded from accuracy", () => {
   assert.equal(s.accuracy, 1);
 });
 
+test("out_of_order predicted correctly is accurate and not harmful", () => {
+  const s = scoreAll(
+    pred([{ machineId: "a", state: "out_of_order", confidence: 0.9 }]),
+    label([{ machineId: "a", type: "washer", state: "out_of_order", gtDeterminate: true }]),
+    ["f1"],
+  );
+  assert.equal(s.accuracy, 1);
+  assert.equal(s.harmfulErrorRate, 0);
+  assert.equal(s.coverage, 1);
+});
+
+test("calling an out_of_order machine 'free' is a harmful error", () => {
+  const s = scoreAll(
+    pred([{ machineId: "a", state: "free", confidence: 0.8 }]),
+    label([{ machineId: "a", type: "washer", state: "out_of_order", gtDeterminate: true }]),
+    ["f1"],
+  );
+  assert.equal(s.accuracy, 0);
+  assert.equal(s.harmfulErrorRate, 1);
+});
+
+test("calling a free machine 'out_of_order' is wrong but NOT harmful", () => {
+  const s = scoreAll(
+    pred([{ machineId: "a", state: "out_of_order", confidence: 0.6 }]),
+    label([{ machineId: "a", type: "washer", state: "free", gtDeterminate: true }]),
+    ["f1"],
+  );
+  assert.equal(s.accuracy, 0);
+  assert.equal(s.harmfulErrorRate, 0);
+  assert.equal(s.coverage, 1); // out_of_order is an actionable answer
+});
+
 test("a missing prediction counts as unknown and is tracked", () => {
   const s = scoreAll(
     pred([]),

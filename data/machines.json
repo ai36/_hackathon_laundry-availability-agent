@@ -1,0 +1,134 @@
+{
+  "site": "dataset site",
+  "note": "Canonical machine roster. Assign a stable id to every physical machine (see docs/LABELING.md). Edit to match the real room.",
+  "machines": [
+    {
+      "machineId": "W-01",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-02",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-03",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-04",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-05",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-06",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-07",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-08",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-09",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-10",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-11",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-12",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-13",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-14",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-15",
+      "type": "washer"
+    },
+    {
+      "machineId": "W-16",
+      "type": "washer"
+    },
+    {
+      "machineId": "D-01",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-02",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-03",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-04",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-05",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-06",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-07",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-08",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-09",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-10",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-11",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-12",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-13",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-14",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-15",
+      "type": "dryer"
+    },
+    {
+      "machineId": "D-16",
+      "type": "dryer"
+    }
+  ]
+}

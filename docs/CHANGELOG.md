@@ -6,15 +6,16 @@ decision it led to. Include experiments that were later removed and what they ta
 
 ## Evaluation method
 
-- **State space:** `free` / `occupied` / `unknown` per machine per frame (`unknown` =
-  not determinable). Conditions (person blocking indicator, low light, lamp off) are
-  per-observation, not per-machine — see `docs/DECISIONS.md` D-0006.
+- **State space:** `free` / `occupied` / `out_of_order` / `unknown` per machine per frame
+  (`out_of_order` = broken/taped off; `unknown` = not determinable). Conditions (person
+  blocking indicator, low light, lamp off) are per-observation, not per-machine — see
+  `docs/DECISIONS.md` D-0006 (+ amendment).
 - **Primary metric:** overall per-machine state accuracy over determinate ground truth on a
   labelled laundry-room frame set. Secondary: **harmful-error rate** (false free/occupied),
   **coverage**, tokens / cost per frame. Full plan in `docs/EVALUATION.md`.
-- **Cases:** 14 P0 single-frame cases spanning states × conditions (incl.
-  `lights_off_no_motion`, occlusion, and a synthetic "person in frame" hard case) + 2 P1
-  sequence cases.
+- **Cases:** 15 P0 single-frame cases spanning states × conditions (incl.
+  `lights_off_no_motion`, occlusion, an `out_of_order` machine, and a synthetic "person in
+  frame" hard case) + 3 P1/P2 sequence cases.
 - **Baseline:** single Claude vision prompt on the whole frame (same metric, same frames);
   contextual baseline = the manual "walk over and check" process.
 - **Harness:** offline scoring script with a `--replay` mode (re-scores from cached model
@@ -74,3 +75,9 @@ Record the result of each infra verification here (append, newest first).
   (produced locally; held out of git pending authorization + redaction — see WORKLOG).
 - `npm run eval -- --mode=baseline --split=evaluation` — runs end-to-end (empty split /
   Fake vision client; real client + labels pending).
+
+### 2026-08-28 — out_of_order state + labelling workflow
+
+- `npm run typecheck` / `npm run lint` / `npm run build` — **pass**.
+- `npm test` — **23/23** (config 10, `score.test.ts` 8 incl. 3 `out_of_order`, `parse.test.ts` 5).
+- `npm run label:new` / `label:check` / `label:stats` — run (0 labels yet).

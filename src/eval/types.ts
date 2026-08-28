@@ -3,8 +3,14 @@
 
 export type MachineType = "washer" | "dryer";
 
-/** Per machine, per frame. `unknown` = not determinable from this evidence. */
-export type MachineState = "free" | "occupied" | "unknown";
+/**
+ * Per machine, per frame.
+ * - `free` / `occupied` — normal states.
+ * - `out_of_order` — visibly broken / taped off / hard-error on the display; a user cannot
+ *   use it even though it is not "occupied".
+ * - `unknown` — not determinable from this evidence (blocked indicator, darkness, glare).
+ */
+export type MachineState = "free" | "occupied" | "unknown" | "out_of_order";
 
 /** Frame-wide transient conditions. Extensible; see docs/PROBLEM.md. */
 export type FrameCondition =

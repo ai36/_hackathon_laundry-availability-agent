@@ -13,7 +13,9 @@ data/
     frames/       Cleaned frame set — downscaled JPEGs, ALL metadata stripped. Produced by
                   `npm run dataset:prepare`. Currently git-ignored / held out (see below).
     README.md     Committed.
+  machines.json   Committed. Canonical machine roster (ids + types). See docs/LABELING.md.
   labels/         Committed. One `<frameId>.json` per labelled frame (schema: labels/README.md).
+                  Scaffold with `npm run label:new -- <frameId>`.
   splits/         Committed. calibration.txt / evaluation.txt / smoke.txt — disjoint frameId lists.
   cache/          Vision-response cache for `--replay`. git-ignored except cache/README.md;
                   the curated evaluation cache is force-added once real runs exist.

@@ -29,7 +29,7 @@ export function parseAssessments(text: string): MachineAssessment[] {
 }
 
 function coerceState(v: unknown): MachineState {
-  return v === "free" || v === "occupied" ? v : "unknown";
+  return v === "free" || v === "occupied" || v === "out_of_order" ? v : "unknown";
 }
 
 function coerceConfidence(v: unknown): number {

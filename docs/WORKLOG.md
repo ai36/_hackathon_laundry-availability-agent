@@ -12,6 +12,29 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — 4th machine state, labelling workflow, .env
+
+- **`out_of_order` state added** (`неисправна/отключена`) — state space is now
+  `free` / `occupied` / `out_of_order` / `unknown` (`docs/DECISIONS.md` D-0006 amendment).
+  `out_of_order` is determinate, not an abstention. Harmful error redefined: predicted
+  `free` while truth is `occupied` **or** `out_of_order`. Updated `src/eval/{types,score}.ts`
+  (+3 tests, now 23/23), `src/agent/parse.ts`, `src/agent/{baseline,pipeline}.ts` prompts,
+  `src/eval/dataset.ts` validator, `docs/PROBLEM.md`, `docs/EVALUATION.md` (metric, rubric,
+  new case 14; P0 count 14→15).
+- Fixed a schema-key inconsistency: `docs/PROBLEM.md` label format now uses `camelCase`
+  (`frameId`, `frameConditions`, `machineId`, `gtDeterminate`, `observationNotes`) to match
+  `src/eval/types.ts` / `data/labels/README.md`.
+- **Labelling workflow** (`docs/DECISIONS.md` D-0010, full guide `docs/LABELING.md`):
+  - `data/machines.json` — canonical roster (placeholder 16 W + 16 D).
+  - `scripts/label.ts` + `npm run label:new|label:check|label:stats` — scaffold a label
+    file from the roster, validate (ids in roster, no dups, splits disjoint, images exist),
+    show coverage/state distribution.
+- **Secrets:** `.env.example` committed (`ANTHROPIC_API_KEY=` blank, optional
+  `LAUNDRY3_VISION_MODEL`); `.gitignore` `!.env.example`; `scripts/load-env.ts` calls
+  `process.loadEnvFile(".env")` before `run-eval` reads env. Keys never enter chat/commits.
+- Verification: `typecheck` / `lint` / `build` pass; `npm test` **23/23**; `label:*` and
+  `eval` run.
+
 ### 2026-08-28 — Dataset pipeline + eval/agent skeleton
 
 - User supplied real mock data (7 JPG + 4 jpeg stills, 5 MOV clips ~7 s each; **16 washers +

@@ -177,7 +177,10 @@ and multiple angles × time points.
 ## D-0006 — Machine state space, label schema, and abstention scoring
 
 - **Date:** 2026-08-28
-- **Status:** Accepted (supersedes the "free vs occupied" binary in D-0005)
+- **Status:** Accepted (supersedes the "free vs occupied" binary in D-0005). **Amended
+  2026-08-28:** state space is 4-way — `out_of_order` added (see the amendment note below);
+  label keys are `camelCase` (`frameId`, `frameConditions`, `machineId`, `gtDeterminate`,
+  `observationNotes`), matching `src/eval/types.ts`.
 
 **Context.** Real frames carry transient conditions — a person blocking one machine's
 indicator, evening light, a motion-sensing lamp cutting the room dark. These are properties
@@ -187,28 +190,37 @@ exactly the failure the product exists to prevent.
 
 **Decision.**
 
-- **State space:** `free` | `occupied` | **`unknown`** per machine per frame. `unknown` =
-  not determinable from this evidence. The portal renders `unknown` as "unknown — check on
-  arrival". (`out_of_order` deferred.)
+- **State space:** `free` | `occupied` | `unknown` (+ `out_of_order`, see the amendment
+  below) per machine per frame. `unknown` = not determinable from this evidence. The portal
+  renders `unknown` as "unknown — check on arrival".
 - **Conditions are per-observation, not per-machine.** Label schema (full form in
-  `docs/PROBLEM.md`): a frame object with `frame_conditions` (frame-wide list) and a
-  `machines[]` array where each entry has `state`, `gt_determinate`, and optional
-  `observation_notes` (per-machine list). Vocabularies are extensible.
+  `docs/PROBLEM.md`, types in `src/eval/types.ts`): a frame object with `frameConditions`
+  (frame-wide list) and a `machines[]` array where each entry has `state`, `gtDeterminate`,
+  and optional `observationNotes` (per-machine list). Keys are `camelCase`. Vocabularies are
+  extensible.
 - **Scoring:**
-  - Primary = accuracy over observations with `gt_determinate: true`; an agent `unknown`
+  - Primary = accuracy over observations with `gtDeterminate: true`; an agent `unknown`
     there is incorrect.
-  - Secondary = **harmful-error rate** (false `free` + false `occupied`); abstaining is not
-    harmful.
+  - Secondary = **harmful-error rate** (predicted `free` on a determinate non-`free` truth),
+    ÷ determinate observations; abstaining is not harmful.
   - Secondary = **coverage** and accuracy-on-covered.
-  - `gt_determinate: false` observations are excluded from primary accuracy, counted
+  - `gtDeterminate: false` observations are excluded from primary accuracy, counted
     separately.
-- **Baseline** uses the same 3-way enum and the same scoring.
+- **Baseline** uses the same enum and the same scoring.
 
 **Consequences.** The measurable agentic win is reframed: not just higher accuracy, but
 **fewer harmful errors at comparable coverage** — verification and memory earn their place
 by converting confident-but-wrong into an honest `unknown`. Reporting must always show
 accuracy + harmful-error + coverage together so a high-abstention method can't look good on
 accuracy-on-covered alone.
+
+**Amendment (2026-08-28) — `out_of_order`.** A machine can be visibly broken, taped off, or
+showing a hard error (`E rot`, `Err`) — a user cannot use it, but it is not "occupied". Added
+`out_of_order` as a fourth, **determinate** state (not an abstention). Scoring impact:
+harmful error is now "predicted `free` while the truth is `occupied` **or `out_of_order`**";
+calling a working machine `out_of_order` is incorrect but not harmful. `coverage` = any
+actionable answer (not `unknown`). Implemented in `src/eval/{types,score}.ts` with tests;
+prompts in `src/agent/{baseline,pipeline}.ts` list all four states.
 
 ---
 
@@ -321,3 +333,34 @@ code needs a place for the scoring harness, the baseline, and the agent pipeline
 Fake client. The real `AnthropicVisionClient` and actual labels are the remaining gap before
 a first baseline number. Keeping the vision layer behind an interface is what makes
 `--replay` (key-free reproduction) and offline tests possible.
+
+---
+
+## D-0010 — Labelling workflow and secrets handling
+
+- **Date:** 2026-08-28
+- **Status:** Accepted
+
+**Context.** Ground truth must be producible by an integrator, not just the author, and the
+Anthropic key must stay out of the repo and out of any transcript.
+
+**Decision.**
+
+- **Roster.** `data/machines.json` is the canonical machine list (`W-01…`, `D-01…`, stable
+  ids matching printed numbers where present). Edited once per site.
+- **Flow** (full guide: `docs/LABELING.md`): `npm run label:new -- <frameId>` scaffolds
+  `data/labels/<frameId>.json` from the roster (all machines, `state: "unknown"`); the
+  labeller sets each `state` / `bbox` / notes from the image and **deletes** machines not
+  visible in that frame. `npm run label:check -- --split=<name>` validates (ids in roster,
+  no dups, splits disjoint, images exist); `npm run label:stats` shows coverage + state
+  distribution. Model-drafted labels are allowed as an accelerator but a human confirms
+  every machine — the label file is the authority.
+- **Secrets.** `.env.example` is committed with `ANTHROPIC_API_KEY=` (blank) and an optional
+  `LAUNDRY3_VISION_MODEL`. `.env` is git-ignored (`!.env.example` un-ignores the template).
+  `scripts/load-env.ts` calls `process.loadEnvFile(".env")` (Node built-in) before anything
+  reads `process.env`; a missing file is fine because `--replay` needs no key. Keys are
+  never pasted into chat, commits, or docs.
+
+**Consequences.** A second person can build the dataset and reproduce a run from a clean
+checkout with only their own key. `label:check` is the gate that keeps splits disjoint and
+labels well-formed before a scored eval.

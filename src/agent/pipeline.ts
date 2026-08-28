@@ -82,8 +82,8 @@ function classifyPrompt(site: SiteConfig | null): string {
   return [
     "You are monitoring a shared laundry room from a fixed camera.",
     roster,
-    "For each machine, decide: free, occupied, or unknown (use unknown when the evidence is not there — blocked indicator, glare, darkness).",
+    "For each machine, decide: free, occupied, out_of_order (broken/taped off/hard error), or unknown (evidence not there — blocked indicator, glare, darkness).",
     "Reply with JSON only:",
-    '{"machines":[{"machineId":"<label>","state":"free|occupied|unknown","confidence":0..1,"rationale":"<short>"}]}',
+    '{"machines":[{"machineId":"<label>","state":"free|occupied|out_of_order|unknown","confidence":0..1,"rationale":"<short>"}]}',
   ].join("\n");
 }

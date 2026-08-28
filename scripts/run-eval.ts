@@ -12,6 +12,8 @@
  * Vision backend: currently a FakeVisionClient behind the cache (skeleton). The real
  * Claude vision client is wired in when the baseline runs for real.
  */
+import "./load-env";
+
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 

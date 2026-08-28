@@ -7,22 +7,33 @@ export interface Scores {
   nIndeterminable: number;
   /** correct / nDeterminate. An agent `unknown` on a determinate GT is incorrect. */
   accuracy: number;
-  /** (false free + false occupied) / nDeterminate. Abstaining is NOT a harmful error. */
+  /**
+   * Predictions that would send a user to a machine they cannot use, / nDeterminate:
+   * predicted `free` while the ground truth is `occupied` or `out_of_order`. Abstaining
+   * (`unknown`) is never a harmful error.
+   */
   harmfulErrorRate: number;
-  /** determinate predictions (free|occupied) / nDeterminate. */
+  /** actionable predictions (not `unknown`) / nDeterminate. */
   coverage: number;
-  /** correct / (determinate predictions). */
+  /** correct / actionable predictions. */
   accuracyOnCovered: number;
   /** rows: ground truth, cols: prediction. */
   confusion: Record<MachineState, Record<MachineState, number>>;
   missingPredictions: number;
 }
 
-const STATES: MachineState[] = ["free", "occupied", "unknown"];
+const STATES: MachineState[] = ["free", "occupied", "unknown", "out_of_order"];
 
+function emptyRow(): Record<MachineState, number> {
+  return { free: 0, occupied: 0, unknown: 0, out_of_order: 0 };
+}
 function emptyConfusion(): Scores["confusion"] {
-  const z = () => ({ free: 0, occupied: 0, unknown: 0 });
-  return { free: z(), occupied: z(), unknown: z() };
+  return { free: emptyRow(), occupied: emptyRow(), unknown: emptyRow(), out_of_order: emptyRow() };
+}
+
+/** A wrong "free" that costs the user a trip. */
+function isHarmful(predicted: MachineState, truth: MachineState): boolean {
+  return predicted === "free" && (truth === "occupied" || truth === "out_of_order");
 }
 
 /**
@@ -64,12 +75,11 @@ export function scoreAll(
 
       const isCorrect = predState === gt.state;
       if (isCorrect) correct++;
+      if (isHarmful(predState, gt.state)) harmful++;
 
-      const answered = predState === "free" || predState === "occupied";
-      if (answered) {
+      if (predState !== "unknown") {
         covered++;
         if (isCorrect) coveredCorrect++;
-        if (!isCorrect) harmful++;
       }
     }
   }
@@ -97,7 +107,7 @@ export function formatScores(s: Scores): string {
     `missing predictions      : ${s.missingPredictions}`,
     ...STATES.map(
       (gt) =>
-        `  gt ${gt.padEnd(9)} -> ` + STATES.map((p) => `${p}:${s.confusion[gt][p]}`).join("  "),
+        `  gt ${gt.padEnd(12)} -> ` + STATES.map((p) => `${p}:${s.confusion[gt][p]}`).join("  "),
     ),
   ].join("\n");
 }
