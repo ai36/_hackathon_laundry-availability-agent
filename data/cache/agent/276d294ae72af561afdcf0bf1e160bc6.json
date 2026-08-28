@@ -1,7 +1,0 @@
-{
-  "text": "{\"machines\":[{\"machineId\":\"D-03\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Panel partially visible, blurred region obscures display and controls.\"},{\"machineId\":\"D-04\",\"state\":\"free\",\"confidence\":0.6,\"rationale\":\"Display shows '2.25' price, door closed, no laundry visible.\"},{\"machineId\":\"D-05\",\"state\":\"free\",\"confidence\":0.6,\"rationale\":\"Display shows '2.25' price, door closed, drum appears empty.\"},{\"machineId\":\"D-06\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Panel visible but digits not clearly readable due to blur/glare.\"},{\"machineId\":\"D-07\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Panel present but display content unreadable due to angle/blur.\"},{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Panel visible but digits obscured, cannot confirm status.\"},{\"machineId\":\"D-09\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Door closed, no visible laundry, panel appears dim/inactive.\"},{\"machineId\":\"D-10\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Door closed, drum empty, panel not showing active cycle.\"},{\"machineId\":\"W-16\",\"state\":\"free\",\"confidence\":0.6,\"rationale\":\"Lid open, drum empty, no laundry visible, appears idle.\"}]}",
-  "model": "claude-sonnet-5",
-  "inputTokens": 2943,
-  "outputTokens": 487,
-  "costUsd": 0.010756
-}

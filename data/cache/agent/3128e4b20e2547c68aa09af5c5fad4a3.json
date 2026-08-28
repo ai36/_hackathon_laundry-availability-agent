@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-08\",\n      \"state\": \"free\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Left dryer in frame shows closed door with empty drum visible through window. Control panel is lit with display showing '48' and 'E' - the '48' appears to be a price/cycle display rather than a countdown timer. No 'running' or 'sensing' indicator is actively lit. No laundry visible in drum. Panel is fully illuminated and functional, not dark or showing error codes like 'Err' or 'E rot'. The machine appears ready for use.\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1879,
+  "outputTokens": 168,
+  "costUsd": 0.002719
+}

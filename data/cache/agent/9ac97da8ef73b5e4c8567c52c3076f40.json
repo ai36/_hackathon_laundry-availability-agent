@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-10\",\n      \"state\": \"free\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Display shows '225' (price only), control panel is lit and functional, door is closed, drum appears empty with no visible laundry, no error codes or out-of-service indicators present\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1879,
+  "outputTokens": 105,
+  "costUsd": 0.002404
+}

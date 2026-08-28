@@ -30,55 +30,105 @@ decision it led to. Include experiments that were later removed and what they ta
 | --- | --- | --- | --- |
 | Setup | Bootstrapped project infra: Next.js 16 + TS + Tailwind v4 + MobX, skills `find-skills` + `grillme`, docs/logging scaffold. Not an iteration on the solution — the starting line. | `npm run typecheck` / `lint` / `build` results below | Infra in place; next step is to define the problem and build the baseline. |
 | Scoping | Ran the `grillme` Socratic-interview skill to turn "laundry3" into a defined problem, user, MVP, metric, baseline, dataset plan, and phased scope. | `docs/PROBLEM.md`, `docs/EVALUATION.md`, D-0005 | Problem pinned: per-machine free/occupied status from laundry-room frames; core = agent → verified status list. |
-| Baseline | Single `claude-sonnet-5` vision call per frame on the whole (downscaled + redacted) image; given the frame's machine-id list + numbering convention, no ROI / calibration / memory / verification. `npm run eval -- --mode=baseline --split=evaluation --live`. | **accuracy 31.1%**, harmful-error 11.1%, coverage 60.0%, acc-on-covered 51.9% (45 determinate obs, 9 frames). Report: `docs/artifacts/eval-baseline-2026-08-28.json`; replay cache: `data/cache/baseline/` (9 files, reproduces frames-absent). Cost $0.081, 25.5k in / 3.0k out tokens. Single sample — the model is stochastic (see `docs/EVALUATION.md` limitations). | Weak starting point, as expected: model abstains on 11/27 free machines, **never** identifies `out_of_order` (0/8), and makes 5 harmful errors (3 of them `out_of_order`→`free`). Redaction bands sit over some displays — same handicap for the agent, so the comparison stays fair. Lots of headroom. |
-| Iteration 1 (P0) | **Verification pass**: after the whole-frame classify, a second focused vision call on the machines that came back `unknown` or low-confidence, naming them and listing explicit out-of-order / occupied / free cues (incl. "dim or dead 7-segment segments — read the shape, don't over-read"). Its answers override pass 1. `npm run eval -- --mode=agent --split=evaluation`. | **accuracy 31.1%** (= baseline, tied), **harmful-error 8.9%** (baseline 11.1%), coverage 51.1% (baseline 60.0%), **acc-on-covered 60.9%** (baseline 51.9%), **`out_of_order` 2/8** (baseline 0/8). 18 calls, $0.17 (2× baseline). Single sample. | **Kept.** Doesn't move raw accuracy, but trades coverage for **safety**: fewer wasted-trip errors, higher precision when it commits, and it starts catching broken machines. Aligned with the primary user value (don't send someone to an unusable machine). **Dead-end removed:** an earlier version abstained on _any_ machine below the 0.7 verification threshold → coverage collapsed to a handful of machines (~4%, observed during development, not separately archived). Lesson: the model's own `unknown` is the abstention signal; a separate confidence gate only helps at a much lower floor (0.35). Next: lift coverage with per-machine ROI crops. |
-| Iteration 2 (P0) | _TBD — per-machine ROI crop (agent gets a tight image per machine instead of the whole frame) to raise coverage._ | _[new result]_ | _[kept / revised / removed]_ |
-| Iteration 3 (P1) | _TBD — temporal memory / change-detection._ | _[new result]_ | _[kept / revised / removed]_ |
+| Baseline | Single `claude-haiku-4-5` vision call per frame on the whole downscaled + author-redacted image; given the frame's machine-id list + numbering convention, no ROI / calibration / memory / verification. `npm run eval -- --mode=baseline --split=evaluation --live`. | **accuracy 62.2%**, harmful-error 2.2%, coverage 95.6%, acc-on-covered 65.1% (45 determinate obs, 9 frames). Report: `docs/artifacts/eval-baseline-2026-08-28.json`; replay cache: `data/cache/baseline/` (9 files, reproduces frames-absent). Cost $0.035, 16.6k in / 3.7k out. Single sample. | The model reads lit displays confidently: it gets the genuinely-occupied machines right (10/10) but **over-calls `free` machines with a lit standby panel as `occupied`** (7/27) and **never identifies `out_of_order`** (0/8 — the "E" error code reads as an active cycle). One harmful error (an `out_of_order` machine called `free`). Headroom is in `free` precision and in `out_of_order`. |
+| Iteration 1 (P0) | **Verification pass**: after the whole-frame classify, a second focused vision call on the machines that came back `unknown` or low-confidence, naming them and listing explicit out-of-order / occupied / free cues (incl. "dim or dead 7-segment segments — read the shape, don't over-read"). Its answers override pass 1. `npm run eval -- --mode=agent --split=evaluation`. | accuracy **57.8%** (baseline 62.2% — **−4.4 pp**), **harmful-error 0.0%** (baseline 2.2%), coverage **100%** (baseline 95.6%), acc-on-covered 57.8% (baseline 65.1%), `out_of_order` **0/8** (unchanged). 14 calls, $0.051 (1.4× baseline). Single sample. | **Mixed — net-negative on the primary metric.** The verify pass resolves the 2 baseline `unknown`s and clears the one harmful error, but it *over-commits*: it flips 4 correctly-`free` machines to `occupied`, so raw accuracy drops. It still cannot tell a broken machine from a running one. On `claude-sonnet-5` (archived at commit `e8de845`, on the earlier lightly-blurred frames) the same pass looked better — harmful 11.1%→8.9%, `out_of_order` 0/8→2/8 — but on the cost-appropriate model it is not a clear win. **Not shipped as the final answer.** Next: a human-in-the-loop correction store (Iteration 2), which is what actually moves `out_of_order`. |
+| Iteration 2 (P0) | **Integrator corrections** (D-0014). The integrator marks a machine wrong once; the correction is stored (`data/corrections/`) and applied as an authoritative override. `observation`-scope fixes one (frame, machine); `machine`-scope (for durable properties like `out_of_order`) applies to that machine in **every** frame. `npm run eval -- --mode=agent --corrections`. | **3 `machine`-scope corrections** (`W-04`, `D-02`, `D-06` = "out of service") → accuracy **57.8% → 75.6%**, **`out_of_order` recall 0/8 → 8/8**, harmful-error 0.0% (unchanged), coverage 100% (unchanged), **no extra model cost** (post-hoc). Report: `docs/artifacts/eval-agent-corrected-2026-08-28.json`; `--replay --corrections` reproduces it. | **Kept — the shipped improvement path.** The vision model can't distinguish a hard-error display from a running cycle; one durable fact per broken machine fixes it in every angle and every future capture. Ceiling: the remaining 11 errors are all `free`→`occupied` over-calls, which are time-varying (`observation`-scope) — correcting those is per-frame hand-labelling, not learning, so they're left as the honest limit. |
+| Iteration 3 (P1) | _TBD — temporal memory / change-detection to cut the `free`→`occupied` over-calls._ | _[new result]_ | _[kept / revised / removed]_ |
 | Final | _TBD — combine what worked._ | _[final result]_ | _Main contribution: …_ |
 
-## Baseline vs. final comparison
+## Baseline → Iteration 1 → Iteration 2
 
-**One sample per mode** (`claude-sonnet-5` is stochastic). Each delta below is a single
-observation, not an average: the accuracy figures are equal and almost certainly within
-run-to-run noise; the harmful-error / acc-on-covered / `out_of_order` differences are larger
-but still one sample each. Multi-sample averaging is the outstanding rigor step (deferred —
-API budget). Both modes score the same 45 determinate observations on the same 9 frames.
+**One sample per mode** (`claude-haiku-4-5`; stochastic, so a single run shifts these a few
+points — multi-sample averaging deferred on API budget). All score the same 45 determinate
+observations on the same 9 committed frames; all `--replay`-reproducible from `data/cache/`.
 
-| Metric | Simple baseline | Agent (Iter 1) | Change |
-| --- | --- | --- | --- |
-| Per-machine accuracy (determinate GT, n=45) | 31.1% | 31.1% | ±0 (noise) |
-| Harmful-error rate | 11.1% | 8.9% | **−2.2 pp** |
-| Accuracy on covered | 51.9% | 60.9% | **+9.0 pp** |
-| Coverage | 60.0% | 51.1% | −8.9 pp |
-| `out_of_order` recall | 0/8 | 2/8 | **+2** |
-| Cost per frame | ~$0.009 | ~$0.019 | ×2 |
-| Human time per task (context) | ~2 wasted round-trips carrying a laundry bag per unlucky visit | 0 (check the portal first) | — |
+| Metric | Baseline | Iter 1 (verify) | Iter 2 (verify + corr.) | **Final: classify + corr.** |
+| --- | --- | --- | --- | --- |
+| Per-machine accuracy (determinate GT, n=45) | 62.2% | 57.8% | 75.6% | **80.0%** |
+| Harmful-error rate | 2.2% | 0.0% | 0.0% | **0.0%** |
+| Coverage | 95.6% | 100% | 100% | 95.6% |
+| Accuracy on covered | 65.1% | 57.8% | 75.6% | **83.7%** |
+| `out_of_order` recall | 0/8 | 0/8 | 8/8 | **8/8** |
+| Model cost per frame | ~$0.004 | ~$0.006 | ~$0.006 | **~$0.004** |
+
+**Iteration 1 (verification pass)** is *not* an improvement on this model — it over-commits,
+flipping correctly-`free` machines to `occupied`, so accuracy drops 4.4 pp. Kept in-tree,
+config-gated (`agent.verification.enabled`), as a studied negative result.
+
+**Iteration 2 (integrator corrections)** is the improvement — but stacked on the regressive
+verify pass it only reaches 75.6%. The **strongest config drops the verify pass**:
+`npm run eval -- --mode=baseline --split=evaluation --replay --corrections` →
+**80.0%** (`docs/artifacts/eval-baseline-corrected-2026-08-28.json`). For deployment, set
+`agent.verification.enabled = false` and keep the corrections.
+
+**How to read the delta.** The corrections are **human-supplied ground truth applied as an
+override**, not a model capability gain — and the Iter 2 / Final columns get a resource the
+Baseline / Iter 1 columns do not. A correction always scores perfectly on its own cell *by
+construction* (its value is label-consistent), so "+13.4 / +17.8 pp" is really "an integrator
+chose to override 8 of 45 cells to their known-correct value." The honest reading: (a) the
+`out_of_order`-recall failure is real and the model doesn't fix it, (b) one durable fact per
+broken unit removes it in every angle and every future capture at zero model cost, (c) there
+is no repo-external proof (service ticket, photo) that `W-04` / `D-02` / `D-06` are physically
+out of service — only the eval label and the author's `note`. The remaining 11 errors are all
+time-varying `free`→`occupied` over-calls, which `machine`-scope corrections can't help.
 
 ## Main contribution, failure mode, and hot take
 
-**Main contribution.** A verification pass that converts the single-call baseline's
-confident-but-wrong answers into either a corrected answer or an honest `unknown`. On the
-metric that reflects the user's cost — a wrong "free" sends them on a wasted trip — it
-**cuts harmful errors from 11.1% to 8.9%**, raises accuracy-on-covered from 51.9% to 60.9%,
-and takes `out_of_order` recall from 0/8 to 2/8, at 2× cost. Raw accuracy is unchanged
-(31.1% both), which is the point: the improvement is in *which* errors remain, not how many.
+**Main contribution.** Two things. (1) The **evaluation frame** that made a plausible-looking
+agent step (the verification pass) show up as a regression instead of shipping: `unknown` +
+`out_of_order` as first-class states, `harmful`-error scored separately (D-0006), a fair
+symmetric baseline (D-0012), key-free `--replay`. (2) The **integrator-correction store**
+(D-0014) — the mechanism that actually moved the metric the model can't: 3 durable "out of
+service" facts an integrator records once take accuracy 62.2% → 75.6% and `out_of_order`
+recall 0/8 → 8/8 at no extra model cost. The agentic win here is *knowing when to stop
+asking the model and let a human write one authoritative fact.*
 
-**Main failure mode.** The verification prompt over-weighted "confirm the machine's printed
-id". Machines with a clearly readable running-cycle display but no visible id number got
-downgraded from a correct `occupied` to `unknown` — that is most of the 9-point coverage
-drop. Trajectory: `docs/trajectories/runtime/2026-08-28-img_1825.md` (D-05: pass 1 got it
-right at 0.6, the verify pass lost it).
+**Main failure mode.** The verification pass *over-commits*. Asked to re-examine a
+low-confidence machine, `claude-haiku-4-5` resolves the doubt by picking the more eventful
+label — a lit standby panel becomes `occupied`, an "E" error code becomes `occupied` — so
+the pass trades 2 recovered `unknown`s for 4 new `free`→`occupied` errors and never reaches
+`out_of_order`. On `claude-sonnet-5` (archived, earlier frames) the same prompt behaved
+better; the regression is model-specific and only shows up when you actually run the cheaper
+model you intend to deploy.
 
-**Hot take.** The single highest-leverage change in this project was not to the agent — it
-was adding `unknown` and `out_of_order` as first-class states and scoring *harmful* errors
-separately from ordinary ones (D-0006). That reframing is what makes a verification pass
-that leaves accuracy flat and lowers coverage still obviously worth keeping. If we had
-optimised "accuracy" we'd have rejected Iteration 1. Decide what each error actually costs
-the user, encode that in the metric, and let it tell you which agent is better.
+**Hot take.** The highest-leverage work here was not any agent change — it was building the
+metric before building the agent. A verification pass that looked like a safety win on a
+strong model turned out **net-negative on accuracy** on the model we'd actually ship. Only
+because `harmful` error, coverage, and `out_of_order` were scored separately could we see
+that clearly and decline to ship it, instead of celebrating a −4-point regression as
+"more cautious". Decide what each error costs the user, encode it in the metric, then let
+the metric — not the demo — tell you whether the agent is better.
 
 ## Verification runs
 
 Record the result of each infra verification here (append, newest first).
+
+### 2026-08-28 — cache refreshed on `claude-haiku-4-5` + committed frames
+
+- Deleted the archived `claude-sonnet-5` cache (still in git at `e8de845`) and re-ran
+  `--live` on `claude-haiku-4-5` against the committed author-redacted frames, so the cache,
+  the reports, and the frames now all match. **Baseline** 62.2% acc / 2.2% harmful / 95.6%
+  coverage / 0/8 `out_of_order`, $0.035, 9 calls. **Agent (verify)** 57.8% acc / 0.0%
+  harmful / 100% coverage / 0/8 `out_of_order`, $0.051, 14 calls. Reports regenerated;
+  `data/cache/{baseline,agent}/` re-committed.
+- `AnthropicVisionClient` no longer hard-codes `output_config.effort` — new
+  `agent.visionEffort` knob (`"none"` default; haiku rejects the parameter, so `"none"`
+  omits it). `runtime.captureIntervalSeconds` knob added (camera screenshot cadence,
+  default 15 s, ≤ `stateRefreshSeconds`). Both validated on load, +tests.
+- Result write-up rewritten honestly: the verification pass is **net-negative on accuracy**
+  on haiku (−4.4 pp) — kept in-tree config-gated as a studied negative result, not shipped.
+  Progression / comparison / hot-take sections updated. The "known gap" from the previous
+  entry is **closed** — cache and committed frames are consistent.
+- **Iteration 2 — integrator corrections (D-0014).** New `src/eval/corrections.ts`
+  (`observation` / `machine` scope, authoritative override), `scripts/correct.ts`
+  (`npm run correct`), `--corrections` flag on `run-eval`. Recorded 3 `machine`-scope
+  corrections (`W-04`, `D-02`, `D-06` = out of service). `npm run eval -- --mode=agent
+  --split=evaluation --replay --corrections` → accuracy **75.6%** (+17.8 pp over Iter 1,
+  +13.4 pp over baseline), **`out_of_order` 8/8**, harmful 0.0%, coverage 100%, no extra
+  model cost. Report: `docs/artifacts/eval-agent-corrected-2026-08-28.json`. +5 tests.
+- `npm run typecheck` / `npm run lint` / `npm run build` / `npm run format:check` — **pass**;
+  `npm test` — **37/37**; `npm run check:data` — **pass**; `--replay` (± `--corrections`)
+  reproduces all three runs exactly.
 
 ### 2026-08-28 — 9 eval frames committed (author-drawn redactions)
 

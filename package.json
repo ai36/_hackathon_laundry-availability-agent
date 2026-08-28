@@ -17,6 +17,7 @@
     "test": "tsx --test \"src/**/*.test.ts\"",
     "dataset:prepare": "tsx scripts/prepare-dataset.ts",
     "eval": "tsx scripts/run-eval.ts",
+    "correct": "tsx scripts/correct.ts",
     "label:new": "tsx scripts/label.ts new",
     "label:check": "tsx scripts/label.ts check",
     "label:stats": "tsx scripts/label.ts stats"

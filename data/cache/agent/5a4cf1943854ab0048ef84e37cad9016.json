@@ -1,7 +1,0 @@
-{
-  "text": "{\"machines\":[{\"machineId\":\"D-04\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Display area heavily blurred, card reader panel shows blue light but digits unreadable, door not visible in this crop\"},{\"machineId\":\"D-05\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Display area heavily blurred with blue light indicator visible, digits unreadable\"},{\"machineId\":\"D-06\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Control panel visible with temp/heat/delicate buttons, arrows shown, door closed and appears empty, no visible running indicator lit\"},{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Panel area blurred, cannot confirm display state or indicators clearly\"}]}",
-  "model": "claude-sonnet-5",
-  "inputTokens": 2923,
-  "outputTokens": 272,
-  "costUsd": 0.008566
-}

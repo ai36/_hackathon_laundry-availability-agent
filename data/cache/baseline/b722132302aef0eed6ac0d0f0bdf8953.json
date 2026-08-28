@@ -1,7 +1,7 @@
 {
-  "text": "{\"machines\":[{\"machineId\":\"D-04\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Display shows numeric time but no active running indicator visible; door closed\"},{\"machineId\":\"D-05\",\"state\":\"out_of_order\",\"confidence\":0.6,\"rationale\":\"Display shows 'E' error code instead of normal readout\"},{\"machineId\":\"D-06\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Payment display visible but dryer status unclear\"},{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Payment display visible but dryer status unclear\"}]}",
-  "model": "claude-sonnet-5",
-  "inputTokens": 2823,
-  "outputTokens": 212,
-  "costUsd": 0.007766
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-04\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Display shows '48' (time remaining in minutes) and 'E' indicator, control panel is lit and active\"\n    },\n    {\n      \"machineId\": \"D-05\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Digital display screen is illuminated showing cycle information, machine appears to be running\"\n    },\n    {\n      \"machineId\": \"D-06\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Digital display screen is illuminated showing cycle information, machine appears to be running\"\n    },\n    {\n      \"machineId\": \"D-08\",\n      \"state\": \"unknown\",\n      \"confidence\": 0.5,\n      \"rationale\": \"Partially visible on far right edge; cannot clearly see display or door status to determine if free, occupied, or out of order\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1831,
+  "outputTokens": 276,
+  "costUsd": 0.003211
 }

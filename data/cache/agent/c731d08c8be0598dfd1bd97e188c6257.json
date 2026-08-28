@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-08\",\n      \"state\": \"free\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Dryer door closed, control panel lit with blue display lights visible, no error code displayed, no laundry visible through door window, appears ready for use\"\n    },\n    {\n      \"machineId\": \"W-15\",\n      \"state\": \"free\",\n      \"confidence\": 0.80,\n      \"rationale\": \"Washer door closed, control panel illuminated with blue display indicators, no countdown timer or running indicator visible, no laundry visible in drum, display appears to show price or default state\"\n    },\n    {\n      \"machineId\": \"W-16\",\n      \"state\": \"free\",\n      \"confidence\": 0.75,\n      \"rationale\": \"Washer door closed, control panel lit with blue display lights, no active cycle indicators, no error codes visible, drum appears empty through window, machine in idle state ready for use\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1887,
+  "outputTokens": 261,
+  "costUsd": 0.003192
+}

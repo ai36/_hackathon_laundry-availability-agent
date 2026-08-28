@@ -63,6 +63,10 @@ export function validateConfig(c: Laundry3Config): void {
 
   assert(c.agent.visionModel.trim().length > 0, "agent.visionModel must not be empty");
   assert(
+    ["none", "low", "medium", "high"].includes(c.agent.visionEffort),
+    'agent.visionEffort must be one of "none" | "low" | "medium" | "high"',
+  );
+  assert(
     Number.isInteger(c.agent.maxVisionCallsPerFrame) && c.agent.maxVisionCallsPerFrame >= 1,
     "agent.maxVisionCallsPerFrame must be an integer >= 1",
   );
@@ -85,8 +89,16 @@ export function validateConfig(c: Laundry3Config): void {
   );
   assert(isPositive(c.frames.videoFps), "frames.videoFps must be > 0");
 
+  assert(
+    isPositive(c.runtime.captureIntervalSeconds),
+    "runtime.captureIntervalSeconds must be > 0",
+  );
   assert(isPositive(c.runtime.stateRefreshSeconds), "runtime.stateRefreshSeconds must be > 0");
   assert(isPositive(c.runtime.staleAfterSeconds), "runtime.staleAfterSeconds must be > 0");
+  assert(
+    c.runtime.stateRefreshSeconds >= c.runtime.captureIntervalSeconds,
+    "runtime.stateRefreshSeconds should be >= runtime.captureIntervalSeconds",
+  );
   assert(
     c.runtime.staleAfterSeconds >= c.runtime.stateRefreshSeconds,
     "runtime.staleAfterSeconds should be >= runtime.stateRefreshSeconds",

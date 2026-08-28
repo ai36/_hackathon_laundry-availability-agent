@@ -10,7 +10,9 @@
  *   --replay  : serve every vision call from the on-disk cache (no key, no cost). Cache miss = error.
  *   --fake    : deterministic FakeVisionClient, no cache, no network (wiring check — empty predictions).
  *
- * --out=... : report path (default docs/artifacts/eval-<mode>-<YYYY-MM-DD>.json)
+ * --out=...       : report path (default docs/artifacts/eval-<mode>-<YYYY-MM-DD>.json)
+ * --corrections   : overlay integrator corrections (data/corrections/) on the predictions
+ *                   before scoring (Iteration 2, D-0014). Writes eval-<mode>-corrected-<date>.json.
  */
 import "./load-env";
 
@@ -22,6 +24,7 @@ import { runBaseline } from "@/agent/baseline";
 import { runAgent } from "@/agent/pipeline";
 import { AnthropicVisionClient, CachedVisionClient, FakeVisionClient } from "@/agent/vision";
 import type { VisionClient } from "@/agent/types";
+import { applyCorrections, loadCorrections } from "@/eval/corrections";
 import { loadFrameLabels, loadSplit } from "@/eval/dataset";
 import { formatScores, scoreAll } from "@/eval/score";
 import type { FramePrediction } from "@/eval/types";
@@ -37,8 +40,11 @@ const split = args.get("split") ?? "evaluation";
 const replay = args.has("replay");
 const fake = args.has("fake");
 const live = args.has("live");
+const withCorrections = args.has("corrections");
 const today = new Date().toISOString().slice(0, 10);
-const outPath = args.get("out") ?? `docs/artifacts/eval-${mode}-${today}.json`;
+const outPath =
+  args.get("out") ??
+  `docs/artifacts/eval-${mode}${withCorrections ? "-corrected" : ""}-${today}.json`;
 
 if (mode !== "baseline" && mode !== "agent") {
   console.error(`--mode must be "baseline" or "agent"`);
@@ -88,6 +94,19 @@ async function main(): Promise<void> {
     predictions.set(frameId, pred);
   }
 
+  let correctionsApplied = 0;
+  if (withCorrections) {
+    const corrections = loadCorrections();
+    for (const [frameId, pred] of predictions) {
+      const { prediction, applied } = applyCorrections(pred, corrections);
+      predictions.set(frameId, prediction);
+      correctionsApplied += applied;
+    }
+    console.log(
+      `corrections: ${corrections.count} on file (${corrections.byMachine.size} machine-scope), ${correctionsApplied} applied across ${frameIds.length} frame(s)`,
+    );
+  }
+
   const scores = scoreAll(predictions, labels, frameIds);
   const labelled = frameIds.filter((id) => labels.has(id)).length;
 
@@ -121,6 +140,7 @@ async function main(): Promise<void> {
         mode,
         split,
         model: modelLabel,
+        ...(withCorrections ? { corrections: correctionsApplied } : {}),
         frames: frameIds,
         labelledFrames: labelled,
         scores,

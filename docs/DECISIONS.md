@@ -365,19 +365,30 @@ reference and its label file — every determinate machine's status display stay
 the 9 are now committed under `data/public/frames/` (`.gitignore` allows them by name).
 Video-derived and unlabelled frames stay local.
 
-**Publish basis unchanged.** This amendment changes *how* the boxes are authored, not the
-bar for publishing. Both still apply: (a) every committed frame verified clear one-by-one
-(done — box-by-box against reference + label), and (b) authorization to film/publish the
-common area per the plan in this decision's first amendment and `docs/PROBLEM.md`. Redaction
-is defence-in-depth, not a substitute for (b). **Open item:** confirm (b) is actually in
-hand (written, covers publishing) and record yes/no here; until then the committed frames
-rest on redaction + "author's own / a friend's room" only.
+**Publish basis (resolved 2026-08-28).** The first amendment's plan listed "written
+authorization from whoever manages the laundry room" as a handling step. **That was not
+obtained and will not be pursued.** The author's basis for publishing these 9 frames instead:
 
-**Known gap (measurement).** The committed replay cache and recorded results (D-0011/D-0013)
-were produced against the earlier lightly-blurred frames, so `--replay` reproduces the
-recorded numbers exactly (image-independent semantic hash) but a fresh `--live` run on the
-committed frames will differ — see `docs/EVALUATION.md` limitations. Refresh with a `--live`
-pass on the committed frames before any results claim is presented as final.
+- The room is a **shared common area open to every resident of the building** — not a private
+  or access-controlled space.
+- **No personal privacy is implicated:** shot with no people present, no third-party
+  belongings in frame, tightly on the appliance faces.
+- **Redaction removes the location-identifying content** — vendor service sticker and phone,
+  window and TV views — verified box-by-box; generic décor is left as-is.
+- The dataset is 9 heavily-redacted stills of coin-op machines, used only to score a status-
+  reading agent.
+
+This is the author's own risk assessment, recorded here for the record. It is *not* a legal
+opinion. If a reviewer or the room's management objects, the frames come out of git and the
+eval falls back to `--replay` from the committed cache (which needs no frames).
+
+**Measurement gap — closed (2026-08-28).** The cache was refreshed: the archived
+`claude-sonnet-5` run (on the earlier lightly-blurred frames) was replaced by a `--live`
+`claude-haiku-4-5` run against the committed author-redacted frames, so cache, reports, and
+frames now all agree. New numbers: baseline 62.2% acc / 2.2% harmful; verify pass 57.8% acc
+/ 0.0% harmful — **net-negative on accuracy**, see `docs/CHANGELOG.md`. The sonnet run stays
+in git history at `e8de845` for contrast only (not point-comparable — model and frames both
+differ).
 
 **Integrator note.** For a real deployment the redaction geometry is better stored as one
 raster mask per camera angle (a PNG painted once per fixed camera and reused for every
@@ -428,14 +439,16 @@ stub. Built per the `claude-api` skill.
 
 - `@anthropic-ai/sdk` dependency; `AnthropicVisionClient` implements the same `VisionClient`
   interface as the Fake/Cached clients, so `--replay` and the offline tests keep working.
-- One `client.messages.create` per frame: base64 JPEG + prompt, `output_config: { effort:
-  "low" }` (high-volume classification — cost over depth), `max_tokens: 1500` (responses are
-  ~300–700 tokens; lowered from 4000). No streaming, no explicit `thinking`.
+- One `client.messages.create` per frame: base64 JPEG + prompt, `max_tokens: 1500`
+  (responses are ~300–700 tokens; lowered from 4000). No streaming, no explicit `thinking`.
+  `output_config.effort` is sent only when `agent.visionEffort` ≠ `"none"` — `claude-haiku-4-5`
+  **rejects** the parameter (400), so the default `"none"` omits it; sonnet/opus accept
+  `"low"`/`"medium"`/`"high"`.
 - **Model** = `laundry3.config.ts` `agent.visionModel`, overridable per run with
-  `LAUNDRY3_VISION_MODEL`. **Default is `claude-haiku-4-5`** ($1/$5 per MTok) for cost. The
-  recorded baseline + Iteration 1 runs used `claude-sonnet-5` (accuracy was the same ~31% as
-  a stronger option would likely give on this heavily-redacted task); `VisionResponse.model`
-  is persisted in the cache so `--replay` reports the model that actually produced each run.
+  `LAUNDRY3_VISION_MODEL`. **Default is `claude-haiku-4-5`** ($1/$5 per MTok) for cost, and
+  the recorded baseline + Iteration 1 runs use it. `VisionResponse.model` is persisted in
+  the cache so `--replay` reports the model that produced each run. An earlier
+  `claude-sonnet-5` run (different, pre-redaction frames) is archived at commit `e8de845`.
 - **Cost attribution:** `VisionResponse` carries `model` / `inputTokens` / `outputTokens` /
   `costUsd` from a per-model `PRICE_PER_MTOK` table (rates dated in the source);
   `run-eval.ts` writes a `totals` block + the model(s) in the report and prints the aggregate.
@@ -483,7 +496,9 @@ detection step, that becomes its own experiment with the id list withheld.
 ## D-0013 — Agent pipeline: verification pass + abstain floor
 
 - **Date:** 2026-08-28
-- **Status:** Accepted (Iteration 1; see `docs/CHANGELOG.md`)
+- **Status:** Iteration 1 — kept in-tree, config-gated, as a **studied negative result**
+  (net-negative on accuracy on `claude-haiku-4-5`; see `docs/CHANGELOG.md`). Not the shipped
+  answer — Iteration 2 (integrator corrections) is.
 
 **Context.** The baseline (one whole-frame call) answers `unknown` on ~40% of machines and
 never recognises `out_of_order`. The agentic layer has to do better without just guessing.
@@ -500,9 +515,55 @@ never recognises `out_of_order`. The agentic layer has to do better without just
    confidence gate only overrides an *answered* machine whose confidence is below
    **half** the verification threshold (0.35), i.e. a near-guess.
 
-**Consequences.** Doesn't move raw accuracy (both ≈31% on one sample) but roughly halves the
-harmful-error rate, lifts accuracy-on-covered, and starts catching broken machines, at 2×
-cost and lower coverage. **Removed dead-end:** abstaining at the full 0.7 threshold collapsed
-coverage to ~4% (dev observation, not archived) — a mis-calibrated gate, not a useful one.
-Next iteration targets coverage
-with per-machine ROI crops.
+**Consequences (on `claude-haiku-4-5`, the deploy model).** The verification pass is
+**net-negative on accuracy** (62.2% → 57.8%): asked to re-examine a low-confidence machine,
+haiku picks the more eventful label, flipping 4 correctly-`free` machines to `occupied`. It
+does clear the one harmful error (2.2% → 0%) and both `unknown`s (coverage 95.6% → 100%), and
+it still never reaches `out_of_order` (0/8). On `claude-sonnet-5` (archived, earlier frames)
+the same prompt cut harmful error and caught 2/8 `out_of_order` — the regression is
+model-specific. **Kept config-gated** (`agent.verification.enabled`) so the result is
+reproducible, but the pipeline's real improvement path is D-0014 **integrator corrections**
+(Iteration 2), which is what moves `out_of_order`. **Removed dead-end:** abstaining at the
+full 0.7 threshold collapsed coverage to ~4% (dev observation, not archived).
+
+---
+
+## D-0014 — Integrator corrections (human-in-the-loop, Iteration 2)
+
+- **Date:** 2026-08-28
+- **Status:** Accepted (Iteration 2; see `docs/CHANGELOG.md`)
+
+**Context.** The vision model — on the deploy model `claude-haiku-4-5` — cannot tell a broken
+machine from a running one: a hard-error code on the display reads as an active cycle, so
+`out_of_order` recall is 0/8 for both baseline and the verification pass, and that is 8 of
+the 19 remaining errors. Prompt tweaks did not fix it. The problem statement always assumed a
+human onboarding phase (`docs/PROBLEM.md`, scoping Q11–12): a service company installs the
+system and spends time confirming its output. That human is the missing signal.
+
+**Decision.** A stored, replayable **correction store** the integrator writes to.
+
+- `src/eval/corrections.ts` — `Correction { machineId, correctState, scope, note?, by, at }`.
+  - `scope: "observation"` — fixes one `(frameId, machineId)`. For `free` / `occupied`,
+    which change over time.
+  - `scope: "machine"` — a **durable** property of the physical unit (`out_of_order`, a
+    removed machine). Applies to that `machineId` in **every** frame until revoked. One
+    entry fixes a broken machine the model keeps misreading, in every angle and every later
+    capture.
+- Storage: `data/corrections/<frameId>.json`, committed (small, human-authored ground
+  truth). `loadCorrections()` flattens all files; `machine`-scope entries are promoted to
+  all frames; an `observation`-scope entry wins over a `machine`-scope one for its frame.
+- `applyCorrections(prediction, corrections)` overlays them as an **authoritative override**
+  (state replaced, `confidence` → 1, rationale marked integrator-sourced). Non-mutating.
+- CLI `npm run correct -- <frameId> <machineId> <state> [--scope=machine] [--note=…]`
+  (`--list` to review). Eval: `npm run eval -- --mode=agent --split=… --corrections` applies
+  the store before scoring and writes `eval-<mode>-corrected-<date>.json` with a
+  `corrections` count.
+
+**Consequences.** **3 `machine`-scope corrections** — `W-04`, `D-02`, `D-06`, each "this unit
+is out of service" — applied across the 9 frames (10 cells, 8 of them determinate) take the
+agent from **57.8% → 75.6%** accuracy and **`out_of_order` recall 0/8 → 8/8**, at **no extra
+model cost** (corrections are applied post-hoc). Harmful-error stays 0.0%, coverage 100%.
+The remaining 11 errors are all `free`→`occupied` over-calls, which are `observation`-scope
+and time-varying — correcting those is per-frame hand-labelling, not durable learning, so
+they are left as the honest ceiling of this mechanism. **This is the shipped improvement
+path**, not the verification pass (D-0013). Portal write-UI for corrections: D-0015.

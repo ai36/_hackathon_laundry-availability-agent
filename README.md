@@ -30,21 +30,32 @@ The core P0: given a laundry-room frame, produce a **verified per-machine status
   explicit out-of-order / occupied / free cues; its answers override the first pass. Then an
   abstain floor so a near-guess becomes an honest `unknown`.
 
-### Results — `claude-sonnet-5`, 9 labelled frames, 45 determinate observations
+### Results — `claude-haiku-4-5`, 9 committed frames, 45 determinate observations
 
-| Metric | Baseline | Agent (Iter 1) | |
-| --- | --- | --- | --- |
-| Per-machine accuracy | 31.1% | 31.1% | tie (within run-to-run noise) |
-| **Harmful-error rate** (told `free`, actually not) | 11.1% | **8.9%** | −2.2 pp |
-| **Accuracy when it commits** | 51.9% | **60.9%** | +9.0 pp |
-| Coverage (gave an actionable answer) | 60.0% | 51.1% | −8.9 pp |
-| **`out_of_order` recall** | 0/8 | **2/8** | +2 |
-| Cost per frame | ~$0.009 | ~$0.019 | ×2 |
+| Metric | Baseline | Iter 1 (verify) | Iter 2 (verify + corr.) | **Final: classify + corr.** |
+| --- | --- | --- | --- | --- |
+| Per-machine accuracy | 62.2% | 57.8% | 75.6% | **80.0%** |
+| **Harmful-error rate** (told `free`, actually not) | 2.2% | 0.0% | 0.0% | **0.0%** |
+| Coverage (gave an actionable answer) | 95.6% | 100% | 100% | 95.6% |
+| **`out_of_order` recall** | 0/8 | 0/8 | 8/8 | **8/8** |
+| Model cost per frame | ~$0.004 | ~$0.006 | ~$0.006 | **~$0.004** |
 
-The verification pass doesn't move raw accuracy, but it **halves the "wasted trip" errors**,
-is more trustworthy when it does answer, and starts catching broken machines — at 2× cost
-and lower coverage. One sample per mode; both are reproducible offline with `--replay`.
-Full write-up with the removed dead-end: **`docs/CHANGELOG.md`**.
+**Iteration 1 (verification pass) did not pan out on the deploy model.** It over-commits —
+flipping correctly-`free` machines to `occupied` — so accuracy drops 4 points. Kept in-tree,
+config-gated, as a documented negative result.
+
+**Iteration 2 (integrator corrections) is the improvement.** The vision model can't tell a
+hard-error display from a running cycle, so `out_of_order` recall is 0/8. An integrator
+records **3 durable facts** — "`W-04` / `D-02` / `D-06` are out of service" — once; they
+override the agent in every frame and every future capture, at no model cost. Dropping the
+regressive verify pass and keeping the corrections is the strongest config: **80.0%**,
+`out_of_order` **8/8**.
+
+**Read the delta honestly:** a correction is human ground truth applied as an override, so it
+scores 100% on its own cell by construction — "+18 pp" means "an integrator overrode 8 of 45
+cells to their known-correct value." What that legitimately shows: the `out_of_order` failure
+is real and unfixed by prompting, and one durable fact per broken unit clears it everywhere
+for free. All runs `--replay`-reproducible offline. Full write-up: **`docs/CHANGELOG.md`**.
 
 ### The portal
 
@@ -58,24 +69,30 @@ so `npm run build` prerenders it. Reservations and a live feed are P2, not wired
 
 ### Main failure mode & hot take
 
-**Failure mode:** a verification step that re-asks "are you sure?" can *lose* a correct
-answer. In Iteration 1 the verify prompt over-weighted "confirm the machine's printed id",
-so machines with a readable running-cycle display but no visible id got downgraded from a
-correct `occupied` to `unknown` — that's most of the coverage drop
-(`docs/trajectories/runtime/2026-08-28-img_1825.md`).
+**Failure mode:** the verification pass *over-commits*. Asked to re-examine a low-confidence
+machine, `claude-haiku-4-5` resolves the doubt by choosing the more eventful label — a lit
+standby panel becomes `occupied`, an "E" error code becomes `occupied` — so it trades 2
+recovered `unknown`s for 4 new `free`→`occupied` errors and never reaches `out_of_order`.
 
-**Hot take:** for this product the useful metric was never raw accuracy — it's *harmful*
-errors and honest abstention. A confident-but-wrong "free" costs a real trip; an "unknown"
-just reproduces today's uncertainty. Adding `unknown` + `out_of_order` as first-class states
-and scoring harmful errors separately changed what "better" means, and made a verification
-pass that *lowers* accuracy still clearly worth keeping. Build the metric around the cost of
-each error before optimising the agent.
+**Hot take:** the highest-leverage work was building the metric *before* the agent, and
+knowing when to stop asking the model. A verification pass that looked like a safety win on
+`claude-sonnet-5` was **net-negative on accuracy** on the cheaper model we'd actually deploy
+— only separate `harmful` / coverage / `out_of_order` scoring made that visible instead of
+shippable. What finally moved the metric wasn't a cleverer prompt: it was letting an
+integrator write **3 authoritative facts** the model kept getting wrong. Decide what each
+error costs, encode it in the metric, and recognise the failures a human should just
+overrule rather than the agent re-litigate.
 
 ## How agents are used
 
 - **The solution agent** (`src/agent/`) — a two-step vision pipeline (classify → verify),
   behind a `VisionClient` interface with a response cache so every scored run reproduces
-  key-free (`--replay`).
+  key-free (`--replay`). The verify step is config-gated and, on the deploy model, a
+  documented regression — see the results above.
+- **Integrator corrections** (`src/eval/corrections.ts`, `npm run correct`) — a human-in-the-
+  loop store the agent treats as authoritative. `machine`-scope corrections encode durable
+  facts (a broken unit) that carry to every frame. This is the step that actually moved the
+  metric (Iteration 2).
 - **`grillme`** skill — a Socratic interview that turned the one-line brief into the scoped
   problem, metric, and dataset plan (`docs/trajectories/` has the outcome; `docs/PROBLEM.md`
   the result).

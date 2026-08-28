@@ -46,6 +46,13 @@ export interface Laundry3Config {
   agent: {
     /** Claude vision model id used for frame/ROI analysis. */
     visionModel: string;
+    /**
+     * Reasoning-effort hint sent as `output_config.effort`. `"none"` omits the parameter
+     * entirely — required for models that reject it (e.g. `claude-haiku-4-5`). `"low"` /
+     * `"medium"` / `"high"` are accepted by models that support effort control (e.g.
+     * `claude-sonnet-5`, `claude-opus-5`) and trade latency/cost against depth.
+     */
+    visionEffort: "none" | "low" | "medium" | "high";
     /** Hard cap on vision API calls per processed frame (cost guard). */
     maxVisionCallsPerFrame: number;
     /** When the evidence is insufficient, emit `unknown` instead of guessing a state. */
@@ -80,7 +87,17 @@ export interface Laundry3Config {
   };
 
   runtime: {
-    /** How often (seconds) the runtime re-derives machine state from new frames. */
+    /**
+     * How often (seconds) a fresh screenshot is pulled from **each camera** and sent to the
+     * agent. Lower = more current, but every capture is one or more vision calls — 1 s is
+     * feasible but token-expensive; 10–15 s is the usual range. Must be ≤ `stateRefreshSeconds`.
+     */
+    captureIntervalSeconds: number;
+    /**
+     * How often (seconds) the runtime re-derives the published per-machine state by fusing
+     * the latest captures across all cameras. Usually a small multiple of the capture
+     * interval (capture often, publish on a steadier beat).
+     */
     stateRefreshSeconds: number;
     /** Portal marks a machine's status "stale" once it is older than this (seconds). */
     staleAfterSeconds: number;

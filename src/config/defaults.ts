@@ -24,6 +24,7 @@ export const DEFAULT_CONFIG: Laundry3Config = {
   },
   agent: {
     visionModel: "claude-haiku-4-5",
+    visionEffort: "none",
     maxVisionCallsPerFrame: 8,
     abstainWhenUncertain: true,
     verification: {
@@ -41,6 +42,7 @@ export const DEFAULT_CONFIG: Laundry3Config = {
     videoFps: 1,
   },
   runtime: {
+    captureIntervalSeconds: 15,
     stateRefreshSeconds: 30,
     staleAfterSeconds: 120,
   },

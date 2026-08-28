@@ -2,6 +2,7 @@
   "mode": "baseline",
   "split": "evaluation",
   "model": "claude-haiku-4-5",
+  "corrections": 10,
   "frames": [
     "img_1819",
     "img_1821",
@@ -17,10 +18,10 @@
   "scores": {
     "nDeterminate": 45,
     "nIndeterminable": 16,
-    "accuracy": 0.6222222222222222,
-    "harmfulErrorRate": 0.022222222222222223,
+    "accuracy": 0.8,
+    "harmfulErrorRate": 0,
     "coverage": 0.9555555555555556,
-    "accuracyOnCovered": 0.6511627906976745,
+    "accuracyOnCovered": 0.8372093023255814,
     "confusion": {
       "free": {
         "free": 18,
@@ -41,10 +42,10 @@
         "out_of_order": 0
       },
       "out_of_order": {
-        "free": 1,
-        "occupied": 7,
+        "free": 0,
+        "occupied": 0,
         "unknown": 0,
-        "out_of_order": 0
+        "out_of_order": 8
       }
     },
     "missingPredictions": 0
@@ -79,9 +80,9 @@
         },
         {
           "machineId": "W-04",
-          "state": "free",
-          "confidence": 0.9,
-          "rationale": "Fourth washing machine from left, lid closed, no visible display activity or laundry inside"
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): taped off, powered down across all frames"
         },
         {
           "machineId": "W-05",
@@ -122,9 +123,9 @@
         },
         {
           "machineId": "D-02",
-          "state": "occupied",
-          "confidence": 0.85,
-          "rationale": "Display panel is lit with blue screen showing active cycle information"
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): hard error code on display, not a running cycle"
         },
         {
           "machineId": "D-03",
@@ -146,9 +147,9 @@
         },
         {
           "machineId": "D-06",
-          "state": "occupied",
-          "confidence": 0.85,
-          "rationale": "Display panel is lit with blue screen showing active cycle information"
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): out of service every frame it appears in"
         },
         {
           "machineId": "D-07",
@@ -195,9 +196,9 @@
         },
         {
           "machineId": "D-02",
-          "state": "occupied",
-          "confidence": 0.85,
-          "rationale": "Second from left in front row, display shows active time/cycle"
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): hard error code on display, not a running cycle"
         },
         {
           "machineId": "D-03",
@@ -219,9 +220,9 @@
         },
         {
           "machineId": "D-06",
-          "state": "occupied",
-          "confidence": 0.85,
-          "rationale": "Second dryer in second row from front-right, display illuminated and active"
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): out of service every frame it appears in"
         },
         {
           "machineId": "D-07",
@@ -250,9 +251,9 @@
         },
         {
           "machineId": "D-02",
-          "state": "occupied",
-          "confidence": 0.9,
-          "rationale": "Digital display lit and active, showing cycle information"
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): hard error code on display, not a running cycle"
         },
         {
           "machineId": "D-03",
@@ -274,9 +275,9 @@
         },
         {
           "machineId": "D-06",
-          "state": "occupied",
-          "confidence": 0.75,
-          "rationale": "Digital display visible and appears active"
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): out of service every frame it appears in"
         },
         {
           "machineId": "D-07",
@@ -335,9 +336,9 @@
         },
         {
           "machineId": "D-06",
-          "state": "occupied",
-          "confidence": 0.85,
-          "rationale": "Has active display screen visible on control panel, appears to be in operation"
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): out of service every frame it appears in"
         },
         {
           "machineId": "D-08",
@@ -372,9 +373,9 @@
         },
         {
           "machineId": "D-06",
-          "state": "occupied",
-          "confidence": 0.9,
-          "rationale": "Digital display screen is illuminated and showing information, indicating active operation"
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): out of service every frame it appears in"
         },
         {
           "machineId": "D-08",
@@ -409,9 +410,9 @@
         },
         {
           "machineId": "D-06",
-          "state": "occupied",
-          "confidence": 0.85,
-          "rationale": "Digital display screen is illuminated showing cycle information, machine appears to be running"
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): out of service every frame it appears in"
         },
         {
           "machineId": "D-08",

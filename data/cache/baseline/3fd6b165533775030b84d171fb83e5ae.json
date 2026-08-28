@@ -1,7 +1,7 @@
 {
-  "text": "{\"machines\":[{\"machineId\":\"D-04\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Display panel visible but no active countdown indicated, likely idle\"},{\"machineId\":\"D-05\",\"state\":\"occupied\",\"confidence\":0.55,\"rationale\":\"Central display shows time value (40) suggesting active cycle\"},{\"machineId\":\"D-06\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Panel visible with no clear running indication\"},{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Edge of frame, display not clearly visible\"}]}",
-  "model": "claude-sonnet-5",
-  "inputTokens": 2823,
-  "outputTokens": 206,
-  "costUsd": 0.007706
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-04\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Display shows '48' and 'oF' with active control panel lit up, indicating running cycle\"\n    },\n    {\n      \"machineId\": \"D-05\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Digital display screen is illuminated showing time/status information, machine appears active\"\n    },\n    {\n      \"machineId\": \"D-06\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Digital display screen is illuminated and showing information, indicating active operation\"\n    },\n    {\n      \"machineId\": \"D-08\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Digital display screen is illuminated showing information, machine appears to be in use\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1831,
+  "outputTokens": 260,
+  "costUsd": 0.003131
 }

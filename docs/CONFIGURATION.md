@@ -48,7 +48,8 @@ This page documents the **deployment config**.
 
 | Key | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `agent.visionModel` | string | `"claude-haiku-4-5"` | Claude vision model id for frame/ROI analysis. Default is haiku for cost ($1/$5 per MTok); the recorded baseline/agent runs used `claude-sonnet-5`. |
+| `agent.visionModel` | string | `"claude-haiku-4-5"` | Claude vision model id for frame/ROI analysis. Default is haiku for cost ($1/$5 per MTok). |
+| `agent.visionEffort` | `"none"` \| `"low"` \| `"medium"` \| `"high"` | `"none"` | Reasoning-effort hint (`output_config.effort`). `"none"` omits the parameter — **required for `claude-haiku-4-5`**, which rejects it. `"low"`/`"medium"`/`"high"` work on models that support effort control (`claude-sonnet-5`, `claude-opus-5`). |
 | `agent.maxVisionCallsPerFrame` | int ≥ 1 | `8` | Hard cap on vision API calls per processed frame (cost guard). |
 | `agent.abstainWhenUncertain` | bool | `true` | Emit `unknown` instead of guessing when evidence is insufficient. |
 | `agent.verification.enabled` | bool | `true` | Run a second-pass check on low-confidence machines before publishing. |
@@ -76,7 +77,8 @@ override per run.
 
 | Key | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `runtime.stateRefreshSeconds` | number > 0 | `30` | How often the runtime re-derives machine state. |
+| `runtime.captureIntervalSeconds` | number > 0 | `15` | How often a fresh screenshot is pulled from **each camera** and sent to the agent. 1 s works but is token-expensive; 10–15 s is typical. Must be ≤ `stateRefreshSeconds`. |
+| `runtime.stateRefreshSeconds` | number > 0 | `30` | How often the runtime re-derives the published per-machine state by fusing the latest captures. Must be ≥ `captureIntervalSeconds`. |
 | `runtime.staleAfterSeconds` | number > 0 | `120` | Portal marks a status "stale" past this age. Must be ≥ `stateRefreshSeconds`. |
 
 ### `cycles` (P1)

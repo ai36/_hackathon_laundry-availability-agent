@@ -32,8 +32,11 @@ data/
 - Frames with people or identifying detail stay only in git-ignored `raw/` and are not
   committed. The "person in frame" case uses a synthetic/augmented image with its source
   recorded in the label file.
-- The laundry-room manager's written authorization to film/publish the common area is kept
-  out of the repo; its existence is noted in `docs/PROBLEM.md`.
+- **No management authorization was obtained** for the committed frames. The basis for
+  publishing them is: a shared common area open to all residents, no people or third-party
+  belongings in frame, and redaction of every location-identifying element. This is the
+  author's own risk call — see `docs/DECISIONS.md` D-0009 ("Publish basis"). If it is
+  challenged, the frames are removed and the eval runs `--replay` from the committed cache.
 - No credentials or personal data anywhere in `data/`.
 
 ## Redaction

@@ -1,7 +1,7 @@
 {
-  "text": "{\"machines\":[{\"machineId\":\"D-04\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Display blurred, cannot determine status\"},{\"machineId\":\"D-05\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Display blurred, cannot determine status\"},{\"machineId\":\"D-06\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Display blurred, cannot determine status\"},{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Display blurred, cannot determine status\"}]}",
-  "model": "claude-sonnet-5",
-  "inputTokens": 2823,
-  "outputTokens": 194,
-  "costUsd": 0.007586
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-04\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Display shows time remaining (48 minutes), machine is actively running\"\n    },\n    {\n      \"machineId\": \"D-05\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Display shows time remaining (68 minutes), machine is actively running\"\n    },\n    {\n      \"machineId\": \"D-06\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Has active display screen visible on control panel, appears to be in operation\"\n    },\n    {\n      \"machineId\": \"D-08\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Has active display screen visible on control panel, appears to be in operation\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1831,
+  "outputTokens": 250,
+  "costUsd": 0.003081
 }

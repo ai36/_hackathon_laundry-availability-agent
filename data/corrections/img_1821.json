@@ -1,0 +1,21 @@
+{
+  "frameId": "img_1821",
+  "corrections": [
+    {
+      "machineId": "D-02",
+      "correctState": "out_of_order",
+      "scope": "machine",
+      "note": "hard error code on display, not a running cycle",
+      "by": "integrator",
+      "at": "2026-08-28T22:47:02.565Z"
+    },
+    {
+      "machineId": "D-06",
+      "correctState": "out_of_order",
+      "scope": "machine",
+      "note": "out of service every frame it appears in",
+      "by": "integrator",
+      "at": "2026-08-28T22:47:03.663Z"
+    }
+  ]
+}

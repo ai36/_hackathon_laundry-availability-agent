@@ -124,9 +124,12 @@ day, plus a short time-ordered series. Handling:
   possible, crop to the machine faces so personal items are out of frame.
 - Blur or exclude any incidental person, apartment numbers, notices with names, or other
   identifying details.
-- Written authorization from whoever manages the laundry room that **explicitly covers
-  filming the common area for this purpose**. This does not extend to other tenants'
-  belongings — hence the exclusion rule above.
+- **Authorization:** none was obtained from the room's management, and none will be pursued.
+  The 9 committed frames rest on: a shared common area open to all residents, no people or
+  third-party belongings in frame, and redaction of every location-identifying element. This
+  is the author's own risk assessment (not a legal opinion) — full reasoning in
+  `docs/DECISIONS.md` D-0009 ("Publish basis"). If challenged, the frames are pulled and the
+  eval runs `--replay` from the committed cache.
 - Frames containing a recognisable person are **not** included in the shared dataset; the
   "person in frame" hard case is covered with a synthetic/augmented frame instead, and the
   augmentation source (fully synthetic, or a licensed/own image) is recorded next to that

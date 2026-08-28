@@ -39,6 +39,13 @@ test("rejects stale window shorter than the refresh interval", () => {
   );
 });
 
+test("rejects a capture interval longer than the state-refresh interval", () => {
+  assert.throws(
+    () => loadConfig({ runtime: { captureIntervalSeconds: 60, stateRefreshSeconds: 30 } }),
+    ConfigError,
+  );
+});
+
 test("rejects a non-integer machine count", () => {
   assert.throws(() => loadConfig({ site: { machines: { washers: 12.5 } } }), ConfigError);
 });
@@ -66,4 +73,9 @@ test("rejects a non-integer or tiny frame width", () => {
 
 test("rejects a non-positive video fps", () => {
   assert.throws(() => loadConfig({ frames: { videoFps: 0 } }), ConfigError);
+});
+
+test("accepts a valid vision effort and rejects an unknown one", () => {
+  assert.equal(loadConfig({ agent: { visionEffort: "medium" } }).agent.visionEffort, "medium");
+  assert.throws(() => loadConfig({ agent: { visionEffort: "max" as "high" } }), ConfigError);
 });

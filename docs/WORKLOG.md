@@ -12,6 +12,81 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Cache refreshed on haiku + config knobs (capture interval, vision effort)
+
+- **User decision:** keep `claude-haiku-4-5` (cost); refresh the cache so it matches the
+  committed frames. Deleted the archived `claude-sonnet-5` cache (still in git at `e8de845`)
+  and re-ran both modes `--live` on haiku against the committed author-redacted frames.
+- **`agent.visionEffort` config knob** (`"none"` default). `AnthropicVisionClient` sent
+  `output_config.effort: "low"` unconditionally; `claude-haiku-4-5` **rejects** it (400
+  `This model does not support the effort parameter`). Now the parameter is sent only when
+  the knob ≠ `"none"`. Validated on load; +test.
+- **`runtime.captureIntervalSeconds` config knob** (default 15 s, ≤ `stateRefreshSeconds`) —
+  how often a screenshot is pulled from each camera. Validated; +test. `runtime.stateRefresh`
+  doc clarified as the *publish* beat vs the *capture* beat.
+- **New numbers** (`claude-haiku-4-5`, 9 committed frames, 45 determinate obs, one sample):
+  - Baseline: accuracy **62.2%**, harmful-error 2.2%, coverage 95.6%, acc-on-covered 65.1%,
+    `out_of_order` 0/8. $0.035, 9 calls. `data/cache/baseline/`.
+  - Agent (verification pass): accuracy **57.8%** (**−4.4 pp vs baseline**), harmful-error
+    **0.0%**, coverage **100%**, acc-on-covered 57.8%, `out_of_order` 0/8. $0.051, 14 calls.
+    `data/cache/agent/`.
+  - **The verification pass is net-negative on accuracy on haiku** — it over-commits,
+    flipping 4 correctly-`free` machines to `occupied`. Kept in-tree config-gated as a
+    studied negative result; **not** the shipped answer. On sonnet (archived `e8de845`) it
+    behaved better — the regression is model-specific.
+- Docs rewritten with the haiku numbers and the honest framing: `README.md` (results +
+  failure mode + hot take), `docs/CHANGELOG.md` (progression, comparison, hot take, new
+  verification-run entry), `docs/EVALUATION.md` (Results + limitations), `docs/REPRODUCTION.md`
+  (both tables), `docs/DECISIONS.md` (D-0009 gap closed, D-0011 effort, D-0013 status →
+  studied negative result), both `docs/trajectories/{baseline,runtime}/*` marked as archived
+  sonnet runs.
+- Verification: `npm run typecheck` / `lint` / `build` / `format:check` — **pass**;
+  `npm test` — **32/32**; `npm run check:data` — **pass**; `--replay` reproduces both new
+  runs exactly.
+
+### 2026-08-28 — Iteration 2: integrator corrections (D-0014)
+
+- **The shipped improvement path.** The vision model can't tell a hard-error display from a
+  running cycle → `out_of_order` recall 0/8 for both baseline and the verify pass, = 8 of
+  the 19 remaining errors. Fix: a human-in-the-loop correction store the agent treats as
+  authoritative.
+- `src/eval/corrections.ts` — `Correction { machineId, correctState, scope, note?, by, at }`.
+  `scope: "observation"` (one frame) or `"machine"` (durable property — applies to that
+  machine in every frame). `loadCorrections()` + `applyCorrections()` (non-mutating override:
+  state replaced, confidence → 1). +5 tests.
+- `scripts/correct.ts` + `npm run correct -- <frameId> <machineId> <state> [--scope=machine]
+  [--note=…]` (`--list` to review). `--corrections` flag on `npm run eval` overlays the store
+  before scoring, writes `eval-<mode>-corrected-<date>.json` with a `corrections` count.
+- Recorded 3 `machine`-scope corrections via the CLI: `W-04`, `D-02`, `D-06` = "out of
+  service" (`data/corrections/img_1819.json`, `img_1821.json`; committed).
+- **Result** (`npm run eval -- --mode=agent --split=evaluation --replay --corrections`):
+  accuracy **57.8% → 75.6%** (+17.8 pp vs Iter 1, **+13.4 pp vs baseline 62.2%**),
+  **`out_of_order` recall 0/8 → 8/8**, harmful-error 0.0% (unchanged), coverage 100%
+  (unchanged), **no extra model cost** (corrections applied post-hoc). Report:
+  `docs/artifacts/eval-agent-corrected-2026-08-28.json`.
+- Honest ceiling: the remaining 11 errors are all `free`→`occupied` over-calls, which are
+  time-varying (`observation`-scope) — correcting those is per-frame hand-labelling, not
+  durable learning, so left as the limit of this mechanism.
+- `docs/DECISIONS.md` D-0014 written; CHANGELOG progression + comparison + hot take + a
+  verification-run line updated; README results + "how agents are used"; EVALUATION Results;
+  REPRODUCTION; `data/corrections/README.md`.
+- **Compliance review** (`hackathon-compliance`, 2 passes):
+  `docs/trajectories/compliance/2026-08-28-iteration-2-corrections.md` — **PASS (with risks)**,
+  no blockers. Risk fixes applied before commit:
+  - **Circularity disclosed.** A correction scores 100% on its own cell by construction;
+    "+13.4 pp" = "an integrator overrode 8 of 45 cells to known-correct". No repo-external
+    proof the 3 units are physically broken (only the label + author `note`). Added to
+    EVALUATION limitations + a "read the delta honestly" paragraph in README + CHANGELOG.
+  - **Best config evaluated.** `baseline + corrections` (no verify pass) → **80.0%** acc,
+    `out_of_order` 8/8. `docs/artifacts/eval-baseline-corrected-2026-08-28.json` committed;
+    added as the **Final (recommended)** column. Deployment note: `verification.enabled=false`.
+  - **Asymmetric resources** (Iter 2 gets human overrides) stated explicitly.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**;
+  `npm test` — **37/37**; `check:data` — **pass**; `--replay` (± `--corrections`) reproduces
+  all four runs exactly (62.2 / 57.8 / 75.6 / 80.0).
+- Next (deferred — token budget; resume after limit refresh): portal roles + correction
+  write-UI (D-0015) per the user's full-slice choice.
+
 ### 2026-08-28 — 9 evaluation frames committed (author-drawn redactions)
 
 - The frames are of a laundry room the author does not own, so redaction is author-authored,

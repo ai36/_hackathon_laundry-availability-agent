@@ -105,7 +105,9 @@ export class AnthropicVisionClient implements VisionClient {
     const res = await this.client.messages.create({
       model: this.model,
       max_tokens: 1500,
-      output_config: { effort: "low" },
+      ...(config.agent.visionEffort !== "none"
+        ? { output_config: { effort: config.agent.visionEffort } }
+        : {}),
       messages: [
         {
           role: "user",

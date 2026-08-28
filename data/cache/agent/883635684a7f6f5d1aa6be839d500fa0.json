@@ -1,7 +1,7 @@
 {
-  "text": "{\"machines\":[{\"machineId\":\"D-04\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Display not clearly visible, position uncertain in bank\"},{\"machineId\":\"D-05\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display shows '40' timer suggesting active cycle\"},{\"machineId\":\"D-06\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Display shows 'E' code, unclear if error or standby\"},{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Machine partially visible, display not readable\"}]}",
-  "model": "claude-sonnet-5",
-  "inputTokens": 2769,
-  "outputTokens": 210,
-  "costUsd": 0.007638
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-04\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Digital display shows time remaining (48), unit is powered on with active controls visible\"\n    },\n    {\n      \"machineId\": \"D-05\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Blue digital display screen visible and illuminated, indicating active operation\"\n    },\n    {\n      \"machineId\": \"D-06\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Blue digital display screen visible and illuminated, indicating active operation\"\n    },\n    {\n      \"machineId\": \"D-08\",\n      \"state\": \"unknown\",\n      \"confidence\": 0.5,\n      \"rationale\": \"Machine partially visible at frame edge with display obscured; insufficient evidence to determine state\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1782,
+  "outputTokens": 252,
+  "costUsd": 0.003042
 }

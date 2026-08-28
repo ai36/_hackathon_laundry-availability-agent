@@ -92,45 +92,64 @@ npm run eval -- --mode=baseline --split=evaluation --fake     # offline wiring c
 ```
 
 `--replay` works from a clean checkout even **without `data/public/frames/`** — the cache key
-is the semantic request, not the image bytes. The 9 labelled eval stills *are* committed, but
-they now carry heavier author-drawn redaction boxes than the frames the cache was recorded
-against, so a fresh `--live` run will differ from the recorded numbers by a few points where
-a box clips a display; `--replay` stays exact. Refreshing the cache with a `--live` pass on
-the committed frames is pending.
+is the semantic request, not the image bytes. The recorded cache and the committed frames are
+consistent (both recorded against the committed author-redacted frames on `claude-haiku-4-5`).
+A fresh `--live` run re-samples the model and shifts the numbers a few points; `--replay` is
+exact.
 
-**Recorded baseline run** (`data/cache/baseline/`, model `claude-sonnet-5`):
+**Recorded baseline run** (`data/cache/baseline/`, model `claude-haiku-4-5`):
 
 | accuracy | harmful-error | coverage | acc-on-covered | cost | runtime |
 | --- | --- | --- | --- | --- | --- |
-| 31.1% | 11.1% | 60.0% | 51.9% | $0.081 (`--live`) / $0 (`--replay`) | ~40 s `--live`, ~1 s `--replay` |
+| 62.2% | 2.2% | 95.6% | 65.1% | $0.035 (`--live`) / $0 (`--replay`) | ~20 s `--live`, ~1 s `--replay` |
 
-45 determinate observations over 9 frames. The model is stochastic — a fresh `--live` run
-shifts these a few points (see `docs/EVALUATION.md` limitations); `--replay` is exact.
+45 determinate observations over 9 frames.
 
 ## Agent (Iteration 1 — verification pass)
 
 ```bash
 npm run eval -- --mode=agent --split=evaluation --replay      # NO key, NO cost — reproduces the recorded run
-npm run eval -- --mode=agent --split=evaluation --live        # re-sample: paid (18 calls)
+npm run eval -- --mode=agent --split=evaluation --live        # re-sample: paid (~14 calls)
 ```
 
-**Recorded agent run** (`data/cache/agent/`, model `claude-sonnet-5`):
+**Recorded agent run** (`data/cache/agent/`, model `claude-haiku-4-5`):
 
 | accuracy | harmful-error | coverage | acc-on-covered | `out_of_order` | cost |
 | --- | --- | --- | --- | --- | --- |
-| 31.1% | 8.9% | 51.1% | 60.9% | 2/8 | $0.170 (`--live`) / $0 (`--replay`) |
+| 57.8% | 0.0% | 100% | 57.8% | 0/8 | $0.051 (`--live`) / $0 (`--replay`) |
 
-Confusion (gt → pred): free 9/4/14/0, occupied 2/3/5/0, out_of_order 2/1/3/2. Same 45
-determinate observations / 9 frames as the baseline — see `docs/CHANGELOG.md` for the A/B.
+Confusion (gt → pred): free 16/11/0/0, occupied 0/10/0/0, out_of_order 0/8/0/0. The verify
+pass is **net-negative on accuracy** here (−4.4 pp vs baseline) — kept config-gated as a
+studied result. Same 45 determinate observations / 9 frames as the baseline; see
+`docs/CHANGELOG.md` for the A/B and the archived `claude-sonnet-5` contrast (`e8de845`).
+
+## Agent + integrator corrections (Iteration 2 — D-0014)
+
+```bash
+npm run eval -- --mode=agent --split=evaluation --replay --corrections   # NO key, NO cost
+npm run correct -- --list                                               # the 3 corrections on file
+```
+
+Overlays `data/corrections/` (3 `machine`-scope entries: `W-04`, `D-02`, `D-06` = out of
+service) on the agent predictions before scoring. Report:
+`docs/artifacts/eval-agent-corrected-2026-08-28.json`.
+
+| accuracy | harmful-error | coverage | `out_of_order` | model cost |
+| --- | --- | --- | --- | --- |
+| **75.6%** | 0.0% | 100% | **8/8** | $0.051 (corrections are free) |
+
++13.4 pp accuracy over baseline at no extra model cost. Confusion (gt → pred): free
+16/11/0/0, occupied 0/10/0/0, out_of_order 0/0/0/8.
 
 Both modes write a JSON report to `docs/artifacts/eval-<mode>-<date>.json`. Its `model`
 field is read from the cached responses (so a `--replay` of the recorded runs reports
-`claude-sonnet-5`), not from config. The report carries no timestamp so it regenerates
+`claude-haiku-4-5`), not from config. The report carries no timestamp so it regenerates
 byte-identically.
 
-> The default `agent.visionModel` is now `claude-haiku-4-5` (cost). A fresh `--live`
-> re-sample therefore runs on haiku unless you pass `LAUNDRY3_VISION_MODEL=claude-sonnet-5`
-> to match the recorded numbers. `--replay` always reproduces the recorded sonnet-5 run.
+> `agent.visionModel` defaults to `claude-haiku-4-5` and `agent.visionEffort` to `"none"`
+> (haiku rejects the `effort` parameter). A `--live` re-sample runs on haiku; `--replay`
+> reproduces the recorded haiku run with no key. The earlier `claude-sonnet-5` run is
+> archived at commit `e8de845` (different frames — not point-comparable).
 
 ## Expected output
 
