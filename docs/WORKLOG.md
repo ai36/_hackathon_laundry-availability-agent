@@ -12,6 +12,21 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Trajectory logging convention
+
+- Added `docs/trajectories/` (README + `compliance/`, `calibration/`, `runtime/`,
+  `baseline/` sub-folders) for hackathon deliverable #4 (agent trajectories) and ground
+  rule 9. A full build-chat transcript is explicitly **not** required — the process record
+  stays in `docs/WORKLOG.md` + `docs/DECISIONS.md`.
+- Saved the two compliance reviews run so far: `docs/trajectories/compliance/2026-08-28-infra-bootstrap.md`
+  and `2026-08-28-problem-scoping.md` (verdict + risks + follow-up actions; not the raw JSONL).
+- `CLAUDE.md` compliance-review rule now says to save each review under
+  `docs/trajectories/compliance/`; `/worklog` command updated to match.
+- No separate compliance-agent run for this change — it only adds a docs convention and
+  transcribes already-reviewed outputs. Manual check against `docs/HACKATHON-RULES.md`:
+  no code, no data, no claims, no new tools; G2/G8 unaffected; consistent with deliverable
+  #4. Next substantive change gets a full review.
+
 ### 2026-08-28 — Problem scoping via the grillme skill
 
 - Ran the `grillme` Socratic-interview skill against the project to define the task.

@@ -28,7 +28,11 @@ Every time you make a meaningful change to the project, before pushing:
 1. Invoke the **`hackathon-compliance`** subagent (`.claude/agents/hackathon-compliance.md`)
    on the diff.
 2. If it returns **CHANGES REQUIRED**, fix the blockers before committing/pushing.
-3. Record the verdict in `docs/WORKLOG.md` (and address or log any RISKS).
+3. Save the review output to `docs/trajectories/compliance/YYYY-MM-DD-<slug>.md` and record
+   the verdict + how RISKS were handled in `docs/WORKLOG.md`.
+
+Trajectory records for solution agents (calibration, runtime, baseline) go in
+`docs/trajectories/` — see its README. A full transcript of the build chat is not required.
 
 ## Golden rule: log every change
 

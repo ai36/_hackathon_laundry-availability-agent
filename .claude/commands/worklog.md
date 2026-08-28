@@ -12,6 +12,8 @@ Rules:
 - If the change reflects a design decision, also add/update an entry in `docs/DECISIONS.md`.
 - If the change is a hackathon iteration (new skill, verification step, orchestration
   change, measured result), also add a row to `docs/CHANGELOG.md`.
+- If a `hackathon-compliance` review ran, save its output under
+  `docs/trajectories/compliance/` and reference it.
 - Keep it factual. No marketing language.
 
 Context / what to log: $ARGUMENTS
