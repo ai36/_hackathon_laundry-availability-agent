@@ -639,3 +639,78 @@ optional annotated screenshot for spatial grounding and an optional mask; and pe
 optional reference-state screenshots and an optional prompt fragment — all non-fine-tuning
 levers. The site-config schema and the portal must be built to this shape; `buildRoomStatus`
 must also apply corrections so the portal reflects the corrected state.
+
+---
+
+## D-0016 — Deployment: Docker service, `FrameSource` abstraction, static-image mock
+
+- **Date:** 2026-08-28
+- **Status:** Proposed — spec + phasing. P0 (judge-walkable integrator path) is the
+  minimal-submission target; the container and real camera sources are later phases.
+
+**Context.** Vercel is out for the integrator side: its filesystem is read-only, and the
+runtime is a polling loop that does not fit a serverless invocation (D-0015 discussion, and
+the deployment notes below). The original scoping always described an on-site "hardware
+solution" a service company installs (`docs/PROBLEM.md`, scoping Q5 / Q16). Owner's call
+(2026-08-28): ship as a **Docker container run as a local service**.
+
+**Decision.**
+
+### Packaging
+- One Docker image: Next.js app (tenant read + integrator write), the runtime loop, `ffmpeg`,
+  Node. `ANTHROPIC_API_KEY` via env / Docker secret.
+- Writable **volume** for all mutable state — this is what read-only Vercel could not do:
+  ```
+  /data
+    site-config.json        cameras, machines, mask refs, prompt fragments
+    machines.json
+    corrections/*.json       D-0014
+    masks/<camera>.png       D-0015
+    reference/<machine>/*.jpg reference-state screenshots
+    snapshot.json            latest published per-machine status (portal reads this)
+  ```
+  Survives container restarts. `docker compose up` for the judge.
+
+### `FrameSource` abstraction
+An interface with one method — "give me the current frame for camera X" — and implementations:
+
+| Impl | How |
+| --- | --- |
+| `HttpSnapshotFrameSource` | network camera: GET a JPEG snapshot every `runtime.captureIntervalSeconds` |
+| `RtspFrameSource` | RTSP stream → one frame via `ffmpeg` |
+| `UsbFrameSource` | `--device=/dev/video0`, `ffmpeg -f v4l2` |
+| **`StaticImageFrameSource`** | the integrator selects/uploads a still per camera through the portal; "capture" = re-read that file |
+
+`StaticImageFrameSource` is **not throwaway** — it is also the dev/test fixture and the
+"replay a recorded incident" tool. Swapping the image simulates a state change in a demo.
+
+### Runtime loop
+A long-running process (not a serverless function): every `captureIntervalSeconds`, for each
+camera — pull a frame via its `FrameSource`, apply the camera mask (D-0015), call the vision
+client (cached), classify the camera's declared machine ids with reference screenshots +
+prompt fragment injected; every `stateRefreshSeconds`, fuse across cameras, overlay D-0014
+corrections, write `snapshot.json`. The portal reads `snapshot.json` (replaces the
+committed-eval-report read in `buildRoomStatus`).
+
+### Phasing
+- **P0 — minimal submission (must ship).** No container required to *evaluate* it. The judge
+  can walk the **entire integrator path key-free**, operating on the 9 committed frames with
+  `--replay`: pick `img_1821` as "camera 1's feed" → see the agent's cached per-machine
+  states → mark `D-02` wrong → `out_of_order` (writes a D-0014 correction via `/api/corrections`,
+  which works under `npm run dev` / any Node host) → re-fuse → the portal shows it fixed. The
+  `--corrections` eval run already proves the measurable effect (D-0014). Camera / mask /
+  reference-screenshot / prompt-fragment editing may be a config file the judge edits by hand
+  if the UI is not finished, but the **correction loop must be clickable**.
+- **P1** — `Dockerfile` + `docker compose`, the runtime loop, `StaticImageFrameSource`, the
+  snapshot publisher. Judge runs `docker compose up` and does the same walk against static
+  images instead of the frozen dataset.
+- **P2** — `HttpSnapshotFrameSource` / `RtspFrameSource` / `UsbFrameSource` for real cameras.
+
+**Acceptance criterion (all phases):** a judge with no hardware and no API key can complete
+the integrator path — add/adjust a camera's machine list, (P1+) point it at an image, run the
+agent, see a wrong state, correct it, and see the correction take effect in the portal and in
+a re-scored eval.
+
+**Consequences.** The read-only tenant portal can still also go on Vercel for a public demo
+link (D-0015 discussion), built from `snapshot.json` or the committed report. The container
+is the real product; Vercel is a convenience mirror of its read side.
