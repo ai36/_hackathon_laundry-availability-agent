@@ -585,9 +585,16 @@ agent consumes it**. Architectural note from the project owner, 2026-08-28.
 
 ### Camera
 - `id` + a **free-text list of machine ids** this camera observes (e.g. `"W-01, W-02, W-03"`).
-  No bbox needed — the text mapping tells the agent which machines to report from this feed.
-  In a real deployment this **replaces** the GT-derived "which machines are in frame" assist
-  (D-0012): integrator-supplied, not label-derived.
+  The text mapping tells the agent which machines to report from this feed. In a real
+  deployment this **replaces** the GT-derived "which machines are in frame" assist (D-0012):
+  integrator-supplied, not label-derived.
+- Optionally **also** an **annotated reference screenshot** from this camera — a still with
+  the machine ids marked on it (shapes / labels drawn over each machine, like the
+  `data/raw/_reference/*.jpg` images). Handed to the agent as a one-off spatial key so it
+  knows *which region is which machine*, not just the roster. The text list and the annotated
+  screenshot are complementary, not either/or: the list is the roster, the screenshot is the
+  spatial grounding. Both optional beyond the list; with the screenshot, per-machine
+  attribution in crowded frames improves.
 - Optional **mask image** (PNG). Semantics: **transparent = analyse**, **solid black
   `rgb(0,0,0)` = exclude from analysis**. Applied to every frame from this camera before the
   agent sees it (same mechanism as the dataset redaction mask, D-0009 — privacy redaction
@@ -610,21 +617,25 @@ agent consumes it**. Architectural note from the project owner, 2026-08-28.
 
 ### Agent consumption order
 1. Apply the camera mask (pre-inference).
-2. Classify only the machine ids the camera declares; inject that machine's reference
-   screenshots (few-shot image blocks) and prompt fragment into the classify/verify prompt.
+2. Classify the machine ids the camera declares; if the camera has an annotated reference
+   screenshot, pass it alongside the live frame as the spatial key. Inject each machine's
+   reference-state screenshots (few-shot image blocks) and prompt fragment into the
+   classify/verify prompt.
 3. Optional verification pass (D-0013, default off — documented regression).
 4. Overlay D-0014 corrections as the final authoritative override.
 
 ### Portal (write-UI — "full slice", per the owner)
 - `?role=integrator` reveals the editing surface; the default (tenant) view shows only
   agent-determined state.
-- CRUD cameras (id, machine-id text, mask upload) and machines (id, type, reference
-  screenshots, prompt fragment); per-machine "mark wrong" → writes a D-0014 correction.
+- CRUD cameras (id, machine-id text list, optional annotated reference screenshot, mask
+  upload) and machines (id, type, reference-state screenshots, prompt fragment); per-machine
+  "mark wrong" → writes a D-0014 correction.
 - Persists to `data/site-config.json` + `data/machines.json` + `data/raw/masks/` +
   `data/corrections/` via Node API routes (server/dev runtime only — the static export has
   no writable FS).
 
-**Consequences.** Gives the integrator three optional, non-fine-tuning levers
-(mask, reference screenshots, prompt fragment) plus the mandatory camera→machine mapping.
-The site-config schema and the portal must be built to this shape; `buildRoomStatus` must
-also apply corrections so the portal reflects the corrected state.
+**Consequences.** Gives the integrator, per camera, a machine-id list (mandatory) plus an
+optional annotated screenshot for spatial grounding and an optional mask; and per machine,
+optional reference-state screenshots and an optional prompt fragment — all non-fine-tuning
+levers. The site-config schema and the portal must be built to this shape; `buildRoomStatus`
+must also apply corrections so the portal reflects the corrected state.
