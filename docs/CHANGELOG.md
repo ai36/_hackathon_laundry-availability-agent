@@ -52,7 +52,29 @@ API budget). Both modes score the same 45 determinate observations on the same 9
 | Coverage | 60.0% | 51.1% | −8.9 pp |
 | `out_of_order` recall | 0/8 | 2/8 | **+2** |
 | Cost per frame | ~$0.009 | ~$0.019 | ×2 |
-| Human time per task | _[value]_ | _[value]_ | _[change]_ |
+| Human time per task (context) | ~2 wasted round-trips carrying a laundry bag per unlucky visit | 0 (check the portal first) | — |
+
+## Main contribution, failure mode, and hot take
+
+**Main contribution.** A verification pass that converts the single-call baseline's
+confident-but-wrong answers into either a corrected answer or an honest `unknown`. On the
+metric that reflects the user's cost — a wrong "free" sends them on a wasted trip — it
+**cuts harmful errors from 11.1% to 8.9%**, raises accuracy-on-covered from 51.9% to 60.9%,
+and takes `out_of_order` recall from 0/8 to 2/8, at 2× cost. Raw accuracy is unchanged
+(31.1% both), which is the point: the improvement is in *which* errors remain, not how many.
+
+**Main failure mode.** The verification prompt over-weighted "confirm the machine's printed
+id". Machines with a clearly readable running-cycle display but no visible id number got
+downgraded from a correct `occupied` to `unknown` — that is most of the 9-point coverage
+drop. Trajectory: `docs/trajectories/runtime/2026-08-28-img_1825.md` (D-05: pass 1 got it
+right at 0.6, the verify pass lost it).
+
+**Hot take.** The single highest-leverage change in this project was not to the agent — it
+was adding `unknown` and `out_of_order` as first-class states and scoring *harmful* errors
+separately from ordinary ones (D-0006). That reframing is what makes a verification pass
+that leaves accuracy flat and lowers coverage still obviously worth keeping. If we had
+optimised "accuracy" we'd have rejected Iteration 1. Decide what each error actually costs
+the user, encode that in the metric, and let it tell you which agent is better.
 
 ## Verification runs
 

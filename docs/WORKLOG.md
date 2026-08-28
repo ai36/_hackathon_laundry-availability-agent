@@ -12,6 +12,19 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Packaging pass (deliverables)
+
+- **README** rewritten for the submission: intended user + bottleneck + why it matters, the
+  built scope (baseline + Iteration 1) with the results table, **main failure mode + hot
+  take**, how each agent/skill/subagent is used, a key-free quick-start (`--replay`).
+- **`docs/CHANGELOG.md`** closed with a "Main contribution, failure mode, and hot take"
+  section (deliverable #1 requirement).
+- **Agent trajectories** (deliverable #4): added `docs/trajectories/baseline/2026-08-28-img_1823.md`
+  (the one-call baseline calling a broken machine `free`) alongside the runtime trajectory;
+  `docs/trajectories/README.md` updated to list what's present and note it's all
+  `--replay`-reproducible.
+- No code change; no API cost.
+
 ### 2026-08-28 — Cost controls + Iter-1 review fixes
 
 - API budget is tight → cut future `--live` cost without touching the recorded runs:

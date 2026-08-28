@@ -5,12 +5,16 @@ ground rule 9 (every claim tied to evidence).
 
 ## What goes here
 
-| Sub-folder | Contents |
-| --- | --- |
-| `compliance/` | Output of each `hackathon-compliance` review run (verdict + blockers + risks + notes), one file per run. |
-| `calibration/` | Runs of the calibration agent: input frames + human confirmations → the per-site config it produced. |
-| `runtime/` | Runs of the runtime agent: input frame(s) + config → per-machine status list, with the verification steps and any retries. |
-| `baseline/` | Runs of the single-prompt baseline (for the fair comparison). |
+| Sub-folder | Contents | Present |
+| --- | --- | --- |
+| `baseline/` | The single-prompt baseline on one frame (the fair-comparison reference). | `2026-08-28-img_1823.md` |
+| `runtime/` | The solution agent (`runAgent`) on one frame: classify → verification pass → override → abstain. | `2026-08-28-img_1825.md` |
+| `compliance/` | Each `hackathon-compliance` review run — verdict, blockers, risks, and the fixes applied. | 8 files |
+| `calibration/` | The calibration agent (per-site ROI config from human-confirmed frames). | — (P1, not built) |
+
+Every trajectory here is reproducible offline: the `baseline/` and `runtime/` runs replay
+from `data/cache/` with `npm run eval -- --mode=… --split=evaluation --replay` (no API key);
+the `compliance/` runs summarise a `hackathon-compliance` subagent invocation.
 
 ## What does NOT go here
 
