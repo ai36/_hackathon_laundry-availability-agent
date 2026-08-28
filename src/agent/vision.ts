@@ -2,6 +2,10 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+import Anthropic from "@anthropic-ai/sdk";
+
+import { config } from "@/config";
+
 import type { VisionClient, VisionRequest, VisionResponse } from "./types";
 
 /** Stable hash of the request's semantic content, used as the on-disk cache filename. */
@@ -63,5 +67,69 @@ export class FakeVisionClient implements VisionClient {
   }
 }
 
-// AnthropicVisionClient (real Claude vision call) is added when the baseline is wired for
-// real — it needs @anthropic-ai/sdk and ANTHROPIC_API_KEY.
+/**
+ * $ per 1M tokens (input, output) — first-party Anthropic API rates as of 2026-08-28
+ * (source: the `claude-api` skill's model table). Keep current; `costUsd` is `undefined`
+ * for a model not listed here.
+ */
+const PRICE_PER_MTOK: Record<string, { input: number; output: number }> = {
+  "claude-opus-5": { input: 5, output: 25 },
+  "claude-sonnet-5": { input: 2, output: 10 },
+  "claude-haiku-4-5": { input: 1, output: 5 },
+  "claude-fable-5": { input: 10, output: 50 },
+};
+
+/**
+ * Real Claude vision call. Sends the frame (JPEG, base64) plus the prompt and returns the
+ * raw reply text. Credentials come from the environment (`ANTHROPIC_API_KEY` in `.env`, or
+ * an `ant auth` profile). Model + call cap come from `laundry3.config.ts`; a
+ * `LAUNDRY3_VISION_MODEL` env var overrides the model for one run.
+ */
+export class AnthropicVisionClient implements VisionClient {
+  private readonly client = new Anthropic();
+  private readonly model: string;
+
+  constructor(model?: string) {
+    this.model = model ?? process.env.LAUNDRY3_VISION_MODEL ?? config.agent.visionModel;
+  }
+
+  async analyze(req: VisionRequest): Promise<VisionResponse> {
+    if (!existsSync(req.imagePath)) {
+      throw new Error(`vision: image not found: ${req.imagePath}`);
+    }
+    // req.crop is honoured by the caller (it passes a pre-cropped path) — not here yet.
+    const data = readFileSync(req.imagePath).toString("base64");
+
+    const res = await this.client.messages.create({
+      model: this.model,
+      max_tokens: 4000,
+      output_config: { effort: "low" },
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: "image/jpeg", data } },
+            { type: "text", text: req.prompt },
+          ],
+        },
+      ],
+    });
+
+    const text = res.content
+      .filter((b): b is Anthropic.TextBlock => b.type === "text")
+      .map((b) => b.text)
+      .join("\n");
+
+    const inputTokens =
+      res.usage.input_tokens +
+      (res.usage.cache_read_input_tokens ?? 0) +
+      (res.usage.cache_creation_input_tokens ?? 0);
+    const outputTokens = res.usage.output_tokens;
+    const price = PRICE_PER_MTOK[this.model];
+    const costUsd = price
+      ? (inputTokens * price.input + outputTokens * price.output) / 1_000_000
+      : undefined;
+
+    return { text, inputTokens, outputTokens, costUsd };
+  }
+}

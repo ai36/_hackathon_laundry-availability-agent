@@ -82,13 +82,16 @@ npm run label:check -- --split=evaluation # validate; npm run label:stats for co
 List frame ids in `data/splits/{calibration,evaluation,smoke}.txt` (must be disjoint).
 
 > **Pre-submission blocker (G10):** the sections below need real numbers — a filled
-> evaluation split, the real vision client wired, and one cached run — before submission.
+> evaluation split and one cached run — before submission.
 
 ## Baseline
 
+Exactly one backend flag is required (guards against accidental API spend):
+
 ```bash
-npm run eval -- --mode=baseline --split=evaluation            # first run: needs ANTHROPIC_API_KEY, writes the cache
+npm run eval -- --mode=baseline --split=evaluation --live     # paid API call; needs ANTHROPIC_API_KEY in .env; writes data/cache/baseline/
 npm run eval -- --mode=baseline --split=evaluation --replay   # reproduce from cache, no key, no cost
+npm run eval -- --mode=baseline --split=evaluation --fake     # offline wiring check, no cache (empty predictions)
 ```
 
 ## Evaluation (agent vs baseline)
@@ -97,11 +100,12 @@ npm run eval -- --mode=baseline --split=evaluation --replay   # reproduce from c
 npm run eval -- --mode=agent --split=evaluation --replay
 ```
 
-Both write a JSON report to `docs/artifacts/eval-<mode>-<date>.json`. `--replay` serves every
-vision call from `data/cache/`; the `smoke` split runs live against the API.
+Both write a JSON report to `docs/artifacts/eval-<mode>-<date>.json` (model from
+`laundry3.config.ts`). The `smoke` split is the one to run `--live`.
 
 ## Expected output
 
 Console shows, per mode: determinate-observation count, **accuracy**, **harmful-error rate**,
-**coverage**, accuracy-on-covered, and a 3×3 confusion matrix. _Real values, runtime, and
-cost: TBD after the first cached run._
+**coverage**, accuracy-on-covered, a 4×4 confusion matrix, and an aggregate line (vision
+calls, tokens, `$costUsd`); the JSON report carries the same in a `totals` block plus
+per-frame `meta`. _Real values, runtime, and cost: TBD after the first `--live` run._

@@ -82,6 +82,13 @@ Record the result of each infra verification here (append, newest first).
 - `npm test` — **23/23** (config 10, `score.test.ts` 8 incl. 3 `out_of_order`, `parse.test.ts` 5).
 - `npm run label:new` / `label:check` / `label:stats` — run (0 labels yet).
 
+### 2026-08-28 — real Claude vision client
+
+- `npm run typecheck` / `npm run lint` — **pass**; `npm test` — **23/23**.
+- `npm run eval -- --mode=baseline --split=<one frame> --fake` — runs end-to-end with the
+  Anthropic SDK wired (no live call). Backend flag now mandatory (`--live`/`--replay`/`--fake`).
+  First `--live` run pending `.env` + labelled split.
+
 ### 2026-08-28 — frame redaction pipeline
 
 - `npm run typecheck` / `npm run lint` / `npm run build` — **pass**; `npm test` — **23/23**.

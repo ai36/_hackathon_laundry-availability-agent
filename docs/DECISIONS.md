@@ -130,8 +130,8 @@ entries carry the same rules across sessions.
 - **Date:** 2026-08-28
 - **Status:** Accepted (from the scoping interview; see `docs/PROBLEM.md`,
   `docs/EVALUATION.md`). **Primary-metric portion superseded by D-0006** — the state space
-  is `free`/`occupied`/`unknown`, not a binary, and the metric now includes harmful-error
-  rate and coverage.
+  is `free`/`occupied`/`out_of_order`/`unknown`, not a binary, and the metric now includes
+  harmful-error rate and coverage.
 
 **Context.** Solo build, hard deadline **2026-08-30 12:00 UTC-7**. The product is a
 laundry-room machine-availability agent; the full vision (calibration + runtime CV +
@@ -374,3 +374,37 @@ Anthropic key must stay out of the repo and out of any transcript.
 **Consequences.** A second person can build the dataset and reproduce a run from a clean
 checkout with only their own key. `label:check` is the gate that keeps splits disjoint and
 labels well-formed before a scored eval.
+
+---
+
+## D-0011 — Real vision client (Anthropic SDK)
+
+- **Date:** 2026-08-28
+- **Status:** Accepted
+
+**Context.** The eval harness needs to actually call Claude vision; the skeleton used a
+stub. Built per the `claude-api` skill.
+
+**Decision.**
+
+- `@anthropic-ai/sdk` dependency; `AnthropicVisionClient` implements the same `VisionClient`
+  interface as the Fake/Cached clients, so `--replay` and the offline tests keep working.
+- One `client.messages.create` per frame: base64 JPEG + prompt, `output_config: { effort:
+  "low" }` (high-volume classification — cost over depth), `max_tokens: 4000`. No streaming
+  (small responses), no explicit `thinking` (Sonnet 5 runs adaptive).
+- **Model** = `laundry3.config.ts` `agent.visionModel` (`claude-sonnet-5`), overridable for
+  one run with `LAUNDRY3_VISION_MODEL`. Not the skill's `claude-opus-5` default — this
+  project's config is the authority, and Sonnet is the cost/quality fit for reading machine
+  indicators across dozens of frames. Revisit if accuracy is short.
+- **Cost attribution:** `VisionResponse` carries `inputTokens` / `outputTokens` / `costUsd`
+  from a per-model `PRICE_PER_MTOK` table (rates dated in the source); `run-eval.ts` writes
+  a `totals` block in the report and prints the aggregate.
+- `run-eval.ts` requires **exactly one** backend flag so a bare `npm run eval` can't bill:
+  `--live` (paid API call, writes the cache), `--replay` (cache only, no key), `--fake`
+  (offline stub, **no cache** — cannot poison the replay cache).
+- `req.crop` (ROI) is not applied in the client yet — the caller will pass a pre-cropped
+  path when the pipeline's classify step is built.
+
+**Consequences.** A first real `npm run eval -- --mode=baseline --split=evaluation --live`
+needs `ANTHROPIC_API_KEY` in `.env` and a labelled split; it writes `data/cache/baseline/`
+which is force-added as the key-free reproduction artifact. Price table must be kept current.

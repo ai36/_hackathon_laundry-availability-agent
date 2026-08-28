@@ -12,6 +12,29 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Real Claude vision client
+
+- Added `@anthropic-ai/sdk` (`^0.122`) and `AnthropicVisionClient` in `src/agent/vision.ts`
+  (guided by the `claude-api` skill): sends the frame as base64 JPEG + the prompt via
+  `client.messages.create`, `output_config: { effort: "low" }`, `max_tokens: 4000`. Model
+  from `laundry3.config.ts` (`claude-sonnet-5`), overridable per-run with
+  `LAUNDRY3_VISION_MODEL`. Credentials from the environment (`.env` / `ant auth`). Returns
+  input/output token counts and a `costUsd` from a per-model price table (sonnet-5 $2/$10
+  per MTok).
+- `scripts/run-eval.ts`: **exactly one** backend flag is required so a bare run can't bill —
+  `--live` (paid API call + cache write), `--replay` (cache only, no key), `--fake` (offline
+  stub, no cache). Report now carries a `totals` block (vision calls, tokens, `costUsd`) and
+  prints the aggregate.
+- Compliance review: **PASS WITH RISKS — no blockers.** Applied: `--live` gate (was:
+  live-by-default, accidental-spend risk); `--fake` bypasses the cache entirely (was:
+  wrote empty responses into the replay cache); `totals` block added; price table dated
+  with source.
+- `pipeline.ts` classify/verify remain stubs — the real per-ROI loop comes after the first
+  baseline number and the labelled dataset.
+- Verification: `typecheck` / `lint` / `build` pass; `npm test` **23/23**;
+  `npm run eval -- --fake` runs end-to-end. No live API call yet (needs `.env` + labelled
+  frames).
+
 ### 2026-08-28 — Frame redaction pipeline
 
 - User: the frames are of a laundry room that is **not theirs** → redact everything that

@@ -5,12 +5,12 @@
  *   npx tsx scripts/run-eval.ts --mode=baseline --split=evaluation
  *   npx tsx scripts/run-eval.ts --mode=agent --split=evaluation --replay
  *
- * --replay  : serve every vision call from the on-disk cache (no API key, no cost).
- *             Fails on a cache miss.
- * --out=... : report path (default docs/artifacts/eval-<mode>-<YYYY-MM-DD>.json)
+ * One of these is required (guards against accidental spend):
+ *   --live    : call the Claude API for real; writes data/cache/<mode>/.
+ *   --replay  : serve every vision call from the on-disk cache (no key, no cost). Cache miss = error.
+ *   --fake    : deterministic FakeVisionClient, no cache, no network (wiring check — empty predictions).
  *
- * Vision backend: currently a FakeVisionClient behind the cache (skeleton). The real
- * Claude vision client is wired in when the baseline runs for real.
+ * --out=... : report path (default docs/artifacts/eval-<mode>-<YYYY-MM-DD>.json)
  */
 import "./load-env";
 
@@ -20,7 +20,7 @@ import { dirname } from "node:path";
 import { config } from "@/config";
 import { runBaseline } from "@/agent/baseline";
 import { runAgent } from "@/agent/pipeline";
-import { CachedVisionClient, FakeVisionClient } from "@/agent/vision";
+import { AnthropicVisionClient, CachedVisionClient, FakeVisionClient } from "@/agent/vision";
 import type { VisionClient } from "@/agent/types";
 import { loadFrameLabels, loadSplit } from "@/eval/dataset";
 import { formatScores, scoreAll } from "@/eval/score";
@@ -35,6 +35,8 @@ const args = new Map(
 const mode = (args.get("mode") ?? "baseline") as "baseline" | "agent";
 const split = args.get("split") ?? "evaluation";
 const replay = args.has("replay");
+const fake = args.has("fake");
+const live = args.has("live");
 const today = new Date().toISOString().slice(0, 10);
 const outPath = args.get("out") ?? `docs/artifacts/eval-${mode}-${today}.json`;
 
@@ -42,16 +44,24 @@ if (mode !== "baseline" && mode !== "agent") {
   console.error(`--mode must be "baseline" or "agent"`);
   process.exit(1);
 }
+if (Number(replay) + Number(fake) + Number(live) !== 1) {
+  console.error(
+    "pick exactly one backend: --live (paid API call), --replay (cache only), or --fake (offline stub)",
+  );
+  process.exit(1);
+}
 
 function buildVisionClient(): VisionClient {
-  // TODO: when ANTHROPIC_API_KEY is set and !replay, use AnthropicVisionClient here.
-  const inner = replay ? null : new FakeVisionClient();
-  if (!replay) {
-    console.warn(
-      "! using FakeVisionClient (skeleton) — predictions will be empty until the real client is wired",
-    );
+  if (fake) {
+    console.warn("! --fake: FakeVisionClient, no cache, no network — predictions will be empty");
+    return new FakeVisionClient();
   }
-  return new CachedVisionClient(inner, `${config.paths.cache}/${mode}`, replay);
+  const cacheDir = `${config.paths.cache}/${mode}`;
+  if (replay) return new CachedVisionClient(null, cacheDir, true);
+  console.log(
+    `vision: live AnthropicVisionClient (${config.agent.visionModel}) — caching to ${cacheDir}/`,
+  );
+  return new CachedVisionClient(new AnthropicVisionClient(), cacheDir, false);
 }
 
 async function main(): Promise<void> {
@@ -73,10 +83,24 @@ async function main(): Promise<void> {
   const scores = scoreAll(predictions, labels, frameIds);
   const labelled = frameIds.filter((id) => labels.has(id)).length;
 
+  const totals = [...predictions.values()].reduce(
+    (t, p) => ({
+      visionCalls: t.visionCalls + (p.meta?.visionCalls ?? 0),
+      inputTokens: t.inputTokens + (p.meta?.inputTokens ?? 0),
+      outputTokens: t.outputTokens + (p.meta?.outputTokens ?? 0),
+      costUsd: t.costUsd + (p.meta?.costUsd ?? 0),
+    }),
+    { visionCalls: 0, inputTokens: 0, outputTokens: 0, costUsd: 0 },
+  );
+
+  const backend = fake ? "fake" : replay ? "replay" : "live";
   console.log(
-    `\nmode=${mode} split=${split} frames=${frameIds.length} labelled=${labelled}${replay ? " (replay)" : ""}`,
+    `\nmode=${mode} split=${split} frames=${frameIds.length} labelled=${labelled} backend=${backend}`,
   );
   console.log(formatScores(scores));
+  console.log(
+    `\nvision calls: ${totals.visionCalls}  tokens: ${totals.inputTokens} in / ${totals.outputTokens} out  cost: $${totals.costUsd.toFixed(4)}`,
+  );
 
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(
@@ -85,12 +109,13 @@ async function main(): Promise<void> {
       {
         mode,
         split,
-        replay,
+        backend,
         generatedAt: new Date().toISOString(),
         model: config.agent.visionModel,
         frames: frameIds,
         labelledFrames: labelled,
         scores,
+        totals,
         predictions: Object.fromEntries(predictions),
       },
       null,
