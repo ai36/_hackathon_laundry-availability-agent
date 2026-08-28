@@ -1,0 +1,74 @@
+# Worklog
+
+Chronological record of every meaningful change to this project. Newest entries first.
+Update this file with `/worklog` (see `.claude/commands/worklog.md`) or by hand.
+
+Entry format:
+
+```
+### YYYY-MM-DD HH:MM — short title
+- concrete change (file / command / decision)
+```
+
+## Log
+
+### 2026-08-28 — Git workflow + compliance review as system rules
+
+- Added GitHub remote `origin` = `git@github.com:ai36/_hackaton_laundry3.git` (SSH auth verified).
+- Renamed the initial branch to `dev`; `main` is integrated manually by the user.
+- `.claude/hooks/git-guard.mjs` — PreToolUse(Bash) hook that blocks any commit / merge /
+  rebase / push that would write to `main` / `master`. Registered in `.claude/settings.json`
+  under `hooks.PreToolUse`.
+- `.claude/hooks/git-guard.test.mjs` — smoke test for the hook; `node .claude/hooks/git-guard.test.mjs`
+  → 8/8 pass (blocks `push origin main`, `HEAD:main`, `dev:main`; allows `push -u origin dev`,
+  `git diff`, `git status`, non-git commands).
+- `.claude/settings.json` — extended the permission allowlist with git write commands
+  (commit, push, branch, checkout, switch, remote, ...); the hook is the real guard.
+- `.claude/agents/hackathon-compliance.md` — subagent that reviews each diff against
+  `docs/HACKATHON-RULES.md` (ground rules + scoring + process hygiene) and returns
+  PASS / PASS WITH RISKS / CHANGES REQUIRED.
+- `docs/HACKATHON-RULES.md` — full transcription of the hackathon PDF into the repo so the
+  reviewer and judges have it version-controlled.
+- `CLAUDE.md` — added a "System rules (non-negotiable)" section: git workflow + mandatory
+  `hackathon-compliance` review before every push.
+- Memory: `git-workflow`, `compliance-review` feedback entries; `docs/DECISIONS.md` D-0004.
+- Ran an independent compliance review (general-purpose agent following
+  `.claude/agents/hackathon-compliance.md`) on the full staged initial commit.
+  **Verdict: PASS WITH RISKS — no blockers.** Risks raised and how they were handled:
+  - WORKLOG referenced a compliance verdict that wasn't written → this entry now records it.
+  - "Tested with 5 payloads" claim had no committed evidence → added
+    `.claude/hooks/git-guard.test.mjs` (8/8 pass) and reworded the note.
+  - Node pinned only in prose → added `package.json` `engines` (`>=24 <25`) and `.nvmrc` (`24`).
+  - No runtime/cost figures → added an approximate table to `docs/REPRODUCTION.md`.
+  - Verification stored no raw logs → added `docs/artifacts/verification-2026-08-28.txt` and
+    `docs/artifacts/build-2026-08-28.txt`; `docs/CHANGELOG.md` points at them.
+  - `grillme` license not recorded → noted MIT in `docs/SKILLS.md` and D-0003.
+  - Remaining as accepted low-priority: keep capturing raw command output for future
+    measured results.
+- Added `.prettierignore` entries for `.nvmrc` and `docs/artifacts/`.
+
+### 2026-08-28 — Project infrastructure bootstrap
+
+- Scaffolded a Next.js 16 app in place with `create-next-app@latest . --ts --tailwind --eslint --app --src-dir --import-alias "@/*" --use-npm --disable-git --yes`.
+- Locked stack versions (see `docs/DECISIONS.md` D-0001): next 16.3.3, react/react-dom 19.2.8, typescript ^5, tailwindcss ^4 (`@tailwindcss/postcss`), eslint ^9 + `eslint-config-next` 16.3.3.
+- Added MobX: `mobx@^7`, `mobx-react-lite@^5` (peer-compatible with React 19).
+- Added dev tooling: `prettier@^3`, `prettier-plugin-tailwindcss`; config in `.prettierrc.json` / `.prettierignore`.
+- Added npm scripts: `typecheck` (`tsc --noEmit`), `format`, `format:check`.
+- Created MobX infrastructure under `src/stores/`:
+  - `root-store.ts` — `RootStore` composition root, `configure({ enforceActions: "always" })`, per-request store on the server + memoized browser store, `RootStoreHydration` type.
+  - `store-provider.tsx` — `"use client"` `StoreProvider` + `useStore()` hook, `enableStaticRendering` on the server.
+  - `example-store.ts` — placeholder domain store (`ExampleStore`) demonstrating `makeAutoObservable`.
+  - `index.ts` — barrel exports.
+- Wired `<StoreProvider>` into `src/app/layout.tsx`; set metadata title/description to `laundry3`.
+- Added `src/components/example-counter.tsx` (`observer` component) and simplified `src/app/page.tsx` to a minimal landing that exercises the store.
+- Connected agent skills (see `docs/SKILLS.md`):
+  - `find-skills` (skills.sh / `npx skills` CLI) — already installed globally.
+  - `grillme` (`jekudy/grillme-skill@grillme`) — installed to `~/.agents/skills/grillme`, symlinked into `~/.claude/skills/`. Security assessments: Gen "Safe", Socket "0 alerts", Snyk "Low Risk".
+- Added Claude Code project config: `.claude/settings.json` (permission allowlist for safe dev commands), `.claude/commands/worklog.md` (logging command).
+- Rewrote `CLAUDE.md` with project overview, stack, commands, conventions, and the logging rule. Kept the `@AGENTS.md` include (Next.js writes agent rules there).
+- Added hackathon deliverable docs: `docs/DECISIONS.md`, `docs/CHANGELOG.md`, `docs/PROBLEM.md`, `docs/REPRODUCTION.md`, `docs/EVALUATION.md`, `docs/SKILLS.md`.
+- Added `cspell.json` with project vocabulary (laundry3, hackathon, grillme, mobx, ...).
+- Fix during verification: `react-hooks/refs` lint error in `store-provider.tsx` — replaced the `useRef` lazy-init pattern with `useState(() => initRootStore(initialData))`.
+- Ran `npm run format` to normalize `.claude/settings.json` and `next.config.ts`.
+- Verification (all pass): `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build` — details in `docs/CHANGELOG.md`.
+- `git init` (no commit) so changes are tracked; nothing committed yet.

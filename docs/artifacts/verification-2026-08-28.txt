@@ -1,0 +1,23 @@
+# Verification — 2026-08-28 (infra bootstrap)
+
+## npm run typecheck
+/usr/bin/bash: line 1: /usr/bin/time: No such file or directory
+
+> laundry3@0.1.0 typecheck
+> tsc --noEmit
+
+
+## npm run lint
+
+> laundry3@0.1.0 lint
+> eslint
+
+
+## npm run format:check
+
+> laundry3@0.1.0 format:check
+> prettier --check .
+
+Checking formatting...
+[[33mwarn[39m] .claude/hooks/git-guard.test.mjs
+[[33mwarn[39m] Code style issues found in the above file. Run Prettier with --write to fix.

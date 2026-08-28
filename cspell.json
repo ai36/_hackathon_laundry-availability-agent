@@ -1,0 +1,19 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "laundry3",
+    "hackathon",
+    "micro1",
+    "worklog",
+    "grillme",
+    "jekudy",
+    "mobx",
+    "Socratic",
+    "typecheck",
+    "tailwindcss",
+    "autoBind",
+    "Geist"
+  ],
+  "ignorePaths": ["node_modules/**", ".next/**", "package-lock.json"]
+}
