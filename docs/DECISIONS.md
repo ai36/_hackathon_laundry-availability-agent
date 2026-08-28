@@ -567,3 +567,64 @@ The remaining 11 errors are all `free`→`occupied` over-calls, which are `obser
 and time-varying — correcting those is per-frame hand-labelling, not durable learning, so
 they are left as the honest ceiling of this mechanism. **This is the shipped improvement
 path**, not the verification pass (D-0013). Portal write-UI for corrections: D-0015.
+
+---
+
+## D-0015 — Integrator calibration model: cameras, masks, per-machine reference states + prompt
+
+- **Date:** 2026-08-28
+- **Status:** Proposed — spec only; portal + `site-config.json` schema not built. Recorded
+  now so the build and the config format agree and to avoid rework.
+
+**Context.** D-0009 / D-0010 name a `data/site-config.json` produced during onboarding
+(per-machine ROIs, reference crops, few-shot exemplars, thresholds). D-0014 adds a correction
+store. This decision fixes **what an integrator supplies** through the portal and **how the
+agent consumes it**. Architectural note from the project owner, 2026-08-28.
+
+**Decision.** Two integrator-managed objects: **cameras** and **machines**.
+
+### Camera
+- `id` + a **free-text list of machine ids** this camera observes (e.g. `"W-01, W-02, W-03"`).
+  No bbox needed — the text mapping tells the agent which machines to report from this feed.
+  In a real deployment this **replaces** the GT-derived "which machines are in frame" assist
+  (D-0012): integrator-supplied, not label-derived.
+- Optional **mask image** (PNG). Semantics: **transparent = analyse**, **solid black
+  `rgb(0,0,0)` = exclude from analysis**. Applied to every frame from this camera before the
+  agent sees it (same mechanism as the dataset redaction mask, D-0009 — privacy redaction
+  and analysis-scoping converge on one tool). A mask may black out the whole frame **except**
+  one machine's indicator area, scoping a camera to a single machine.
+- Capture cadence stays global (`runtime.captureIntervalSeconds`), not per-camera, for now.
+
+### Machine
+- `id`, `type` — as today (`data/machines.json`).
+- Optional **reference-state screenshots**: one or more images per state (`free` / `occupied`
+  / `out_of_order` / …), **not necessarily from the camera** — e.g. a close-up of this
+  machine's indicator panel in each state. Given to the agent as visual few-shot context
+  when it assesses this machine.
+- Optional **per-machine prompt fragment**: free text describing this machine's states / how
+  to read its indicator (e.g. "left digits = cycle-minutes countdown; a solid `E` with no
+  digits = out of order; all segments dark = powered off"). Appended to the agent's prompt
+  for this machine.
+- Both are **optional**. With neither, the agent relies on its own judgement and the camera
+  view (current behaviour). With them, per-machine accuracy rises **without fine-tuning**.
+
+### Agent consumption order
+1. Apply the camera mask (pre-inference).
+2. Classify only the machine ids the camera declares; inject that machine's reference
+   screenshots (few-shot image blocks) and prompt fragment into the classify/verify prompt.
+3. Optional verification pass (D-0013, default off — documented regression).
+4. Overlay D-0014 corrections as the final authoritative override.
+
+### Portal (write-UI — "full slice", per the owner)
+- `?role=integrator` reveals the editing surface; the default (tenant) view shows only
+  agent-determined state.
+- CRUD cameras (id, machine-id text, mask upload) and machines (id, type, reference
+  screenshots, prompt fragment); per-machine "mark wrong" → writes a D-0014 correction.
+- Persists to `data/site-config.json` + `data/machines.json` + `data/raw/masks/` +
+  `data/corrections/` via Node API routes (server/dev runtime only — the static export has
+  no writable FS).
+
+**Consequences.** Gives the integrator three optional, non-fine-tuning levers
+(mask, reference screenshots, prompt fragment) plus the mandatory camera→machine mapping.
+The site-config schema and the portal must be built to this shape; `buildRoomStatus` must
+also apply corrections so the portal reflects the corrected state.

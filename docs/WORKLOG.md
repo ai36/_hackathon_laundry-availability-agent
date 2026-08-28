@@ -87,6 +87,24 @@ Entry format:
 - Next (deferred — token budget; resume after limit refresh): portal roles + correction
   write-UI (D-0015) per the user's full-slice choice.
 
+### 2026-08-28 — D-0015 spec: integrator calibration model (doc only)
+
+- Architectural note from the owner, recorded as **D-0015 (Proposed)** in `docs/DECISIONS.md`
+  so the portal build and the `site-config.json` schema agree:
+  - **Camera** = id + free-text machine-id list it observes (replaces the GT-derived frame-
+    membership assist D-0012 in a real deployment) + optional mask PNG
+    (**transparent = analyse, solid black `rgb(0,0,0)` = exclude**; may leave only one
+    machine's indicator — privacy redaction and analysis-scoping are one tool).
+  - **Machine** = optional per-state reference screenshots (few-shot image context) +
+    optional per-machine prompt fragment (how to read its indicator). Both optional; without
+    them the agent uses its own judgement. No fine-tuning.
+  - Agent order: mask → classify declared ids with refs/prompt injected → optional verify
+    (off by default) → D-0014 corrections override.
+- `data/README.md` mask section updated to the black-`rgb(0,0,0)`-excludes semantics.
+- Spec only — no code. `applyMask` today is alpha-driven (opaque → gray patch), which a
+  "transparent background + black shapes" PNG already satisfies. Full compliance review folds
+  into the next substantive commit.
+
 ### 2026-08-28 — 9 evaluation frames committed (author-drawn redactions)
 
 - The frames are of a laundry room the author does not own, so redaction is author-authored,

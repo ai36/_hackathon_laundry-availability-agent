@@ -49,11 +49,17 @@ strip; a mask supersedes rectangles for the same source.
 
 Drop `data/raw/masks/<source>.png` (git-ignored). Paint it once, in any image editor, over a
 still from that camera **at `frames.maxStillPx` width** (`laundry3.config.ts` — the same
-resolution the pipeline and the runtime use): **opaque** pixels become a solid gray patch on
-every frame from that source, **transparent** pixels pass through. Any shape. A fixed camera
-never moves, so the mask is authored once and reused forever. No coordinates, no per-frame
-tuning. (The pipeline rescales a mismatched mask to the frame, but authoring at the target
-width keeps edges crisp.)
+resolution the pipeline and the runtime use):
+
+- **transparent background = keep / analyse**
+- **solid black `rgb(0,0,0)` = exclude** — covered on every frame from that source.
+
+Any shape. The mask may black out the whole frame **except** one machine's indicator area, to
+scope a camera to a single machine — privacy redaction and analysis-scoping are the same
+tool (see `docs/DECISIONS.md` D-0015). A fixed camera never moves, so the mask is authored
+once and reused forever. No coordinates, no per-frame tuning. (The pipeline rescales a
+mismatched mask to the frame, but authoring at the target width keeps edges crisp. It fills
+excluded regions with solid gray so the strip is visibly inert.)
 
 ### 2. Per-source rectangles — used when no mask exists
 
