@@ -58,10 +58,10 @@ function cmdNew(): void {
     machines: roster().machines.map((m) => ({
       machineId: m.machineId,
       type: m.type,
-      bbox: [0, 0, 0, 0],
       state: "unknown",
       gtDeterminate: true,
       observationNotes: [] as string[],
+      // bbox: [x, y, w, h] — add for ROI calibration (P1); not needed for the baseline.
     })),
   };
   writeFileSync(out, JSON.stringify(skeleton, null, 2) + "\n");
@@ -84,10 +84,14 @@ function cmdCheck(): void {
       if (seen.has(m.machineId)) problems.push(`${frameId}: duplicate machineId "${m.machineId}"`);
       seen.add(m.machineId);
       const b = (m as { bbox?: number[] }).bbox;
-      if (b && b.length === 4 && b.every((n) => n === 0)) bboxTodo++;
+      if (!b || (b.length === 4 && b.every((n) => n === 0))) bboxTodo++;
     }
   }
-  if (bboxTodo) console.log(`note: ${bboxTodo} machine(s) still have a placeholder bbox [0,0,0,0]`);
+  if (bboxTodo) {
+    console.log(
+      `note: ${bboxTodo} machine-observation(s) have no bbox (needed for ROI calibration, P1)`,
+    );
+  }
 
   if (splitArg) {
     const listed = loadSplit(splitArg);

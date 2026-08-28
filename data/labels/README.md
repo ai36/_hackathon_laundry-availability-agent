@@ -29,7 +29,8 @@ types):
 - `state`: `free` | `occupied` | `unknown`.
 - `gtDeterminate`: `false` only when even a human cannot tell from the evidence — those
   observations are excluded from the primary accuracy metric.
-- `bbox`: `[x, y, w, h]` in source-frame pixels. Optional but needed for ROI calibration.
+- `bbox`: `[x, y, w, h]` in the produced frame's pixels. **Optional** — only for per-ROI
+  calibration (P1); omit it for a baseline / state-accuracy pass.
 - Vocabularies for `frameConditions` / `observationNotes` are extensible.
 
 Validate the shape by running `npm run eval -- --split=<name>` — the loader rejects malformed

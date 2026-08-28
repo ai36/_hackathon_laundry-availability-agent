@@ -1,6 +1,6 @@
 {
-  "site": "dataset site",
-  "note": "Canonical machine roster. Assign a stable id to every physical machine (see docs/LABELING.md). Edit to match the real room.",
+  "site": "dataset site (apartment-complex shared laundry room)",
+  "note": "16 washers + 16 dryers. Not all appear in the current reference photos (D-11..D-16 and some washers are only reachable from camera angles not yet shot). See docs/LABELING.md for the reference->id map. A frame labels only the machines visible in it.",
   "machines": [
     {
       "machineId": "W-01",

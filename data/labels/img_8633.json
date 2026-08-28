@@ -1,0 +1,36 @@
+{
+  "frameId": "img_8633",
+  "timestamp": "",
+  "camera": "",
+  "frameConditions": [],
+  "machines": [
+    {
+      "machineId": "W-13",
+      "type": "washer",
+      "state": "free",
+      "gtDeterminate": true,
+      "observationNotes": []
+    },
+    {
+      "machineId": "W-14",
+      "type": "washer",
+      "state": "occupied",
+      "gtDeterminate": true,
+      "observationNotes": []
+    },
+    {
+      "machineId": "W-15",
+      "type": "washer",
+      "state": "free",
+      "gtDeterminate": true,
+      "observationNotes": []
+    },
+    {
+      "machineId": "W-16",
+      "type": "washer",
+      "state": "free",
+      "gtDeterminate": true,
+      "observationNotes": []
+    }
+  ]
+}

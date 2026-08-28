@@ -222,6 +222,13 @@ calling a working machine `out_of_order` is incorrect but not harmful. `coverage
 actionable answer (not `unknown`). Implemented in `src/eval/{types,score}.ts` with tests;
 prompts in `src/agent/{baseline,pipeline}.ts` list all four states.
 
+**Amendment (2026-08-28) — `note` field + labelling vocabulary.** `MachineLabel` gains an
+optional free-text `note` (labeller comments / judgement calls — provenance only, not
+scored), distinct from the controlled `observationNotes` tag list. When the dataset author
+supplies states in their own words, `scripts/gen-initial-labels.ts` maps them:
+`busy`→`occupied`, `error`→`out_of_order`, `off`→`out_of_order` (the author's usage),
+`unknown`→`unknown` with `gtDeterminate: false`.
+
 ---
 
 ## D-0007 — Reservations are advisory; camera is the source of truth
@@ -312,8 +319,11 @@ code needs a place for the scoring harness, the baseline, and the agent pipeline
 - **The produced frames are held out of git** (`/data/public/frames/` is git-ignored) until
   identifying details are removed and publish authorization is confirmed. Only the pipeline
   + scaffolding ship for now — a real-photo publish stays behind an explicit human check.
-- **Splits.** `data/splits/{calibration,evaluation,smoke}.txt` — plain frame-id lists, must
-  be disjoint. Labels: one `data/labels/<frameId>.json` per frame, shape-checked on load.
+- **Splits.** `data/splits/{calibration,evaluation,smoke}.txt` — plain frame-id lists.
+  `calibration` and `evaluation` must be **disjoint** (never score on a calibration frame).
+  `smoke` is a small **subset of `evaluation`** — a few frames to run `--live` cheaply as a
+  sanity/cache check; it is not a separate scored set and must not be used to tune prompts
+  or calibration. Labels: one `data/labels/<frameId>.json` per frame, shape-checked on load.
 - **Code layout.**
   - `src/eval/` — `types.ts` (label schema), `dataset.ts` (loaders), `score.ts` (metrics:
     accuracy over determinate GT, harmful-error rate, coverage, confusion).

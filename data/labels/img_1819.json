@@ -1,0 +1,58 @@
+{
+  "frameId": "img_1819",
+  "timestamp": "",
+  "camera": "",
+  "frameConditions": [],
+  "machines": [
+    {
+      "machineId": "W-01",
+      "type": "washer",
+      "state": "free",
+      "gtDeterminate": true,
+      "observationNotes": []
+    },
+    {
+      "machineId": "W-02",
+      "type": "washer",
+      "state": "free",
+      "gtDeterminate": true,
+      "observationNotes": []
+    },
+    {
+      "machineId": "W-03",
+      "type": "washer",
+      "state": "free",
+      "gtDeterminate": true,
+      "observationNotes": []
+    },
+    {
+      "machineId": "W-04",
+      "type": "washer",
+      "state": "out_of_order",
+      "gtDeterminate": true,
+      "observationNotes": [],
+      "note": "author labelled 'off' (out of order)"
+    },
+    {
+      "machineId": "W-05",
+      "type": "washer",
+      "state": "free",
+      "gtDeterminate": true,
+      "observationNotes": []
+    },
+    {
+      "machineId": "W-06",
+      "type": "washer",
+      "state": "free",
+      "gtDeterminate": true,
+      "observationNotes": []
+    },
+    {
+      "machineId": "W-07",
+      "type": "washer",
+      "state": "free",
+      "gtDeterminate": true,
+      "observationNotes": []
+    }
+  ]
+}

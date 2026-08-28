@@ -42,7 +42,10 @@ export interface MachineLabel {
   state: MachineState;
   /** false only when even a human cannot tell from the available evidence. */
   gtDeterminate: boolean;
+  /** Controlled per-machine condition tags. */
   observationNotes?: ObservationNote[];
+  /** Free-text labeller comment (provenance, judgement calls). Not scored. */
+  note?: string;
 }
 
 export interface FrameLabel {

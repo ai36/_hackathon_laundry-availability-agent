@@ -16,8 +16,23 @@ Time: ~1–2 min per frame once the roster exists.
 - If a machine has a printed number, mirror it (`W-07` ↔ printed "7") so the labeller and
   the model agree.
 
-Edit `data/machines.json` to match the real room (the checked-in file is a 16 + 16
-placeholder).
+Edit `data/machines.json` to match the real room. Not every machine has to be visible from
+every camera — the roster is the whole room; a frame labels only what it shows.
+
+### Overlapping camera angles
+
+A physical machine may appear in more than one angle. **It keeps the same id in every
+frame.** Annotate one reference image per angle (`data/raw/_reference/<SOURCE>.jpg`, e.g.
+coloured overlays + `W-07` on each machine); where the same id shows up in two references,
+it's the same machine. IDs, not colours, are global — colours can differ between references.
+
+### Camera coverage is a deployment setting
+
+Which machines' indicators are actually readable from a given camera is a property of the
+install, not the machine. The integrator records, per angle: the camera position and the
+list of machine ids whose state is reliably visible from it. Machines outside that list are
+`unknown` from that angle by design — calibration and the runtime use this to abstain
+instead of guessing. (Future: this lives in the per-site calibration config.)
 
 ## 1. Produce the frames
 
@@ -59,7 +74,7 @@ Open `data/public/frames/<frameId>.jpg` and edit the JSON:
 | `frameConditions` | Frame-wide tags: `low_light`, `lights_off_no_motion`, `glare`, `backlit`, `motion_blur`, `person_in_frame`, `partial_view`. `[]` if none. |
 | `machines[].state` | `free` \| `occupied` \| `out_of_order` \| `unknown` — see rules below. |
 | `machines[].gtDeterminate` | `true` normally. `false` **only** when even you cannot tell from this frame (then the observation is dropped from accuracy). |
-| `machines[].bbox` | `[x, y, w, h]` in frame pixels around the machine's status area (door + indicator). Needed for ROI calibration; leave `[0,0,0,0]` if you are only doing a state-accuracy pass. |
+| `machines[].bbox` | **Optional.** `[x, y, w, h]` in the produced frame's pixels around the machine's status area (door + indicator). Only used for per-ROI calibration (P1) — **omit it** for a state-accuracy / baseline pass. |
 | `machines[].observationNotes` | Per-machine tags: `indicator_occluded_by_person`, `indicator_occluded_by_object`, `indicator_partial`, `glare_on_door`, `door_open`, `ambiguous`. |
 
 **If a machine is not visible in this frame, delete its entry — do not guess.**

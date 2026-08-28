@@ -1,1 +1,2 @@
-# 3-5 frames for a quick live sanity run
+# One frame for a cheap live (--live) sanity run.
+img_1819

@@ -1,1 +1,2 @@
-# calibration frames (disjoint from evaluation.txt) — add ids as frames are labelled
+# calibration frames (disjoint from evaluation.txt). Not needed for the baseline;
+# populated when the per-ROI calibration step is built.

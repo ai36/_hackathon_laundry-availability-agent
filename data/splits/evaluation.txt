@@ -1,1 +1,11 @@
-# evaluation frames — baseline and agent are scored on these
+# P0 evaluation set — the annotated still frames (author's 2026-08-28 state list).
+# Video-derived frames (dryer wall) are added as they are labelled.
+img_1819
+img_1821
+img_1822
+img_1823
+img_1824
+img_1825
+img_1826
+img_8629
+img_8633

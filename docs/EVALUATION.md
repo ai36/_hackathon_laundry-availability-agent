@@ -107,8 +107,20 @@ see `docs/DECISIONS.md` D-0007.
 
 - `--replay` re-runs steps 2 and 4 from cached responses: no `ANTHROPIC_API_KEY`, no cost,
   same score.
-- A `smoke` subset (3–5 frames) runs live against the API for anyone who wants to verify the
-  cache is faithful.
+- A `smoke` subset (a few frames, **within** the evaluation set — see D-0009) runs `--live`
+  against the API for anyone who wants to verify the cache is faithful.
+
+## Ground truth & labeller
+
+The evaluation labels are the **dataset author's** assessment of their own photos (they took
+the frames and know which machines were running). Vocabulary and schema: `docs/DECISIONS.md`
+D-0006; workflow: `docs/LABELING.md`; the initial 9-frame set was built by
+`scripts/gen-initial-labels.ts` from the author's per-machine state list. A machine the
+author could not determine from the image is `gtDeterminate: false` and excluded from
+accuracy. **An author spot-check of the generated label files is required before any
+baseline number is reported** — recorded in `docs/WORKLOG.md` / `docs/CHANGELOG.md`. A
+second independent labeller is out of scope for the hackathon timeline; this is stated as a
+known limitation.
 
 ## Rubric
 

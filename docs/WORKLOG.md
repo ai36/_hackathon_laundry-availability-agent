@@ -12,6 +12,34 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Initial ground-truth labels
+
+- Author annotated 9 reference frames (`data/raw/_reference/`) with global ids and supplied
+  a per-machine state list; roster confirmed as **W-01…W-16 + D-01…D-16** (only D-01…D-10
+  and most washers appear in current photos — more angles are an integrator task).
+- `scripts/gen-initial-labels.ts` (run once, kept as provenance) converts the state list to
+  `data/labels/*.json`. Vocabulary map: `busy`→`occupied`, `error`→`out_of_order`,
+  `off`→`out_of_order` (author's usage), `unknown`→`unknown` + `gtDeterminate:false`.
+- **9 frames labelled, 61 machine-observations:** 27 free / 10 occupied / 8 out_of_order /
+  16 unknown (45 determinate). `data/splits/evaluation.txt` = all 9; `smoke.txt` = img_1819.
+- `MachineLabel` gains an optional free-text `note` (labeller comments / judgement calls;
+  not scored) — distinct from the controlled `observationNotes` tag list.
+- `docs/LABELING.md`: added the overlapping-angles rule (same id across frames) and the
+  "camera coverage is a deployment setting" note (per-angle readable-machine list).
+- **`bbox` is omitted** in these labels — it is only used for per-ROI calibration (P1), not
+  the whole-frame baseline. `label:new` no longer scaffolds a `[0,0,0,0]` placeholder;
+  `docs/LABELING.md` / `data/labels/README.md` mark it optional.
+- Video-derived frames (dryer wall) not yet labelled — to be added to the eval split.
+- Pending: author spot-check of the labels (ground rule 5); first `--live` baseline run
+  (needs `ANTHROPIC_API_KEY`).
+- Compliance review: **PASS WITH RISKS — no blockers.** Applied: `smoke` split redefined as
+  an explicit **subset of `evaluation`** (D-0009) so it no longer "overlaps"; added a
+  "Ground truth & labeller" section to `docs/EVALUATION.md` (single author-labeller, spot-check
+  required before any number, second labeller out of scope); D-0006 amendment records the
+  `note` field + the author-vocabulary map; `docs/CHANGELOG.md` "Cases" reconciled to the
+  actual 9 frames / 61 obs with the ≥10 target still open; fixed "8"→"9" reference count.
+- Verification: `typecheck` / `lint` pass; `npm test` **23/23**; `label:check --split=evaluation` OK.
+
 ### 2026-08-28 — Real Claude vision client
 
 - Added `@anthropic-ai/sdk` (`^0.122`) and `AnthropicVisionClient` in `src/agent/vision.ts`

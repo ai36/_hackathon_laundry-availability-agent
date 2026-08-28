@@ -13,9 +13,11 @@ decision it led to. Include experiments that were later removed and what they ta
 - **Primary metric:** overall per-machine state accuracy over determinate ground truth on a
   labelled laundry-room frame set. Secondary: **harmful-error rate** (false free/occupied),
   **coverage**, tokens / cost per frame. Full plan in `docs/EVALUATION.md`.
-- **Cases:** 15 P0 single-frame cases spanning states × conditions (incl.
-  `lights_off_no_motion`, occlusion, an `out_of_order` machine, and a synthetic "person in
-  frame" hard case) + 3 P1/P2 sequence cases.
+- **Cases:** target ≥10 P0 single-frame cases across states × conditions (`out_of_order`,
+  low-light, occlusion, a synthetic "person in frame" hard case — full list in
+  `docs/EVALUATION.md`) + 3 P1/P2 sequence cases. **Actual so far:** 9 labelled still frames
+  (`data/splits/evaluation.txt`) = 61 machine-observations, 45 determinate; the dryer-wall
+  video frames are being added to reach ≥10.
 - **Baseline:** single Claude vision prompt on the whole frame (same metric, same frames);
   contextual baseline = the manual "walk over and check" process.
 - **Harness:** offline scoring script with a `--replay` mode (re-scores from cached model
@@ -81,6 +83,13 @@ Record the result of each infra verification here (append, newest first).
 - `npm run typecheck` / `npm run lint` / `npm run build` — **pass**.
 - `npm test` — **23/23** (config 10, `score.test.ts` 8 incl. 3 `out_of_order`, `parse.test.ts` 5).
 - `npm run label:new` / `label:check` / `label:stats` — run (0 labels yet).
+
+### 2026-08-28 — initial ground-truth labels
+
+- `npm run typecheck` / `npm run lint` — **pass**; `npm test` — **23/23**.
+- `npm run label:check -- --split=evaluation` — **OK** (9 frames, 61 observations:
+  27 free / 10 occupied / 8 out_of_order / 16 unknown).
+- Baseline number pending the author's spot-check + a `--live` run.
 
 ### 2026-08-28 — real Claude vision client
 
