@@ -31,19 +31,27 @@ decision it led to. Include experiments that were later removed and what they ta
 | Setup | Bootstrapped project infra: Next.js 16 + TS + Tailwind v4 + MobX, skills `find-skills` + `grillme`, docs/logging scaffold. Not an iteration on the solution — the starting line. | `npm run typecheck` / `lint` / `build` results below | Infra in place; next step is to define the problem and build the baseline. |
 | Scoping | Ran the `grillme` Socratic-interview skill to turn "laundry3" into a defined problem, user, MVP, metric, baseline, dataset plan, and phased scope. | `docs/PROBLEM.md`, `docs/EVALUATION.md`, D-0005 | Problem pinned: per-machine free/occupied status from laundry-room frames; core = agent → verified status list. |
 | Baseline | Single `claude-sonnet-5` vision call per frame on the whole (downscaled + redacted) image; given the frame's machine-id list + numbering convention, no ROI / calibration / memory / verification. `npm run eval -- --mode=baseline --split=evaluation --live`. | **accuracy 31.1%**, harmful-error 11.1%, coverage 60.0%, acc-on-covered 51.9% (45 determinate obs, 9 frames). Report: `docs/artifacts/eval-baseline-2026-08-28.json`; replay cache: `data/cache/baseline/` (9 files, reproduces frames-absent). Cost $0.081, 25.5k in / 3.0k out tokens. Single sample — the model is stochastic (see `docs/EVALUATION.md` limitations). | Weak starting point, as expected: model abstains on 11/27 free machines, **never** identifies `out_of_order` (0/8), and makes 5 harmful errors (3 of them `out_of_order`→`free`). Redaction bands sit over some displays — same handicap for the agent, so the comparison stays fair. Lots of headroom. |
-| Iteration 1 (P0) | _TBD — per-machine ROI crop (agent gets a tight image per machine instead of the whole frame)._ | _[new result]_ | _[kept / revised / removed]_ |
-| Iteration 2 (P0) | _TBD — explicit verification pass for low-confidence machines._ | _[new result]_ | _[kept / revised / removed]_ |
+| Iteration 1 (P0) | **Verification pass**: after the whole-frame classify, a second focused vision call on the machines that came back `unknown` or low-confidence, naming them and listing explicit out-of-order / occupied / free cues (incl. "dim or dead 7-segment segments — read the shape, don't over-read"). Its answers override pass 1. `npm run eval -- --mode=agent --split=evaluation`. | **accuracy 31.1%** (= baseline, tied), **harmful-error 8.9%** (baseline 11.1%), coverage 51.1% (baseline 60.0%), **acc-on-covered 60.9%** (baseline 51.9%), **`out_of_order` 2/8** (baseline 0/8). 18 calls, $0.17 (2× baseline). Single sample. | **Kept.** Doesn't move raw accuracy, but trades coverage for **safety**: fewer wasted-trip errors, higher precision when it commits, and it starts catching broken machines. Aligned with the primary user value (don't send someone to an unusable machine). **Dead-end removed:** an earlier version abstained on _any_ machine below the 0.7 verification threshold → coverage collapsed to a handful of machines (~4%, observed during development, not separately archived). Lesson: the model's own `unknown` is the abstention signal; a separate confidence gate only helps at a much lower floor (0.35). Next: lift coverage with per-machine ROI crops. |
+| Iteration 2 (P0) | _TBD — per-machine ROI crop (agent gets a tight image per machine instead of the whole frame) to raise coverage._ | _[new result]_ | _[kept / revised / removed]_ |
 | Iteration 3 (P1) | _TBD — temporal memory / change-detection._ | _[new result]_ | _[kept / revised / removed]_ |
 | Final | _TBD — combine what worked._ | _[final result]_ | _Main contribution: …_ |
 
 ## Baseline vs. final comparison
 
-| Metric | Simple baseline | Agent solution | Change |
+**One sample per mode** (`claude-sonnet-5` is stochastic). Each delta below is a single
+observation, not an average: the accuracy figures are equal and almost certainly within
+run-to-run noise; the harmful-error / acc-on-covered / `out_of_order` differences are larger
+but still one sample each. Multi-sample averaging is the outstanding rigor step (deferred —
+API budget). Both modes score the same 45 determinate observations on the same 9 frames.
+
+| Metric | Simple baseline | Agent (Iter 1) | Change |
 | --- | --- | --- | --- |
-| Per-machine accuracy (determinate GT) | 31.1% | _[value]_ | _[change]_ |
-| Harmful-error rate | 11.1% | _[value]_ | _[change]_ |
-| Coverage | 60.0% | _[value]_ | _[change]_ |
-| Cost per frame | ~$0.009 | _[value]_ | _[change]_ |
+| Per-machine accuracy (determinate GT, n=45) | 31.1% | 31.1% | ±0 (noise) |
+| Harmful-error rate | 11.1% | 8.9% | **−2.2 pp** |
+| Accuracy on covered | 51.9% | 60.9% | **+9.0 pp** |
+| Coverage | 60.0% | 51.1% | −8.9 pp |
+| `out_of_order` recall | 0/8 | 2/8 | **+2** |
+| Cost per frame | ~$0.009 | ~$0.019 | ×2 |
 | Human time per task | _[value]_ | _[value]_ | _[change]_ |
 
 ## Verification runs
@@ -93,6 +101,30 @@ Record the result of each infra verification here (append, newest first).
 - `npm run label:check -- --split=evaluation` — **OK** (9 frames, 61 observations:
   27 free / 10 occupied / 8 out_of_order / 16 unknown).
 - Author spot-check of the 9 label files: **approved as correct** (2026-08-28).
+
+### 2026-08-28 — cost controls + Iter-1 review fixes
+
+- `typecheck` / `lint` pass; `npm test` **23/23**.
+- Default `agent.visionModel` → `claude-haiku-4-5` (cost); `max_tokens` 4000 → 1500;
+  `VisionResponse.model` persisted in the cache; 27 cache files backfilled with
+  `claude-sonnet-5`. Both `--replay` runs still reproduce 31.1% / 31.1% and the report
+  regenerates byte-identically.
+- Compliance re-review of Iteration 1 was **CHANGES REQUIRED** (unsupported "3 samples"
+  claim) — fixed to "one unaveraged sample per mode"; added a Recorded-agent-run table to
+  `docs/REPRODUCTION.md`, D-0013 for the pipeline structure, and renamed the
+  `verifiedMachineIds` meta field.
+
+### 2026-08-28 — agent Iteration 1 (verification pass)
+
+- `npm run eval -- --mode=agent --split=evaluation --live` — 18 `claude-sonnet-5` calls
+  (9 classify + 9 verify), $0.17. **accuracy 31.1% · harmful-error 8.9% · coverage 51.1% ·
+  acc-on-covered 60.9% · `out_of_order` 2/8**. Report:
+  `docs/artifacts/eval-agent-2026-08-28.json`; replay cache: `data/cache/agent/` (18 files,
+  committed, reproduces frames-absent).
+- Removed dead-end: abstaining on any machine below the 0.7 verification threshold →
+  coverage collapsed to ~4% (dev observation, not archived). Recalibrated to a 0.35 floor
+  on *answered* machines only.
+- `typecheck` / `lint` pass; `npm test` **23/23**.
 
 ### 2026-08-28 — first baseline run
 

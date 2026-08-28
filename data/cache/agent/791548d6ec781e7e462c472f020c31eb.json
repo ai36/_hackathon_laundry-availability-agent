@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"W-13\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Only partial view of a washer with control panel icons visible (fabric symbols), no display digits visible, door/lid area obscured by blur, cannot determine occupancy state\"},{\"machineId\":\"W-14\",\"state\":\"free\",\"confidence\":0.55,\"rationale\":\"Speed Queen Commercial Washer display shows partial digits/text, panel appears lit with standard info, door closed, no visible laundry or running indicator, consistent with idle/free state\"},{\"machineId\":\"W-15\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Top portion of washer visible with round port opening at top, no control panel or display visible in frame to determine state\"},{\"machineId\":\"W-16\",\"state\":\"free\",\"confidence\":0.4,\"rationale\":\"Front-loading washer with open door and empty visible drum, no laundry inside, suggesting machine is free and available\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2923,
+  "outputTokens": 322,
+  "costUsd": 0.009066
+}

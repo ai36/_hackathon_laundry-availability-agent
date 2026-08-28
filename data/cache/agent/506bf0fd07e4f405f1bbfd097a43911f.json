@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"D-01\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Top dryer, display blurred/unreadable\"},{\"machineId\":\"D-02\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Bottom dryer, display blurred\"},{\"machineId\":\"D-03\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Stacked unit in right bank, obscured by glare/blur\"},{\"machineId\":\"D-04\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Stacked unit, indicator not visible\"},{\"machineId\":\"D-05\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Coin meter panel blocks view\"},{\"machineId\":\"D-06\",\"state\":\"occupied\",\"confidence\":0.5,\"rationale\":\"Display panel lit with active screen, suggests in use\"},{\"machineId\":\"D-07\",\"state\":\"occupied\",\"confidence\":0.5,\"rationale\":\"Lit control panel with active screen\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2781,
+  "outputTokens": 345,
+  "costUsd": 0.009012
+}

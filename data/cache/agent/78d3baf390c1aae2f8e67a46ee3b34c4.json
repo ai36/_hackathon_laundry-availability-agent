@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"D-04\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Not clearly visible/labeled in this crop; leftmost dryer panel is blurred/out of frame, cannot confirm identity or display.\"},{\"machineId\":\"D-05\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Not clearly labeled; second dryer panel shows a blue card-reader screen but no machine ID visible to confirm this is D-05.\"},{\"machineId\":\"D-06\",\"state\":\"out_of_order\",\"confidence\":0.55,\"rationale\":\"Center Speed Queen unit shows '40' on left display and 'oF' on right display, which reads as an error/off-state code rather than a normal countdown or price, door closed with no laundry visible.\"},{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Not clearly labeled; rightmost dryer panel shows a lit card-reader screen but no visible ID confirming it is D-08.\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2923,
+  "outputTokens": 340,
+  "costUsd": 0.009246
+}

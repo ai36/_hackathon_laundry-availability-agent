@@ -400,15 +400,16 @@ stub. Built per the `claude-api` skill.
 - `@anthropic-ai/sdk` dependency; `AnthropicVisionClient` implements the same `VisionClient`
   interface as the Fake/Cached clients, so `--replay` and the offline tests keep working.
 - One `client.messages.create` per frame: base64 JPEG + prompt, `output_config: { effort:
-  "low" }` (high-volume classification — cost over depth), `max_tokens: 4000`. No streaming
-  (small responses), no explicit `thinking` (Sonnet 5 runs adaptive).
-- **Model** = `laundry3.config.ts` `agent.visionModel` (`claude-sonnet-5`), overridable for
-  one run with `LAUNDRY3_VISION_MODEL`. Not the skill's `claude-opus-5` default — this
-  project's config is the authority, and Sonnet is the cost/quality fit for reading machine
-  indicators across dozens of frames. Revisit if accuracy is short.
-- **Cost attribution:** `VisionResponse` carries `inputTokens` / `outputTokens` / `costUsd`
-  from a per-model `PRICE_PER_MTOK` table (rates dated in the source); `run-eval.ts` writes
-  a `totals` block in the report and prints the aggregate.
+  "low" }` (high-volume classification — cost over depth), `max_tokens: 1500` (responses are
+  ~300–700 tokens; lowered from 4000). No streaming, no explicit `thinking`.
+- **Model** = `laundry3.config.ts` `agent.visionModel`, overridable per run with
+  `LAUNDRY3_VISION_MODEL`. **Default is `claude-haiku-4-5`** ($1/$5 per MTok) for cost. The
+  recorded baseline + Iteration 1 runs used `claude-sonnet-5` (accuracy was the same ~31% as
+  a stronger option would likely give on this heavily-redacted task); `VisionResponse.model`
+  is persisted in the cache so `--replay` reports the model that actually produced each run.
+- **Cost attribution:** `VisionResponse` carries `model` / `inputTokens` / `outputTokens` /
+  `costUsd` from a per-model `PRICE_PER_MTOK` table (rates dated in the source);
+  `run-eval.ts` writes a `totals` block + the model(s) in the report and prints the aggregate.
 - `run-eval.ts` requires **exactly one** backend flag so a bare `npm run eval` can't bill:
   `--live` (paid API call, writes the cache), `--replay` (cache only, no key), `--fake`
   (offline stub, **no cache** — cannot poison the replay cache).
@@ -447,3 +448,32 @@ run the model returned its own positional labels ("center-washer") — nothing m
 roster and machine count for the frame. The agentic contribution to measure is therefore
 ROI cropping, verification, and memory — not machine discovery. If a later iteration adds a
 detection step, that becomes its own experiment with the id list withheld.
+
+---
+
+## D-0013 — Agent pipeline: verification pass + abstain floor
+
+- **Date:** 2026-08-28
+- **Status:** Accepted (Iteration 1; see `docs/CHANGELOG.md`)
+
+**Context.** The baseline (one whole-frame call) answers `unknown` on ~40% of machines and
+never recognises `out_of_order`. The agentic layer has to do better without just guessing.
+
+**Decision.** `runAgent` (`src/agent/pipeline.ts`):
+
+1. **Classify** every machine from the whole frame (baseline-equivalent prompt).
+2. **Verification pass** — for machines returned `unknown` or below
+   `config.agent.verification.confidenceThreshold` (0.7), one *second* focused vision call
+   that names those machines and lists explicit `out_of_order` / `occupied` / `free` cues
+   (incl. "dim/dead 7-segment segments — read the shape, don't over-read"). Its answers
+   override pass 1 for those ids. Capped by `config.agent.maxVisionCallsPerFrame`.
+3. **Abstain floor** — the model's own `unknown` is the abstention signal; a separate
+   confidence gate only overrides an *answered* machine whose confidence is below
+   **half** the verification threshold (0.35), i.e. a near-guess.
+
+**Consequences.** Doesn't move raw accuracy (both ≈31% on one sample) but roughly halves the
+harmful-error rate, lifts accuracy-on-covered, and starts catching broken machines, at 2×
+cost and lower coverage. **Removed dead-end:** abstaining at the full 0.7 threshold collapsed
+coverage to ~4% (dev observation, not archived) — a mis-calibrated gate, not a useful one.
+Next iteration targets coverage
+with per-machine ROI crops.

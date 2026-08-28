@@ -19,6 +19,12 @@ export default defineConfig({
       dryers: 16,
     },
   },
+  agent: {
+    // haiku-4-5 ($1/$5 per MTok) is ~half the cost of sonnet-5 for this vision task.
+    // The recorded baseline/agent runs used claude-sonnet-5 (see docs/CHANGELOG.md);
+    // this is the default for new --live runs.
+    visionModel: "claude-haiku-4-5",
+  },
   reservation: {
     enabled: false, // flip on once the reservation simulation (P2) is built
     holdMinutes: 5,

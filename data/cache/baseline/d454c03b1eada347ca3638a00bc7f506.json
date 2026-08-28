@@ -1,5 +1,6 @@
 {
   "text": "{\"machines\":[{\"machineId\":\"D-01\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Top-left stacked unit, display not clearly visible\"},{\"machineId\":\"D-02\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Bottom-left stacked unit, door closed but state unclear\"},{\"machineId\":\"D-03\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Right bank top unit, partially visible\"},{\"machineId\":\"D-04\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Right bank unit, display not legible\"},{\"machineId\":\"D-05\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Right bank unit, insufficient detail\"},{\"machineId\":\"D-06\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Right bank unit, insufficient detail\"},{\"machineId\":\"D-07\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Right bank unit, insufficient detail\"}]}",
+  "model": "claude-sonnet-5",
   "inputTokens": 2835,
   "outputTokens": 347,
   "costUsd": 0.00914

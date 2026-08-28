@@ -13,14 +13,19 @@ export function loadSiteConfig(path = config.paths.siteConfig): SiteConfig | nul
 }
 
 /**
- * The agent pipeline: calibrate-aware classification with a verification pass.
+ * The agent pipeline.
  *
- * SKELETON — the per-machine classify and verify steps are stubs. The shape is:
- *   1. load the per-site calibration config (ROIs, reference cues)
- *   2. classify each machine from its ROI  (stub: one whole-frame call, then split)
- *   3. verify machines below config.agent.verification.confidenceThreshold
- *      (stub: re-query with tighter crop; here: pass through)
- *   4. abstain (`unknown`) instead of guessing when still uncertain
+ *   1. classify every machine from the whole frame (same starting point as the baseline)
+ *   2. verification pass — for machines that came back `unknown` or below
+ *      `config.agent.verification.confidenceThreshold`, a second focused vision call that
+ *      names those machines and lists explicit out-of-order cues; its answers override
+ *      pass 1 for those ids. Capped by `config.agent.maxVisionCallsPerFrame`.
+ *   3. abstain — the model already says `unknown` when it can't tell, so this only
+ *      overrides an *answered* machine whose confidence is very low (a near-guess), at
+ *      half the verification threshold. (An earlier version abstained at the full 0.7
+ *      threshold and collapsed coverage to ~4% — see the changelog.)
+ *
+ * ROI cropping / temporal memory are later iterations.
  */
 export async function runAgent(
   frameId: string,
@@ -28,52 +33,82 @@ export async function runAgent(
   machineIds: string[],
 ): Promise<FramePrediction> {
   const site = loadSiteConfig();
-  let visionCalls = 0;
-
-  // Step 2 (stub): single structured call; a real implementation loops per ROI.
-  const res = await vision.analyze({
-    cacheKey: `agent:classify:${frameId}:${machineIds.join(",")}`,
-    imagePath: frameImagePath(frameId),
-    prompt: classifyPrompt(site, machineIds),
-  });
-  visionCalls++;
-  let assessments = parseAssessments(res.text);
-
-  // Step 3 (stub): machines below the threshold would be re-queried with a tight ROI crop
-  // (config.agent.maxVisionCallsPerFrame caps the total). For now they are only flagged.
   const threshold = config.agent.verification.confidenceThreshold;
-  const needsVerification = assessments
-    .filter((a) => a.confidence < threshold)
-    .map((a) => a.machineId);
+  let visionCalls = 0;
+  let inputTokens = 0;
+  let outputTokens = 0;
+  let costUsd = 0;
+  const models = new Set<string>();
 
-  // Step 4: abstain instead of guessing when still not confident.
-  if (config.agent.abstainWhenUncertain) {
-    assessments = assessments.map((a) =>
-      a.confidence < threshold ? { ...a, state: "unknown" as const } : a,
-    );
+  const call = async (cacheKey: string, prompt: string): Promise<MachineAssessment[]> => {
+    const res = await vision.analyze({ cacheKey, imagePath: frameImagePath(frameId), prompt });
+    visionCalls++;
+    inputTokens += res.inputTokens ?? 0;
+    outputTokens += res.outputTokens ?? 0;
+    costUsd += res.costUsd ?? 0;
+    if (res.model) models.add(res.model);
+    return parseAssessments(res.text);
+  };
+
+  // Step 1 — classify.
+  const byId = new Map<string, MachineAssessment>();
+  for (const a of await call(
+    `agent:classify:${frameId}:${machineIds.join(",")}`,
+    classifyPrompt(site, machineIds),
+  )) {
+    byId.set(a.machineId, a);
   }
 
-  const machines: MachinePrediction[] = assessments.map(toPrediction);
+  // Step 2 — verification pass on the shaky ones.
+  const shaky = machineIds.filter((id) => {
+    const a = byId.get(id);
+    return !a || a.state === "unknown" || a.confidence < threshold;
+  });
+  const verified: string[] = [];
+  if (
+    config.agent.verification.enabled &&
+    shaky.length > 0 &&
+    visionCalls < config.agent.maxVisionCallsPerFrame
+  ) {
+    for (const a of await call(`agent:verify:${frameId}:${shaky.join(",")}`, verifyPrompt(shaky))) {
+      if (shaky.includes(a.machineId)) {
+        byId.set(a.machineId, a);
+        verified.push(a.machineId);
+      }
+    }
+  }
+
+  // Step 3 — abstain only on a near-guess (very low confidence on an answered machine).
+  const abstainFloor = threshold / 2;
+  const machines: MachinePrediction[] = machineIds.map((id) => {
+    const a = byId.get(id) ?? {
+      machineId: id,
+      state: "unknown" as const,
+      confidence: 0,
+      rationale: "no answer",
+    };
+    const nearGuess =
+      config.agent.abstainWhenUncertain && a.state !== "unknown" && a.confidence < abstainFloor;
+    return {
+      machineId: id,
+      state: nearGuess ? "unknown" : a.state,
+      confidence: a.confidence,
+      rationale: a.rationale,
+    };
+  });
+
   return {
     frameId,
     machines,
     meta: {
       mode: "agent",
+      model: [...models].join("+") || undefined,
       visionCalls,
-      inputTokens: res.inputTokens,
-      outputTokens: res.outputTokens,
-      costUsd: res.costUsd,
-      needsVerification,
+      inputTokens,
+      outputTokens,
+      costUsd,
+      verifiedMachineIds: verified,
     },
-  };
-}
-
-function toPrediction(a: MachineAssessment): MachinePrediction {
-  return {
-    machineId: a.machineId,
-    state: a.state,
-    confidence: a.confidence,
-    rationale: a.rationale,
   };
 }
 
@@ -97,4 +132,23 @@ function classifyPrompt(site: SiteConfig | null, machineIds: string[]): string {
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+function verifyPrompt(machineIds: string[]): string {
+  return [
+    "Second look. Focus ONLY on these machines and study each one's control panel, display,",
+    `door position and drum: ${machineIds.join(", ")}.`,
+    "First describe exactly what you see on each (digits/letters on the display, lights, lid",
+    "up or down, laundry visible), then classify it.",
+    "Out-of-order cues: the display shows an error like 'Err', 'E rot', 'oF', 'dc'; the panel",
+    "is dark/unlit while neighbours are lit; there is tape or an out-of-service sign.",
+    "Occupied cues: a countdown time, a lit 'running'/'sensing' indicator, laundry in the drum.",
+    "Free cues: blank or price-only display ('2.25'), lid closed, empty drum.",
+    "Seven-segment digits can have dim or dead segments — read the overall shape and the",
+    "neighbouring machines' style; do not turn 'occupied' into 'out_of_order' just because a",
+    "segment is missing, and do not read a partial digit as an error code.",
+    "Only answer unknown if the relevant area is genuinely hidden or unreadable.",
+    "Reply with JSON only, one entry per id:",
+    '{"machines":[{"machineId":"W-01","state":"free|occupied|out_of_order|unknown","confidence":0..1,"rationale":"<what you saw>"}]}',
+  ].join("\n");
 }

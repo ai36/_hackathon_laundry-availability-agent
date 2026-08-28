@@ -56,6 +56,7 @@ Each case's `condition` maps to `frameConditions` (frame-wide) and/or `observati
 | 7 | Low / evening light, indicator lights dominant | frame (`low_light`) | free + occupied | Low-light handling |
 | 8 | `lights_off_no_motion` — motion-sensing lamp cut the room dark | frame | mostly `unknown` expected | Agent should abstain, not hallucinate states |
 | 9 | Indicator only partially visible for one machine | one machine (`indicator_partial`) | that machine low-confidence | Low-confidence → verification path |
+| 9b | 7-segment display with dim / dead segments (partial indicator failure, not occlusion) | one machine (`indicator_partial`) | still the true state, not `out_of_order` | Read the digit shape from context; don't misread a missing segment as an error code |
 | 10 | One machine door open, drum empty (idle) next to a closed running machine | per-machine | free + occupied | free/occupied disambiguation |
 | 11 | Mixed cycle phases — mid-cycle vs just-finished (door closed, light off) | per-machine | occupied ("not emptied") vs free | "finished but not emptied" |
 | 12 | Near-empty room, 1–2 machines running | frame | mostly free | Low-occupancy (few positives) |
@@ -176,3 +177,17 @@ _Populated as runs happen. Raw outputs under `docs/artifacts/`._
 | Cost | $0.081 (9 calls, 25.5k in / 3.0k out) |
 
 `out_of_order` recognised 0/8; 11/27 `free` machines answered `unknown`.
+
+### Agent — Iteration 1, verification pass — 2026-08-28 (`data/cache/agent/`, `--replay`-reproducible)
+
+| Metric | Value | vs baseline |
+| --- | --- | --- |
+| Per-machine accuracy (determinate GT, n=45) | 31.1% | ±0 (noise) |
+| Harmful-error rate | **8.9%** | −2.2 pp |
+| Accuracy on covered | **60.9%** | +9.0 pp |
+| Coverage | 51.1% | −8.9 pp |
+| `out_of_order` recall | **2/8** | +2 |
+| Cost | $0.170 (18 calls: 9 classify + 9 verify) | ×2 |
+
+Confusion (gt → free/occupied/unknown/out_of_order): free 9/4/14/0, occupied 2/3/5/0,
+out_of_order 2/1/3/2. Model: `claude-sonnet-5` (see `docs/CHANGELOG.md` for the A/B write-up).

@@ -46,7 +46,7 @@ npm start        # serve the production build
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint (flat config)
 npm run format:check # prettier
-npm test             # tsx --test — config loader/validator (expect: 10/10 pass)
+npm test             # tsx --test — config, scoring, reply-parser (expect: 23/23 pass)
 npm run check:data   # dataset privacy gate (also runs as the pre-commit hook)
 ```
 
@@ -87,7 +87,7 @@ Exactly one backend flag is required (guards against accidental API spend):
 
 ```bash
 npm run eval -- --mode=baseline --split=evaluation --replay   # reproduce the recorded run — NO key, NO cost, ~1 s
-npm run eval -- --mode=baseline --split=evaluation --live     # re-sample: paid API call (~$0.08); needs ANTHROPIC_API_KEY in .env; rewrites data/cache/baseline/
+npm run eval -- --mode=baseline --split=evaluation --live     # re-sample: paid API call; needs ANTHROPIC_API_KEY in .env; rewrites data/cache/baseline/
 npm run eval -- --mode=baseline --split=evaluation --fake     # offline wiring check, no cache (empty predictions)
 ```
 
@@ -103,14 +103,30 @@ held out of git) — the cache key is the semantic request, not the image bytes.
 45 determinate observations over 9 frames. The model is stochastic — a fresh `--live` run
 shifts these a few points (see `docs/EVALUATION.md` limitations); `--replay` is exact.
 
-## Evaluation (agent vs baseline)
+## Agent (Iteration 1 — verification pass)
 
 ```bash
-npm run eval -- --mode=agent --split=evaluation --replay      # once the agent cache is committed
+npm run eval -- --mode=agent --split=evaluation --replay      # NO key, NO cost — reproduces the recorded run
+npm run eval -- --mode=agent --split=evaluation --live        # re-sample: paid (18 calls)
 ```
 
-Both write a JSON report to `docs/artifacts/eval-<mode>-<date>.json` (model from
-`laundry3.config.ts`). The report carries no timestamp so it regenerates byte-identically.
+**Recorded agent run** (`data/cache/agent/`, model `claude-sonnet-5`):
+
+| accuracy | harmful-error | coverage | acc-on-covered | `out_of_order` | cost |
+| --- | --- | --- | --- | --- | --- |
+| 31.1% | 8.9% | 51.1% | 60.9% | 2/8 | $0.170 (`--live`) / $0 (`--replay`) |
+
+Confusion (gt → pred): free 9/4/14/0, occupied 2/3/5/0, out_of_order 2/1/3/2. Same 45
+determinate observations / 9 frames as the baseline — see `docs/CHANGELOG.md` for the A/B.
+
+Both modes write a JSON report to `docs/artifacts/eval-<mode>-<date>.json`. Its `model`
+field is read from the cached responses (so a `--replay` of the recorded runs reports
+`claude-sonnet-5`), not from config. The report carries no timestamp so it regenerates
+byte-identically.
+
+> The default `agent.visionModel` is now `claude-haiku-4-5` (cost). A fresh `--live`
+> re-sample therefore runs on haiku unless you pass `LAUNDRY3_VISION_MODEL=claude-sonnet-5`
+> to match the recorded numbers. `--replay` always reproduces the recorded sonnet-5 run.
 
 ## Expected output
 

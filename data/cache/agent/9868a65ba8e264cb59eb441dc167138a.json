@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"W-01\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Top-loader lid closed, display shows standby icons, no time indicated\"},{\"machineId\":\"W-02\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Lid closed, display shows standby icons\"},{\"machineId\":\"W-03\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Lid closed, display shows standby icons\"},{\"machineId\":\"W-04\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Display partially visible, unclear state due to angle\"},{\"machineId\":\"W-05\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Lid open, empty drum visible, no laundry\"},{\"machineId\":\"W-06\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Lid open, empty drum visible\"},{\"machineId\":\"W-07\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Partially visible at frame edge, insufficient detail\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2781,
+  "outputTokens": 346,
+  "costUsd": 0.009022
+}

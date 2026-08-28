@@ -23,7 +23,7 @@ export const DEFAULT_CONFIG: Laundry3Config = {
     reconcileOnExpiry: true,
   },
   agent: {
-    visionModel: "claude-sonnet-5",
+    visionModel: "claude-haiku-4-5",
     maxVisionCallsPerFrame: 8,
     abstainWhenUncertain: true,
     verification: {

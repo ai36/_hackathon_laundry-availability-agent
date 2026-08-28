@@ -29,6 +29,8 @@ export interface VisionRequest {
 
 export interface VisionResponse {
   text: string;
+  /** Model that produced this response (persisted in the cache so --replay reports it). */
+  model?: string;
   inputTokens?: number;
   outputTokens?: number;
   costUsd?: number;

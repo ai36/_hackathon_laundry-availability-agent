@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"D-01\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Machine labeled D-01 not clearly distinguishable in image; only stacked washer/dryer units with coin meter labels visible, no clear individual identifier.\"},{\"machineId\":\"D-02\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Cannot clearly isolate this specific machine's control panel from the image to determine display or door state.\"},{\"machineId\":\"D-03\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"No distinguishable individual panel labeled D-03; image shows blurred and stacked machines without clear separation.\"},{\"machineId\":\"D-04\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Bottom left dryer has closed door, handle visible, no laundry seen, panel area blurred but drum appears empty.\"},{\"machineId\":\"D-05\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Panel and display obscured by blur in middle section, cannot read digits or lights.\"},{\"machineId\":\"D-06\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Bottom right machine shows lit blue/green indicator lights on control panel suggesting active cycle.\"},{\"machineId\":\"D-07\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Adjacent bottom right dryer also shows lit indicator lights and small screen active, suggesting running cycle.\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2935,
+  "outputTokens": 491,
+  "costUsd": 0.01078
+}

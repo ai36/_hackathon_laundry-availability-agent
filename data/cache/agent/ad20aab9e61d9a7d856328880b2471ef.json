@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"D-04\",\"state\":\"unknown\",\"confidence\":0.5,\"rationale\":\"Display panel blurred, cannot confirm status\"},{\"machineId\":\"D-05\",\"state\":\"unknown\",\"confidence\":0.5,\"rationale\":\"Display panel blurred, cannot confirm status\"},{\"machineId\":\"D-06\",\"state\":\"unknown\",\"confidence\":0.5,\"rationale\":\"Display panel blurred, cannot confirm status\"},{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.5,\"rationale\":\"Display panel blurred, cannot confirm status\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2769,
+  "outputTokens": 206,
+  "costUsd": 0.007598
+}

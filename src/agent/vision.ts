@@ -65,7 +65,7 @@ export class FakeVisionClient implements VisionClient {
     const text =
       this.responses.get(req.cacheKey) ??
       JSON.stringify({ machines: [], note: "FakeVisionClient: no response configured" });
-    return { text, inputTokens: 0, outputTokens: 0, costUsd: 0 };
+    return { text, model: "fake", inputTokens: 0, outputTokens: 0, costUsd: 0 };
   }
 }
 
@@ -104,7 +104,7 @@ export class AnthropicVisionClient implements VisionClient {
 
     const res = await this.client.messages.create({
       model: this.model,
-      max_tokens: 4000,
+      max_tokens: 1500,
       output_config: { effort: "low" },
       messages: [
         {
@@ -132,6 +132,6 @@ export class AnthropicVisionClient implements VisionClient {
       ? (inputTokens * price.input + outputTokens * price.output) / 1_000_000
       : undefined;
 
-    return { text, inputTokens, outputTokens, costUsd };
+    return { text, model: this.model, inputTokens, outputTokens, costUsd };
   }
 }

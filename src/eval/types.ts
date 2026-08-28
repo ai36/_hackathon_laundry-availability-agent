@@ -71,11 +71,13 @@ export interface FramePrediction {
   /** How the prediction was produced, for the trajectory record. */
   meta?: {
     mode: "baseline" | "agent";
+    /** Model(s) that produced the vision responses for this frame. */
+    model?: string;
     visionCalls: number;
     inputTokens?: number;
     outputTokens?: number;
     costUsd?: number;
-    /** agent only: machine ids the verification pass would re-check. */
-    needsVerification?: string[];
+    /** agent only: machine ids the verification pass re-checked. */
+    verifiedMachineIds?: string[];
   };
 }

@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"W-01\",\"state\":\"free\",\"confidence\":0.6,\"rationale\":\"Lid closed, display shows price-like readout '2.25', no visible error or countdown, consistent with idle machine\"},{\"machineId\":\"W-02\",\"state\":\"free\",\"confidence\":0.6,\"rationale\":\"Lid closed, panel lit with standard display, no error code or countdown visible\"},{\"machineId\":\"W-03\",\"state\":\"free\",\"confidence\":0.6,\"rationale\":\"Lid closed, panel lit similarly to neighbours, no signs of running cycle\"},{\"machineId\":\"W-04\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Lid closed, panel lit with digital display, no visible countdown or error\"},{\"machineId\":\"W-05\",\"state\":\"occupied\",\"confidence\":0.5,\"rationale\":\"Lid open, drum appears empty but panel shows active display suggesting mid-cycle or door open loading state\"},{\"machineId\":\"W-06\",\"state\":\"occupied\",\"confidence\":0.55,\"rationale\":\"Lid open, drum visible, panel lit with active-looking display indicating in-use status\"},{\"machineId\":\"W-07\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Only partial view of machine at edge of frame, panel and drum not clearly visible\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2935,
+  "outputTokens": 437,
+  "costUsd": 0.01024
+}

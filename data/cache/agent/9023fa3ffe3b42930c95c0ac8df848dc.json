@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"D-04\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Blurred/out of focus, no clear evidence\"},{\"machineId\":\"D-05\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display shows time (40) suggesting active cycle\"},{\"machineId\":\"D-06\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Blurred/out of focus, no clear evidence\"},{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Blurred/out of focus, no clear evidence\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2769,
+  "outputTokens": 210,
+  "costUsd": 0.007638
+}

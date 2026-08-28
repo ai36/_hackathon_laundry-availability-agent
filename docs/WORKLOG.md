@@ -12,6 +12,57 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Cost controls + Iter-1 review fixes
+
+- API budget is tight → cut future `--live` cost without touching the recorded runs:
+  - **Default model → `claude-haiku-4-5`** ($1/$5 vs sonnet-5 $2/$10). `defaults.ts` +
+    `laundry3.config.ts` + `docs/CONFIGURATION.md` + D-0011.
+  - `AnthropicVisionClient` `max_tokens` 4000 → 1500 (responses are ~300–700 tokens).
+  - `VisionResponse.model` is now persisted in the cache; `FramePrediction.meta.model` and
+    the report's `model` field derive from the responses, so `--replay` of the sonnet-5
+    cache correctly reports `claude-sonnet-5` even with the config on haiku. Backfilled the
+    27 existing cache files with `"model": "claude-sonnet-5"`.
+  - Recorded baseline + Iteration 1 stay on `claude-sonnet-5` and are reproduced free via
+    `--replay`. Multi-sample averaging stays deferred (budget).
+- Compliance re-review of Iter 1 (**CHANGES REQUIRED**) — applied:
+  - **G9 blocker:** removed the "directionally consistent across 3 samples" claim
+    (`docs/CHANGELOG.md`, `docs/WORKLOG.md`) — only one sample per mode is committed. Now
+    stated as one unaveraged observation each.
+  - `docs/REPRODUCTION.md`: added a "Recorded agent run" results table; fixed `npm test`
+    expectation `10/10` → `23/23`.
+  - `docs/DECISIONS.md` D-0013 — the agent pipeline structure (verification pass + 0.35
+    abstain floor, and the removed 0.7-gate dead-end).
+  - Renamed `meta.needsVerification` → `meta.verifiedMachineIds` (it holds the *verified*
+    ids); agent report regenerated via `--replay` (no cost).
+- Verification: `typecheck` / `lint` pass; `npm test` **23/23**; both `--replay` runs
+  reproduce (31.1% / 31.1%), reports byte-stable.
+
+### 2026-08-28 — Agent Iteration 1: verification pass
+
+- `runAgent` fleshed out: (1) whole-frame classify (baseline-equivalent); (2) **verification
+  pass** — a second focused vision call on `unknown` / low-confidence machines, naming them
+  and listing explicit out-of-order / occupied / free cues, incl. the author's new edge case
+  ("dim or dead 7-segment segments — read the shape, don't over-read a missing segment as an
+  error"); (3) near-guess abstain (only overrides an *answered* machine below 0.35, not the
+  0.7 verify trigger).
+- **Dead-end found + removed:** first version abstained on any machine below the 0.7 verify
+  threshold → coverage collapsed to ~4% (dev observation, not separately archived). The model's own
+  `unknown` is the abstention signal; a separate gate only helps at a much lower floor.
+- **Result** (`npm run eval -- --mode=agent --split=evaluation --live`, 18 calls, $0.17):
+  accuracy **31.1%** (= baseline, tied within noise), harmful-error **8.9%** (baseline
+  11.1%), coverage 51.1% (baseline 60.0%), acc-on-covered **60.9%** (baseline 51.9%),
+  `out_of_order` **2/8** (baseline 0/8). Kept — trades coverage for safety + precision +
+  catching broken machines, aligned with the primary user value. Next: ROI crops to lift
+  coverage.
+- **One sample per mode** — `claude-sonnet-5` is stochastic and each delta is a single
+  observation. The accuracy figures are equal (within noise); the harmful-error /
+  acc-on-covered / `out_of_order` differences are larger but unaveraged. Multi-sample
+  averaging deferred (API budget) and listed as an open limitation.
+- Edge case noted in `docs/PROBLEM.md` + `docs/EVALUATION.md` (partial/dim indicator).
+- `data/cache/agent/` force-added; `--replay` verified frames-absent. `docs/CHANGELOG.md`
+  Iter 1 row + comparison table filled.
+- Verification: `typecheck` / `lint` pass; `npm test` **23/23**.
+
 ### 2026-08-28 — First baseline number
 
 - Author confirmed the 9 label files correct (spot-check) and set `ANTHROPIC_API_KEY`.

@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"W-06\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Not clearly visible in frame\"},{\"machineId\":\"W-07\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Not clearly visible in frame\"},{\"machineId\":\"W-08\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display showing time 2:25 indicating active cycle\"},{\"machineId\":\"W-09\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Blurred/obscured area near display\"},{\"machineId\":\"W-10\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Blocked by blurred region\"},{\"machineId\":\"W-11\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Second display showing 2:25 timer active\"},{\"machineId\":\"W-12\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Obscured by blur\"},{\"machineId\":\"W-13\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Obscured by blur\"},{\"machineId\":\"W-14\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Empty drum visible, no display lit\"},{\"machineId\":\"W-15\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Partially visible, insufficient evidence\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2793,
+  "outputTokens": 457,
+  "costUsd": 0.010156
+}

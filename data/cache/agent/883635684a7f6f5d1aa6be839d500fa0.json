@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"D-04\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Display not clearly visible, position uncertain in bank\"},{\"machineId\":\"D-05\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display shows '40' timer suggesting active cycle\"},{\"machineId\":\"D-06\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Display shows 'E' code, unclear if error or standby\"},{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Machine partially visible, display not readable\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2769,
+  "outputTokens": 210,
+  "costUsd": 0.007638
+}

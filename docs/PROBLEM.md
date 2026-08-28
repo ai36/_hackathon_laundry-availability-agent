@@ -216,7 +216,10 @@ types in `src/eval/types.ts`):
   separately.
 - `observationNotes` — per-machine, optional, list. Vocabulary (extensible):
   `indicator_occluded_by_person`, `indicator_occluded_by_object`, `indicator_partial`,
-  `glare_on_door`, `door_open`, `ambiguous`.
+  `glare_on_door`, `door_open`, `ambiguous`. `indicator_partial` also covers a **7-segment
+  display with dim or dead segments** (partial indicator *failure*, not occlusion) — the
+  agent should still read the state from the digit shape / neighbouring machines and not
+  mistake a missing segment for an error code.
 - A machine not visible in the frame is **omitted**, never guessed.
 
 You can hand the labels over in any form (even prose per frame); they get normalised to this

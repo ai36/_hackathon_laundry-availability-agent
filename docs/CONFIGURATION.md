@@ -48,7 +48,7 @@ This page documents the **deployment config**.
 
 | Key | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `agent.visionModel` | string | `"claude-sonnet-5"` | Claude vision model id for frame/ROI analysis. |
+| `agent.visionModel` | string | `"claude-haiku-4-5"` | Claude vision model id for frame/ROI analysis. Default is haiku for cost ($1/$5 per MTok); the recorded baseline/agent runs used `claude-sonnet-5`. |
 | `agent.maxVisionCallsPerFrame` | int ≥ 1 | `8` | Hard cap on vision API calls per processed frame (cost guard). |
 | `agent.abstainWhenUncertain` | bool | `true` | Emit `unknown` instead of guessing when evidence is insufficient. |
 | `agent.verification.enabled` | bool | `true` | Run a second-pass check on low-confidence machines before publishing. |

@@ -52,6 +52,7 @@ export async function runBaseline(
     })),
     meta: {
       mode: "baseline",
+      model: res.model,
       visionCalls: 1,
       inputTokens: res.inputTokens,
       outputTokens: res.outputTokens,

@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"D-01\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display active with control panel lit\"},{\"machineId\":\"D-02\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display panel lit with countdown indicator\"},{\"machineId\":\"D-03\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display shows time (2:25) indicating running cycle\"},{\"machineId\":\"D-04\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Panel lit with arrows and buttons active\"},{\"machineId\":\"D-05\",\"state\":\"occupied\",\"confidence\":0.7,\"rationale\":\"Display shows '41' timer, active cycle\"},{\"machineId\":\"D-06\",\"state\":\"occupied\",\"confidence\":0.5,\"rationale\":\"Panel lit, appears active\"},{\"machineId\":\"D-07\",\"state\":\"occupied\",\"confidence\":0.5,\"rationale\":\"Panel lit with control buttons visible\"},{\"machineId\":\"D-08\",\"state\":\"occupied\",\"confidence\":0.7,\"rationale\":\"Display shows '41' timer, active cycle\"},{\"machineId\":\"W-15\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Machine obscured by blur in image\"},{\"machineId\":\"W-16\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Machine obscured by blur in image\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2793,
+  "outputTokens": 474,
+  "costUsd": 0.010326
+}

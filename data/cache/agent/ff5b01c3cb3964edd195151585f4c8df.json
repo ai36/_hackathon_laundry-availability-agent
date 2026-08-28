@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"W-13\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Not clearly identifiable in frame\"},{\"machineId\":\"W-14\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Not clearly identifiable in frame\"},{\"machineId\":\"W-15\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Not clearly identifiable in frame\"},{\"machineId\":\"W-16\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Not clearly identifiable in frame\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2769,
+  "outputTokens": 194,
+  "costUsd": 0.007478
+}

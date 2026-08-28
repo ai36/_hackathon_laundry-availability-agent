@@ -102,8 +102,10 @@ async function main(): Promise<void> {
   );
 
   const backend = fake ? "fake" : replay ? "replay" : "live";
+  const models = [...new Set([...predictions.values()].map((p) => p.meta?.model).filter(Boolean))];
+  const modelLabel = models.length ? models.join(", ") : config.agent.visionModel;
   console.log(
-    `\nmode=${mode} split=${split} frames=${frameIds.length} labelled=${labelled} backend=${backend}`,
+    `\nmode=${mode} split=${split} frames=${frameIds.length} labelled=${labelled} backend=${backend} model=${modelLabel}`,
   );
   console.log(formatScores(scores));
   console.log(
@@ -118,7 +120,7 @@ async function main(): Promise<void> {
         // No timestamp: the committed report must regenerate byte-identically from --replay.
         mode,
         split,
-        model: config.agent.visionModel,
+        model: modelLabel,
         frames: frameIds,
         labelledFrames: labelled,
         scores,

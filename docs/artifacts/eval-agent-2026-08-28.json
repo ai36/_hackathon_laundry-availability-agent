@@ -1,0 +1,618 @@
+{
+  "mode": "agent",
+  "split": "evaluation",
+  "model": "claude-sonnet-5",
+  "frames": [
+    "img_1819",
+    "img_1821",
+    "img_1822",
+    "img_1823",
+    "img_1824",
+    "img_1825",
+    "img_1826",
+    "img_8629",
+    "img_8633"
+  ],
+  "labelledFrames": 9,
+  "scores": {
+    "nDeterminate": 45,
+    "nIndeterminable": 16,
+    "accuracy": 0.3111111111111111,
+    "harmfulErrorRate": 0.08888888888888889,
+    "coverage": 0.5111111111111111,
+    "accuracyOnCovered": 0.6086956521739131,
+    "confusion": {
+      "free": {
+        "free": 9,
+        "occupied": 4,
+        "unknown": 14,
+        "out_of_order": 0
+      },
+      "occupied": {
+        "free": 2,
+        "occupied": 3,
+        "unknown": 5,
+        "out_of_order": 0
+      },
+      "unknown": {
+        "free": 0,
+        "occupied": 0,
+        "unknown": 0,
+        "out_of_order": 0
+      },
+      "out_of_order": {
+        "free": 2,
+        "occupied": 1,
+        "unknown": 3,
+        "out_of_order": 2
+      }
+    },
+    "missingPredictions": 0
+  },
+  "totals": {
+    "visionCalls": 18,
+    "inputTokens": 51412,
+    "outputTokens": 6732,
+    "costUsd": 0.170144
+  },
+  "predictions": {
+    "img_1819": {
+      "frameId": "img_1819",
+      "machines": [
+        {
+          "machineId": "W-01",
+          "state": "free",
+          "confidence": 0.6,
+          "rationale": "Lid closed, display shows price-like readout '2.25', no visible error or countdown, consistent with idle machine"
+        },
+        {
+          "machineId": "W-02",
+          "state": "free",
+          "confidence": 0.6,
+          "rationale": "Lid closed, panel lit with standard display, no error code or countdown visible"
+        },
+        {
+          "machineId": "W-03",
+          "state": "free",
+          "confidence": 0.6,
+          "rationale": "Lid closed, panel lit similarly to neighbours, no signs of running cycle"
+        },
+        {
+          "machineId": "W-04",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Lid closed, panel lit with digital display, no visible countdown or error"
+        },
+        {
+          "machineId": "W-05",
+          "state": "occupied",
+          "confidence": 0.5,
+          "rationale": "Lid open, drum appears empty but panel shows active display suggesting mid-cycle or door open loading state"
+        },
+        {
+          "machineId": "W-06",
+          "state": "occupied",
+          "confidence": 0.55,
+          "rationale": "Lid open, drum visible, panel lit with active-looking display indicating in-use status"
+        },
+        {
+          "machineId": "W-07",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Only partial view of machine at edge of frame, panel and drum not clearly visible"
+        }
+      ],
+      "meta": {
+        "mode": "agent",
+        "model": "claude-sonnet-5",
+        "visionCalls": 2,
+        "inputTokens": 5716,
+        "outputTokens": 783,
+        "costUsd": 0.019262,
+        "verifiedMachineIds": [
+          "W-01",
+          "W-02",
+          "W-03",
+          "W-04",
+          "W-05",
+          "W-06",
+          "W-07"
+        ]
+      }
+    },
+    "img_1821": {
+      "frameId": "img_1821",
+      "machines": [
+        {
+          "machineId": "D-01",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Panel not clearly visible in labeled crop; door area shown is upper section only, controls obscured/blurred."
+        },
+        {
+          "machineId": "D-02",
+          "state": "occupied",
+          "confidence": 0.55,
+          "rationale": "Display shows numeric value '2.25'-like or countdown with arrows lit, suggesting active cycle indicators visible on panel."
+        },
+        {
+          "machineId": "D-03",
+          "state": "occupied",
+          "confidence": 0.6,
+          "rationale": "Panel shows lit display with '41' and orange down arrow illuminated, indicating a running countdown timer."
+        },
+        {
+          "machineId": "D-04",
+          "state": "occupied",
+          "confidence": 0.55,
+          "rationale": "Adjacent panel shows lit segmented display with arrows and green indicator lights, consistent with active cycle."
+        },
+        {
+          "machineId": "D-05",
+          "state": "occupied",
+          "confidence": 0.7,
+          "rationale": "Display shows '41' timer, active cycle"
+        },
+        {
+          "machineId": "D-06",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Machine partially cropped out of frame; control panel not visible."
+        },
+        {
+          "machineId": "D-07",
+          "state": "occupied",
+          "confidence": 0.5,
+          "rationale": "Display shows '41' with orange arrow lit similar to other running dryers, panel illuminated."
+        },
+        {
+          "machineId": "D-08",
+          "state": "occupied",
+          "confidence": 0.7,
+          "rationale": "Display shows '41' timer, active cycle"
+        },
+        {
+          "machineId": "W-15",
+          "state": "unknown",
+          "confidence": 0.2,
+          "rationale": "No washer panel clearly visible in the image; likely mislabeled or out of frame."
+        },
+        {
+          "machineId": "W-16",
+          "state": "unknown",
+          "confidence": 0.2,
+          "rationale": "No washer panel clearly visible in the image; likely mislabeled or out of frame."
+        }
+      ],
+      "meta": {
+        "mode": "agent",
+        "model": "claude-sonnet-5",
+        "visionCalls": 2,
+        "inputTokens": 5732,
+        "outputTokens": 1003,
+        "costUsd": 0.021494,
+        "verifiedMachineIds": [
+          "D-01",
+          "D-02",
+          "D-03",
+          "D-04",
+          "D-06",
+          "D-07",
+          "W-15",
+          "W-16"
+        ]
+      }
+    },
+    "img_1822": {
+      "frameId": "img_1822",
+      "machines": [
+        {
+          "machineId": "D-01",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Machine labeled D-01 not clearly distinguishable in image; only stacked washer/dryer units with coin meter labels visible, no clear individual identifier."
+        },
+        {
+          "machineId": "D-02",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Cannot clearly isolate this specific machine's control panel from the image to determine display or door state."
+        },
+        {
+          "machineId": "D-03",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "No distinguishable individual panel labeled D-03; image shows blurred and stacked machines without clear separation."
+        },
+        {
+          "machineId": "D-04",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Bottom left dryer has closed door, handle visible, no laundry seen, panel area blurred but drum appears empty."
+        },
+        {
+          "machineId": "D-05",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Panel and display obscured by blur in middle section, cannot read digits or lights."
+        },
+        {
+          "machineId": "D-06",
+          "state": "occupied",
+          "confidence": 0.6,
+          "rationale": "Bottom right machine shows lit blue/green indicator lights on control panel suggesting active cycle."
+        },
+        {
+          "machineId": "D-07",
+          "state": "occupied",
+          "confidence": 0.6,
+          "rationale": "Adjacent bottom right dryer also shows lit indicator lights and small screen active, suggesting running cycle."
+        }
+      ],
+      "meta": {
+        "mode": "agent",
+        "model": "claude-sonnet-5",
+        "visionCalls": 2,
+        "inputTokens": 5716,
+        "outputTokens": 836,
+        "costUsd": 0.019791999999999997,
+        "verifiedMachineIds": [
+          "D-01",
+          "D-02",
+          "D-03",
+          "D-04",
+          "D-05",
+          "D-06",
+          "D-07"
+        ]
+      }
+    },
+    "img_1823": {
+      "frameId": "img_1823",
+      "machines": [
+        {
+          "machineId": "D-01",
+          "state": "occupied",
+          "confidence": 0.7,
+          "rationale": "Display shows 225 time remaining, indicating active cycle"
+        },
+        {
+          "machineId": "D-02",
+          "state": "occupied",
+          "confidence": 0.7,
+          "rationale": "Display shows 225 time remaining, indicating active cycle"
+        },
+        {
+          "machineId": "D-03",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Panel partially visible, blurred region obscures display and controls."
+        },
+        {
+          "machineId": "D-04",
+          "state": "free",
+          "confidence": 0.6,
+          "rationale": "Display shows '2.25' price, door closed, no laundry visible."
+        },
+        {
+          "machineId": "D-05",
+          "state": "free",
+          "confidence": 0.6,
+          "rationale": "Display shows '2.25' price, door closed, drum appears empty."
+        },
+        {
+          "machineId": "D-06",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Panel visible but digits not clearly readable due to blur/glare."
+        },
+        {
+          "machineId": "D-07",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Panel present but display content unreadable due to angle/blur."
+        },
+        {
+          "machineId": "D-08",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Panel visible but digits obscured, cannot confirm status."
+        },
+        {
+          "machineId": "D-09",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Door closed, no visible laundry, panel appears dim/inactive."
+        },
+        {
+          "machineId": "D-10",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Door closed, drum empty, panel not showing active cycle."
+        },
+        {
+          "machineId": "W-16",
+          "state": "free",
+          "confidence": 0.6,
+          "rationale": "Lid open, drum empty, no laundry visible, appears idle."
+        }
+      ],
+      "meta": {
+        "mode": "agent",
+        "model": "claude-sonnet-5",
+        "visionCalls": 2,
+        "inputTokens": 5740,
+        "outputTokens": 1053,
+        "costUsd": 0.022010000000000002,
+        "verifiedMachineIds": [
+          "D-03",
+          "D-04",
+          "D-05",
+          "D-06",
+          "D-07",
+          "D-08",
+          "D-09",
+          "D-10",
+          "W-16"
+        ]
+      }
+    },
+    "img_1824": {
+      "frameId": "img_1824",
+      "machines": [
+        {
+          "machineId": "D-04",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Display area heavily blurred, card reader panel shows blue light but digits unreadable, door not visible in this crop"
+        },
+        {
+          "machineId": "D-05",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Display area heavily blurred with blue light indicator visible, digits unreadable"
+        },
+        {
+          "machineId": "D-06",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Control panel visible with temp/heat/delicate buttons, arrows shown, door closed and appears empty, no visible running indicator lit"
+        },
+        {
+          "machineId": "D-08",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Panel area blurred, cannot confirm display state or indicators clearly"
+        }
+      ],
+      "meta": {
+        "mode": "agent",
+        "model": "claude-sonnet-5",
+        "visionCalls": 2,
+        "inputTokens": 5692,
+        "outputTokens": 478,
+        "costUsd": 0.016164,
+        "verifiedMachineIds": [
+          "D-04",
+          "D-05",
+          "D-06",
+          "D-08"
+        ]
+      }
+    },
+    "img_1825": {
+      "frameId": "img_1825",
+      "machines": [
+        {
+          "machineId": "D-04",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Not clearly visible/labeled in this crop; leftmost dryer panel is blurred/out of frame, cannot confirm identity or display."
+        },
+        {
+          "machineId": "D-05",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Not clearly labeled; second dryer panel shows a blue card-reader screen but no machine ID visible to confirm this is D-05."
+        },
+        {
+          "machineId": "D-06",
+          "state": "out_of_order",
+          "confidence": 0.55,
+          "rationale": "Center Speed Queen unit shows '40' on left display and 'oF' on right display, which reads as an error/off-state code rather than a normal countdown or price, door closed with no laundry visible."
+        },
+        {
+          "machineId": "D-08",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Not clearly labeled; rightmost dryer panel shows a lit card-reader screen but no visible ID confirming it is D-08."
+        }
+      ],
+      "meta": {
+        "mode": "agent",
+        "model": "claude-sonnet-5",
+        "visionCalls": 2,
+        "inputTokens": 5692,
+        "outputTokens": 550,
+        "costUsd": 0.016884,
+        "verifiedMachineIds": [
+          "D-04",
+          "D-05",
+          "D-06",
+          "D-08"
+        ]
+      }
+    },
+    "img_1826": {
+      "frameId": "img_1826",
+      "machines": [
+        {
+          "machineId": "D-04",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Machine not clearly visible/labeled in this crop; only card reader panel partially visible on left edge, no display readable."
+        },
+        {
+          "machineId": "D-05",
+          "state": "occupied",
+          "confidence": 0.55,
+          "rationale": "Display shows '40' with running-style digits, similar to a countdown timer, suggesting an active cycle."
+        },
+        {
+          "machineId": "D-06",
+          "state": "out_of_order",
+          "confidence": 0.65,
+          "rationale": "Display shows 'E' followed by garbled/error-like segments, distinct from normal price or countdown format, indicating an error code."
+        },
+        {
+          "machineId": "D-08",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Machine label not clearly visible in this crop; panel and display not identifiable for D-08 specifically."
+        }
+      ],
+      "meta": {
+        "mode": "agent",
+        "model": "claude-sonnet-5",
+        "visionCalls": 2,
+        "inputTokens": 5692,
+        "outputTokens": 500,
+        "costUsd": 0.016384,
+        "verifiedMachineIds": [
+          "D-04",
+          "D-05",
+          "D-06",
+          "D-08"
+        ]
+      }
+    },
+    "img_8629": {
+      "frameId": "img_8629",
+      "machines": [
+        {
+          "machineId": "W-06",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Machine not clearly visible or labeled in this image; only partial washer views shown without clear ID markers."
+        },
+        {
+          "machineId": "W-07",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "No visible label for this machine ID in the image."
+        },
+        {
+          "machineId": "W-08",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "No visible label for this machine ID in the image."
+        },
+        {
+          "machineId": "W-09",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "No visible label for this machine ID in the image."
+        },
+        {
+          "machineId": "W-10",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Central Speed Queen washer shows display reading '2.25' (price display), lid closed, no error code visible - consistent with free/idle state."
+        },
+        {
+          "machineId": "W-11",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Right-side washer display also shows '2.25', lid appears closed, drum area empty."
+        },
+        {
+          "machineId": "W-12",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "No visible label for this machine ID; blurred background machine."
+        },
+        {
+          "machineId": "W-13",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "No visible label for this machine ID; blurred background machine."
+        },
+        {
+          "machineId": "W-14",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "No visible label for this machine ID; blurred background machine."
+        },
+        {
+          "machineId": "W-15",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "No visible label for this machine ID; blurred background machine."
+        }
+      ],
+      "meta": {
+        "mode": "agent",
+        "model": "claude-sonnet-5",
+        "visionCalls": 2,
+        "inputTokens": 5740,
+        "outputTokens": 1013,
+        "costUsd": 0.02161,
+        "verifiedMachineIds": [
+          "W-06",
+          "W-07",
+          "W-08",
+          "W-09",
+          "W-10",
+          "W-11",
+          "W-12",
+          "W-13",
+          "W-14",
+          "W-15"
+        ]
+      }
+    },
+    "img_8633": {
+      "frameId": "img_8633",
+      "machines": [
+        {
+          "machineId": "W-13",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Only partial view of a washer with control panel icons visible (fabric symbols), no display digits visible, door/lid area obscured by blur, cannot determine occupancy state"
+        },
+        {
+          "machineId": "W-14",
+          "state": "free",
+          "confidence": 0.55,
+          "rationale": "Speed Queen Commercial Washer display shows partial digits/text, panel appears lit with standard info, door closed, no visible laundry or running indicator, consistent with idle/free state"
+        },
+        {
+          "machineId": "W-15",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Top portion of washer visible with round port opening at top, no control panel or display visible in frame to determine state"
+        },
+        {
+          "machineId": "W-16",
+          "state": "free",
+          "confidence": 0.4,
+          "rationale": "Front-loading washer with open door and empty visible drum, no laundry inside, suggesting machine is free and available"
+        }
+      ],
+      "meta": {
+        "mode": "agent",
+        "model": "claude-sonnet-5",
+        "visionCalls": 2,
+        "inputTokens": 5692,
+        "outputTokens": 516,
+        "costUsd": 0.016544,
+        "verifiedMachineIds": [
+          "W-13",
+          "W-14",
+          "W-15",
+          "W-16"
+        ]
+      }
+    }
+  }
+}

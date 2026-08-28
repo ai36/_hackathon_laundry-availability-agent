@@ -1,0 +1,7 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"D-04\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Machine not clearly visible/labeled in this crop; only card reader panel partially visible on left edge, no display readable.\"},{\"machineId\":\"D-05\",\"state\":\"occupied\",\"confidence\":0.55,\"rationale\":\"Display shows '40' with running-style digits, similar to a countdown timer, suggesting an active cycle.\"},{\"machineId\":\"D-06\",\"state\":\"out_of_order\",\"confidence\":0.65,\"rationale\":\"Display shows 'E' followed by garbled/error-like segments, distinct from normal price or countdown format, indicating an error code.\"},{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Machine label not clearly visible in this crop; panel and display not identifiable for D-08 specifically.\"}]}",
+  "model": "claude-sonnet-5",
+  "inputTokens": 2923,
+  "outputTokens": 290,
+  "costUsd": 0.008746
+}
