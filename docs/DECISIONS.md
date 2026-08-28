@@ -568,6 +568,26 @@ and time-varying — correcting those is per-frame hand-labelling, not durable l
 they are left as the honest ceiling of this mechanism. **This is the shipped improvement
 path**, not the verification pass (D-0013). Portal write-UI for corrections: D-0015.
 
+**Feedback loop (amendment 2026-08-28) — a correction updates the machine's prompt, not just
+its output.** The override above is the *immediate* fix. A `machine`-scope correction also
+feeds a **per-machine prompt-synthesis** step so the model itself stops making the mistake:
+
+1. Integrator marks machine `X` wrong — predicted `S_pred`, actually `S_true`, plus an
+   optional note ("the bare `E` means error, not a running cycle").
+2. An LLM call takes **the machine's current prompt fragment** (D-0015 — whatever the
+   integrator wrote there) **+ the error info** (`S_pred` → `S_true`, note, and the frame /
+   crop the correction was about) and **regenerates that machine's prompt fragment** so a
+   future classify of `X` reads its indicator correctly.
+3. The updated fragment is saved to `X`'s settings (site-config) with provenance
+   `merged` (integrator text + agent-synthesised refinement) and injected into every future
+   classify/verify prompt for `X`.
+
+Scope is deliberately narrow: **only the one machine's integration prompt changes.** The
+global classify prompt is never edited from corrections. The override (step 0) stays as the
+guaranteed fix; the prompt update is the durable learning that, over time, makes the override
+unnecessary. Demonstrable with `--live` or in the container (the frozen 9-frame eval measures
+the override only).
+
 ---
 
 ## D-0015 — Integrator calibration model: cameras, masks, per-machine reference states + prompt
@@ -611,7 +631,10 @@ agent consumes it**. Architectural note from the project owner, 2026-08-28.
 - Optional **per-machine prompt fragment**: free text describing this machine's states / how
   to read its indicator (e.g. "left digits = cycle-minutes countdown; a solid `E` with no
   digits = out of order; all segments dark = powered off"). Appended to the agent's prompt
-  for this machine.
+  for this machine. **Provenance:** `integrator` (hand-written), `agent` (synthesised from a
+  correction), or `merged`. The D-0014 feedback loop regenerates this field from the
+  integrator's text + the details of a wrong-state correction — see D-0014 "Feedback loop".
+  The integrator can always edit or reset it from settings.
 - Both are **optional**. With neither, the agent relies on its own judgement and the camera
   view (current behaviour). With them, per-machine accuracy rises **without fine-tuning**.
 
@@ -703,7 +726,10 @@ committed-eval-report read in `buildRoomStatus`).
   if the UI is not finished, but the **correction loop must be clickable**.
 - **P1** — `Dockerfile` + `docker compose`, the runtime loop, `StaticImageFrameSource`, the
   snapshot publisher. Judge runs `docker compose up` and does the same walk against static
-  images instead of the frozen dataset.
+  images instead of the frozen dataset. **Plus the D-0014 feedback loop:** a `machine`-scope
+  correction triggers per-machine prompt synthesis (integrator's prompt fragment + the error
+  details → regenerated fragment, provenance `merged`), so the next classify of that machine
+  is right without the override. Global prompt is never touched.
 - **P2** — `HttpSnapshotFrameSource` / `RtspFrameSource` / `UsbFrameSource` for real cameras.
 
 **Acceptance criterion (all phases):** a judge with no hardware and no API key can complete
