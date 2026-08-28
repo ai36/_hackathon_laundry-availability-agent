@@ -209,3 +209,35 @@ exactly the failure the product exists to prevent.
 by converting confident-but-wrong into an honest `unknown`. Reporting must always show
 accuracy + harmful-error + coverage together so a high-abstention method can't look good on
 accuracy-on-covered alone.
+
+---
+
+## D-0007 — Reservations are advisory; camera is the source of truth
+
+- **Date:** 2026-08-28
+- **Status:** Accepted
+
+**Context.** A 5-minute reservation cannot be enforced on hardware. Not every tenant uses
+the app, and a tenant already in the room may take a reserved machine (e.g. they need a
+second machine and one is short). The reserving user then arrives to find their machine
+gone.
+
+**Decision.**
+
+- The reservation record is a **hint**, never a lock. The **camera-derived state is
+  authoritative**; where they disagree, observed reality wins.
+- The runtime agent reconciles reservations vs. observation on every state refresh. A
+  reserved machine taken by a walk-in is marked **pre-empted**: the portal shows `occupied`
+  at once, with a "reservation pre-empted — machine X free" note **as portal state on the
+  existing read page** (not push/SMS/email — a real outbound channel would be its own
+  consequential action with a sandbox + approval note).
+- Guard rails: one active reservation per user; cannot reserve all machines; 5-minute expiry.
+- The write-up states plainly that a given reservation can be lost; the benefit is a lower
+  average wasted-trip rate, not a per-trip guarantee. In-room signage / a display is the
+  production mitigation — out of scope here.
+
+**Consequences.** Reservation handling stays P2. If it is built, the relevant metric is
+**reservation-honoured rate**, measurable only in a simulation with a configurable fraction
+of non-app tenants — reported separately from the P0 accuracy metric, never mixed with it.
+This reconciliation is one of the concrete "conflict handling" jobs that justify an agent
+over a single classifier call.

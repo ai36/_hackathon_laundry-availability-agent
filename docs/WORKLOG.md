@@ -12,6 +12,27 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Reservations are advisory (walk-in preemption)
+
+- Edge case raised: not every tenant uses the app; a reserved machine can be physically
+  taken by someone already in the room (esp. if they need a second machine).
+- `docs/DECISIONS.md` D-0007: the reservation record is a hint, the **camera-derived state
+  is authoritative**. Runtime agent reconciles reservation vs. observation on each refresh;
+  a pre-empted machine flips to `occupied` and the reserving user is re-routed before the
+  trip is wasted. Guard rails: one reservation/user, can't reserve all, 5-min expiry.
+- Stated as a known limitation: a specific reservation can be lost; value is a lower
+  *average* wasted-trip rate, not a per-trip guarantee. Reservation stays P2; its metric
+  (reservation-honoured rate) lives in a simulation, separate from the P0 accuracy metric.
+- `docs/PROBLEM.md` reservation section rewritten; `docs/EVALUATION.md` adds P2 sequence
+  case S3.
+- Compliance review: **PASS WITH RISKS — no blockers.** Applied: pre-emption notice is
+  explicitly **portal state on the existing read page**, not a new outbound channel (G4
+  scope kept tight; PROBLEM.md consequential-actions section updated to match, D-0007 too);
+  EVALUATION sequence-case heading renamed "P1 / P2" with a per-case Tier column and
+  independent drop rules (P1 and reservation sim are separate); made explicit that the
+  pre-emption notice only helps a user who re-checks the portal before leaving. Review saved
+  to `docs/trajectories/compliance/2026-08-28-reservations.md`.
+
 ### 2026-08-28 — 3-way machine state + per-observation conditions + label schema
 
 - Feedback: `condition` is a property of the observation (person blocks an indicator,

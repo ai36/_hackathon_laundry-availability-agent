@@ -62,14 +62,19 @@ Each case's `condition` maps to `frame_conditions` (frame-wide) and/or `observat
 Case 14 reveals whether the agent abstains (or, under P1, holds the prior state) for the
 machines the person blocks, instead of guessing.
 
-### P1 sequence cases (only if P1 is built)
+### P1 / P2 sequence cases (only if the relevant feature is built)
 
-| # | Sequence | What it tests |
-| --- | --- | --- |
-| S1 | Two time-ordered frames, machine N flips state between them | Change-detection: only N's ROI is re-analysed |
-| S2 | Series where a machine finishes and laundry is left inside | Abandoned-laundry detection + cycle timer |
+| # | Tier | Sequence | What it tests |
+| --- | --- | --- | --- |
+| S1 | P1 | Two time-ordered frames, machine N flips state between them | Change-detection: only N's ROI is re-analysed |
+| S2 | P1 | Series where a machine finishes and laundry is left inside | Abandoned-laundry detection + cycle timer |
+| S3 | P2 | A reserved machine is taken by a walk-in during the hold window | Reconciliation: reservation marked pre-empted, portal follows the camera, reserving user re-routed |
 
-If P1 is not built, S1/S2 are dropped from the report and the P0 count (14 cases) stands.
+Drop rules: **S1/S2 are dropped unless P1 is built; S3 is dropped unless the reservation
+simulation is built.** They are independent — P1 built without the reservation sim keeps
+S1/S2 and drops S3. Either way the P0 count (14 cases) stands. S3 is scored in the
+reservation simulation (reservation-honoured rate), not the per-machine accuracy metric —
+see `docs/DECISIONS.md` D-0007.
 
 ## Baseline
 

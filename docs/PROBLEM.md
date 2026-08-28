@@ -66,15 +66,39 @@ per-site config.
 ### Reservation logic (simple, P2)
 
 User picks a free machine → it is marked occupied for 5 minutes → after 5 minutes the system
-re-checks the real status: if occupied, keep it; if still free, mark it free again on the
-portal. Guard rail: a user cannot reserve **all** machines at once. A user arriving and
-using a different machine that is actually free but was never reserved does not break the
-system.
+re-checks the real status from the camera: if occupied, keep it; if still free, mark it free
+again on the portal. Guard rails: a user cannot reserve **all** machines at once; one active
+reservation per user.
+
+**A reservation is advisory, not a lock.** The camera is the source of truth, not the
+reservation record. Not every tenant uses the app, and someone already in the room may take
+a reserved machine — especially if they need a second machine and one is short. The system
+does not (and cannot) prevent this. It handles it:
+
+- The runtime agent reconciles reservations against observed reality on every state refresh.
+  If a reserved machine is taken by a walk-in, the reservation is marked **pre-empted** and
+  the portal immediately shows the machine as `occupied` with a "reservation pre-empted —
+  machine X is free" note. This is **portal state on the same read page**, not a new
+  outbound channel — the user sees it when they check the portal before leaving. Any real
+  push / SMS / email notification would be a new consequential action needing its own
+  sandbox + approval note; out of scope here.
+- A held machine that is still free at expiry simply reverts to `free`.
+- A user arriving and using a different actually-free machine that was never reserved does
+  not break anything.
+
+**Known limitation:** for a specific reservation the hold can be lost, and the pre-emption
+notice only helps a user who re-checks the portal before leaving. The value is statistical —
+fewer wasted trips on average — not a guarantee for any one trip. Non-app tenants are
+outside the system's control and this is stated plainly in the write-up (and would be
+mitigated in production by in-room signage / a small display, out of scope here).
 
 ### Consequential actions (ground rule 04)
 
-The only outward action is a soft 5-minute reservation on a portal — reversible, low impact,
-and simulated in the hackathon build. No hardware is actuated. A reservation auto-expires.
+The only outward action is a soft 5-minute reservation, expressed entirely as state on the
+portal read page — reversible, low impact, simulated in the hackathon build. No hardware is
+actuated, no message is sent on any external channel. A reservation auto-expires. Adding a
+real notification channel later would be a separate consequential action with its own
+sandbox + human-approval note.
 
 ### Human reviewer (ground rule 05)
 
