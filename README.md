@@ -33,18 +33,29 @@ npm ci
 npm run dev      # http://localhost:3000
 ```
 
-Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`.
+Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`,
+`npm test`, `npm run check:data`.
 
 Full setup from a clean environment: **`docs/REPRODUCTION.md`**.
+
+## Configuring for a real site
+
+Edit **`laundry3.config.ts`** — reservation hold time, per-user reservation limit, machine
+count, refresh interval, vision model, cost caps, cycle-length fallbacks, paths. Every
+setting is documented in **`docs/CONFIGURATION.md`**; values are validated on load.
 
 ## Project layout
 
 ```
-src/app/          Next.js App Router routes (Server Components by default)
-src/components/    React components
-src/stores/        MobX RootStore + StoreProvider + domain stores
-docs/             Hackathon deliverables
-.claude/          Claude Code project config + slash commands
+laundry3.config.ts  Deployment config (site integration knobs)
+src/app/            Next.js App Router routes (Server Components by default)
+src/components/      React components
+src/config/         Typed config: defaults, loader + validator, tests
+src/stores/          MobX RootStore + StoreProvider + domain stores
+scripts/            Standalone scripts (dataset privacy gate, later: eval)
+data/               Dataset (frames + labels + splits + cache); see data/README.md
+docs/               Hackathon deliverables
+.claude/            Claude Code project config, subagents, hooks, slash commands
 ```
 
 ## Documentation
@@ -53,10 +64,13 @@ docs/             Hackathon deliverables
 | --- | --- |
 | `docs/PROBLEM.md` | Problem, user, bottleneck, scope, definition of "good" |
 | `docs/CHANGELOG.md` | **Improvement Changelog** — baseline → iterations → final, with evidence |
-| `docs/DECISIONS.md` | Decision log (stack, architecture, skills) |
+| `docs/DECISIONS.md` | Decision log (stack, architecture, skills, config) |
 | `docs/REPRODUCTION.md` | Clean-environment setup, commands, expected output |
 | `docs/EVALUATION.md` | Metric, cases, procedure, rubric |
+| `docs/CONFIGURATION.md` | Every deployment-config setting: type, default, meaning |
 | `docs/SKILLS.md` | Connected agent skills and when to use them |
+| `docs/HACKATHON-RULES.md` | Full transcription of the hackathon rules |
+| `docs/trajectories/` | Agent trajectory records (compliance, calibration, runtime, baseline) |
 | `docs/WORKLOG.md` | Chronological record of every change |
 | `CLAUDE.md` | Agent working agreement for this repo |
 

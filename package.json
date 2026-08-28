@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check:data": "node scripts/check-data-privacy.mjs"
+    "check:data": "node scripts/check-data-privacy.mjs",
+    "test": "tsx --test \"src/**/*.test.ts\""
   },
   "dependencies": {
     "mobx": "^7.0.3",
@@ -32,6 +33,7 @@
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.12",
     "typescript": "^5"
   }
 }

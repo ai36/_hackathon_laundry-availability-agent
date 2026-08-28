@@ -25,9 +25,10 @@ reproduction — it may resolve newer versions.
 
 | Step | Wall time | Notes |
 | --- | --- | --- |
-| `npm ci` | ~20–30 s | ~370 packages, no native builds |
+| `npm ci` | ~20–30 s | ~372 packages (incl. `tsx` dev dep), no native builds |
 | `npm run build` | ~5 s | Next.js 16 + Turbopack, warm cache |
 | `npm run typecheck` / `lint` | ~1–2 s each | |
+| `npm test` | ~1 s | `tsx --test`, config loader/validator |
 | Cost | $0 | no paid APIs used yet |
 
 ## Run the app
@@ -41,9 +42,11 @@ npm start        # serve the production build
 ## Checks
 
 ```bash
-npm run typecheck   # tsc --noEmit
+npm run typecheck    # tsc --noEmit
 npm run lint         # eslint (flat config)
 npm run format:check # prettier
+npm test             # tsx --test — config loader/validator (expect: 10/10 pass)
+npm run check:data   # dataset privacy gate (also runs as the pre-commit hook)
 ```
 
 ## Agent skills

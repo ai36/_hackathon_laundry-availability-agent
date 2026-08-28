@@ -241,3 +241,39 @@ gone.
 of non-app tenants — reported separately from the P0 accuracy metric, never mixed with it.
 This reconciliation is one of the concrete "conflict handling" jobs that justify an agent
 over a single classifier call.
+
+---
+
+## D-0008 — Deployment configuration is a typed, validated TS module
+
+- **Date:** 2026-08-28
+- **Status:** Accepted
+
+**Context.** Integrating the system into a real site needs a small set of operational knobs
+(reservation hold time, per-user reservation limit, machine count, refresh interval, vision
+model, cost caps, cycle-length fallbacks, paths). These must be easy for a non-author to
+find, understand, and change — separate from the calibration site-config, which is
+machine-generated.
+
+**Decision.**
+
+- Single root file **`laundry3.config.ts`**, same convention as `next.config.ts` /
+  `postcss.config.mjs`. It exports overrides only; `src/config/defaults.ts` holds every
+  default; the two are deep-merged and **validated on load** (`src/config/load.ts` —
+  range/type/enum checks, IANA-zone check, `staleAfterSeconds ≥ stateRefreshSeconds`).
+- Every field is documented inline in `src/config/types.ts` and tabulated in
+  `docs/CONFIGURATION.md` (name, type, default, meaning).
+- Consumers import the resolved singleton: `import { config } from "@/config"`.
+- Private per-site overrides go in git-ignored `laundry3.config.local.ts`.
+- `defineConfig()` gives the root file full type-checking without importing the loader
+  (keeps it cycle-free).
+- No new runtime dependency for validation (hand-rolled). `tsx` added as a dev dependency to
+  run `.ts` tests (`node --test` via `tsx`) and, later, the `.ts` eval scripts with the
+  `@/*` path alias. `src/config/load.test.ts` covers the loader/validator.
+
+**Consequences.** Framework-agnostic — the same config loads in Next.js and in the Node eval
+scripts. If the schema grows, revisit adopting `zod` for the validator. The machine roster
+still comes from the calibration config; `site.machines.{washers,dryers}` is only a declared
+sanity-check split by type. P2 features default off (`reservation.enabled: false`,
+`agent.changeDetection.enabled: false`) — the other values in those groups are the intended
+production settings.

@@ -28,7 +28,10 @@
     "behaviour",
     "labeller",
     "normalised",
-    "hooksPath"
+    "hooksPath",
+    "IANA",
+    "honoured",
+    "tsx"
   ],
   "ignorePaths": ["node_modules/**", ".next/**", "package-lock.json"]
 }

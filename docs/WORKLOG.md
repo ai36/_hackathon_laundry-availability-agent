@@ -12,6 +12,39 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Deployment config module
+
+- Added a typed, validated deployment config for site integration (`docs/DECISIONS.md`
+  D-0008), separate from the machine-generated calibration site-config.
+- `laundry3.config.ts` (root) — overrides only; `src/config/defaults.ts` — all defaults;
+  `src/config/load.ts` — deep-merge + `validateConfig()` (ranges, types, IANA zone,
+  `staleAfterSeconds ≥ stateRefreshSeconds`); `src/config/{types,define,resolved,index}.ts`.
+- Consumers: `import { config } from "@/config"`. Private overrides:
+  git-ignored `laundry3.config.local.ts`.
+- Settings groups: `site` (name, timezone, machineCount), `reservation` (enabled,
+  holdMinutes, maxActivePerUser, maxReservedFractionOfFree, reconcileOnExpiry), `agent`
+  (visionModel, maxVisionCallsPerFrame, abstainWhenUncertain, verification.*,
+  changeDetection.*), `runtime` (stateRefreshSeconds, staleAfterSeconds), `cycles`
+  (defaultWash/DryMinutes), `portal` (showConfidence, confirmOnArrivalNotice), `paths`
+  (siteConfig, dataset, cache). Full table in `docs/CONFIGURATION.md`.
+- Added `tsx` (devDep) to run `.ts` tests and, later, `.ts` eval scripts with the `@/*`
+  alias. New scripts: `npm test` (`tsx --test`), and `src/config/load.test.ts`.
+- Feedback: machines come in two types → `site.machineCount` replaced with
+  `site.machines: { washers, dryers }` (non-negative ints, total ≥ 1; supports a
+  washers-only or dryers-only site). Tests updated → **10/10 pass**.
+- Compliance review of the config module: **PASS WITH RISKS — no blockers.** Applied:
+  - `docs/REPRODUCTION.md` "Checks" now lists `npm test` (expect 10/10) and
+    `npm run check:data`; runtime table notes `tsx` and the count.
+  - `reservation.enabled` now defaults **`false`** (was `true`) — reservations are P2 and
+    unbuilt; note added in `docs/CONFIGURATION.md` and D-0008 that the other `reservation.*`
+    values are the intended production settings, and P2 features default off.
+- No separate subagent review for the `machines`-by-type tweak + these fixes — small schema
+  change covered by passing tests + typecheck, and the config feature was just reviewed.
+  Self-check vs `docs/HACKATHON-RULES.md`: no new deps, no data, no results claims, G8
+  clean. Next substantive change (project skeleton / baseline) gets a full review.
+- Verification: `npm run typecheck` / `lint` / `build` pass; `npm test` 10/10;
+  `npm run check:data` pass.
+
 ### 2026-08-28 — Reservations are advisory (walk-in preemption)
 
 - Edge case raised: not every tenant uses the app; a reserved machine can be physically

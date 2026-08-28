@@ -49,3 +49,6 @@ next-env.d.ts
 # agent response cache (committed selectively; keep large local scratch out)
 /data/cache/local/
 
+# private per-site config overrides
+/laundry3.config.local.ts
+

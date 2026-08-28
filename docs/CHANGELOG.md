@@ -57,3 +57,11 @@ Record the result of each infra verification here (append, newest first).
 - `node .claude/hooks/git-guard.test.mjs` — **8/8 pass** (branch-protection hook).
 - Hackathon-compliance review (independent agent): **PASS WITH RISKS**, no blockers; risks
   addressed in the 2026-08-28 worklog entry.
+
+### 2026-08-28 — deployment config module
+
+- `npm run typecheck` / `npm run lint` / `npm run build` — **pass**.
+- `npm test` (`tsx --test`) — **10/10 pass** (`src/config/load.test.ts`: defaults valid,
+  deep-merge, washers-only site, and rejection of bad fraction / hold time / IANA zone /
+  stale window / non-integer count / empty roster).
+- `npm run check:data` — **pass** (no data staged).
