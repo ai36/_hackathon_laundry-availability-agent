@@ -5,7 +5,8 @@ Status: **v1, from the 2026-08-28 scoping interview.** Open questions are listed
 ## Who has the problem?
 
 A person renting an apartment in an apartment complex that has a **shared laundry room**
-(~20–30 machines, roughly half washers and half dryers), who wants to do a load of laundry.
+(a mid-size room, roughly half washers and half dryers — the dataset site has 32: 16 + 16),
+who wants to do a load of laundry.
 
 ## What is the bottleneck?
 

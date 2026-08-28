@@ -65,3 +65,12 @@ Record the result of each infra verification here (append, newest first).
   deep-merge, washers-only site, and rejection of bad fraction / hold time / IANA zone /
   stale window / non-integer count / empty roster).
 - `npm run check:data` — **pass** (no data staged).
+
+### 2026-08-28 — dataset pipeline + eval/agent skeleton
+
+- `npm run typecheck` / `npm run lint` / `npm run build` — **pass**.
+- `npm test` — **20/20 pass** (config 10, `src/eval/score.test.ts` 5, `src/agent/parse.test.ts` 5).
+- `npm run dataset:prepare` — 16 originals → **45 frames**, 5.2 MB, metadata-stripped
+  (produced locally; held out of git pending authorization + redaction — see WORKLOG).
+- `npm run eval -- --mode=baseline --split=evaluation` — runs end-to-end (empty split /
+  Fake vision client; real client + labels pending).

@@ -12,6 +12,52 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Dataset pipeline + eval/agent skeleton
+
+- User supplied real mock data (7 JPG + 4 jpeg stills, 5 MOV clips ~7 s each; **16 washers +
+  16 dryers**). All carried EXIF/XMP + GPS + Apple device info; the privacy gate blocked them
+  (as designed).
+- Moved originals to git-ignored `data/raw/`. Added `scripts/prepare-dataset.ts`
+  (`npm run dataset:prepare`, ffmpeg 8.1.2): stills → downscaled ≤1600px, videos → frames at
+  `--fps` (default 1) ≤1280px, **all with `-map_metadata -1` + a JPEG marker stripper**
+  (drops every APPn segment — EXIF/XMP/IPTC/ICC/Adobe — and the COM comment ffmpeg writes;
+  keeps a plain JFIF APP0 if present). Output: `data/public/frames/` — 45 frames, 5.2 MB,
+  `manifest.json` with source + approx timestamp. Metadata gate passes; byte check confirms
+  no EXIF/XMP/ICC/Lavc-COM remain.
+- **Frames are HELD OUT of git for now.** Spot review of the produced frames found a vendor
+  service sticker with a phone number and window views to the outdoors — identifying details
+  under the `docs/PROBLEM.md` data plan. `/data/public/frames/` is git-ignored until (a) the
+  laundry-room manager's authorization to publish is confirmed and (b) the stickers /
+  windows / any apartment numbers are redacted. The pipeline that produces them is
+  committed; the images are not.
+- Privacy gate extended: rejects any video staged under `data/`. `.gitignore`: `data/public/`
+  is ignored except its `README.md` (and `frames/` too, once cleared for publication);
+  `*.mov/*.mp4` never committed; `data/cache/*` ignored except its README.
+- `laundry3.config.ts` → `site.machines: { washers: 16, dryers: 16 }`.
+- Skeleton (`tsx`-run, `@/*` alias):
+  - `src/eval/types.ts` — label schema types (3-way state, frame/observation conditions,
+    bbox, predictions).
+  - `src/eval/score.ts` (+ 5 tests) — accuracy over determinate GT, harmful-error rate,
+    coverage, accuracy-on-covered, confusion matrix. Abstaining ≠ harmful; missing
+    prediction = `unknown`.
+  - `src/eval/dataset.ts` — load `data/labels/*.json` (shape-checked), `data/splits/*.txt`.
+  - `src/agent/parse.ts` (+ 5 tests) — tolerant JSON extraction from a vision reply.
+  - `src/agent/vision.ts` — `VisionClient` interface, `CachedVisionClient` (JSON cache +
+    `--replay` = cache-only), `FakeVisionClient` (deterministic offline). Real Anthropic
+    client is a marked TODO.
+  - `src/agent/baseline.ts` — one whole-frame vision call → predictions (the fair baseline).
+  - `src/agent/pipeline.ts` — calibrate → classify → verify → abstain; classify/verify are
+    stubs with the real shape sketched.
+  - `scripts/run-eval.ts` (`npm run eval -- --mode=baseline|agent --split=… [--replay]`) —
+    runs, scores, writes `docs/artifacts/eval-<mode>-<date>.json`.
+- `data/{labels,splits,public,cache}/README.md` + empty `calibration.txt` / `evaluation.txt`
+  / `smoke.txt`.
+- Verification: `typecheck` / `lint` / `build` pass; `npm test` **20/20**; `npm run eval`
+  runs end-to-end (Fake client → empty predictions until labels + real client land).
+- Next: confirm authorization + redact frames so they can be committed → label frames (with
+  the user) → fill splits → wire the real Anthropic vision client → first real baseline
+  number.
+
 ### 2026-08-28 — Deployment config module
 
 - Added a typed, validated deployment config for site integration (`docs/DECISIONS.md`

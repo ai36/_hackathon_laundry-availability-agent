@@ -19,6 +19,7 @@
 import { execFileSync } from "node:child_process";
 
 const IMAGE_RE = /\.(jpe?g|png|webp|heic|heif|tiff?)$/i;
+const VIDEO_RE = /\.(mov|mp4|m4v|avi|mkv|webm)$/i;
 
 function stagedFiles() {
   let out;
@@ -91,6 +92,12 @@ for (const f of stagedFiles()) {
   if (norm.startsWith("data/raw/") || norm.startsWith("data/frames/")) {
     problems.push(
       `${f} — data/raw/ and data/frames/ are local-only; do not commit frames from here`,
+    );
+    continue;
+  }
+  if (norm.startsWith("data/") && VIDEO_RE.test(norm)) {
+    problems.push(
+      `${f} — video is never committed (large + metadata-heavy); extract frames instead`,
     );
     continue;
   }

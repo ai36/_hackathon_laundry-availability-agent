@@ -15,8 +15,8 @@ export default defineConfig({
     name: "laundry3 dev site",
     timezone: "America/Los_Angeles",
     machines: {
-      washers: 12,
-      dryers: 12,
+      washers: 16,
+      dryers: 16,
     },
   },
   reservation: {

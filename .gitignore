@@ -46,8 +46,22 @@ next-env.d.ts
 *.orig.jpg
 *.orig.png
 
-# agent response cache (committed selectively; keep large local scratch out)
-/data/cache/local/
+# data/public: only the processed frame set + its README are committed
+/data/public/*
+!/data/public/README.md
+# frames/ is HELD OUT of git pending: (a) laundry-room manager authorization to publish,
+# (b) redaction of the vendor service sticker (phone number) + window views. Re-enable by
+# deleting the next line once cleared.
+/data/public/frames/
+# never commit video
+*.mov
+*.MOV
+*.mp4
+*.m4v
+
+# agent response cache — regenerated locally; curated replay caches are force-added later
+/data/cache/*
+!/data/cache/README.md
 
 # private per-site config overrides
 /laundry3.config.local.ts

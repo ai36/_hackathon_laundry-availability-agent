@@ -3,7 +3,7 @@ import type { Laundry3Config } from "./types";
 /**
  * Default deployment configuration. `laundry3.config.ts` overrides only what it needs;
  * everything else comes from here. Keep these values sane for a mid-size shared laundry
- * room (~20–30 machines).
+ * room (roughly 20–40 machines).
  */
 export const DEFAULT_CONFIG: Laundry3Config = {
   site: {

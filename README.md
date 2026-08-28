@@ -36,6 +36,9 @@ npm run dev      # http://localhost:3000
 Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`,
 `npm test`, `npm run check:data`.
 
+Dataset + eval: `npm run dataset:prepare` (needs ffmpeg), then
+`npm run eval -- --mode=baseline --split=evaluation [--replay]`.
+
 Full setup from a clean environment: **`docs/REPRODUCTION.md`**.
 
 ## Configuring for a real site
@@ -50,10 +53,12 @@ setting is documented in **`docs/CONFIGURATION.md`**; values are validated on lo
 laundry3.config.ts  Deployment config (site integration knobs)
 src/app/            Next.js App Router routes (Server Components by default)
 src/components/      React components
-src/config/         Typed config: defaults, loader + validator, tests
+src/config/         Typed deployment config: defaults, loader + validator, tests
+src/eval/           Label schema types, dataset loaders, scoring
+src/agent/          Vision client (+ cache/replay), reply parser, baseline, agent pipeline
 src/stores/          MobX RootStore + StoreProvider + domain stores
-scripts/            Standalone scripts (dataset privacy gate, later: eval)
-data/               Dataset (frames + labels + splits + cache); see data/README.md
+scripts/            prepare-dataset, run-eval, check-data-privacy
+data/               raw/ (ignored) · public/frames/ · labels/ · splits/ · cache/ — see data/README.md
 docs/               Hackathon deliverables
 .claude/            Claude Code project config, subagents, hooks, slash commands
 ```

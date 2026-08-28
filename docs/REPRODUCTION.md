@@ -60,22 +60,40 @@ npx skills add jekudy/grillme-skill@grillme -g -y
 
 `find-skills` is part of the base Claude Code skill set (uses `npx skills find`).
 
-> **Pre-submission blocker (G10):** the three sections below must contain the exact
-> commands, expected output, runtime, and cost before the project is submitted. They are
-> TBD only while the harness does not yet exist.
+## Dataset
+
+Originals go in `data/raw/` (git-ignored). Build the committable, metadata-stripped frame
+set (needs `ffmpeg` on PATH — developed with ffmpeg 8.1.2):
+
+```bash
+npm run dataset:prepare -- --fps=1     # → data/public/frames/ + manifest.json
+npm run check:data                     # privacy gate (also runs pre-commit)
+```
+
+Then label frames as `data/labels/<frameId>.json` (schema: `data/labels/README.md`) and
+list frame ids in `data/splits/{calibration,evaluation,smoke}.txt` (must be disjoint).
+
+> **Pre-submission blocker (G10):** the sections below need real numbers — a filled
+> evaluation split, the real vision client wired, and one cached run — before submission.
 
 ## Baseline
 
-_TBD — exact command to run the single-prompt baseline on the evaluation cases
-(`--replay` for the cached, key-free run)._
+```bash
+npm run eval -- --mode=baseline --split=evaluation            # first run: needs ANTHROPIC_API_KEY, writes the cache
+npm run eval -- --mode=baseline --split=evaluation --replay   # reproduce from cache, no key, no cost
+```
 
-## Evaluation
+## Evaluation (agent vs baseline)
 
-_TBD — exact command to score baseline and agent on the shared P0 cases. See
-`docs/EVALUATION.md`. Record expected output, approximate runtime, and cost;
-`--replay` runs offline with no `ANTHROPIC_API_KEY`, the `smoke` subset runs live._
+```bash
+npm run eval -- --mode=agent --split=evaluation --replay
+```
+
+Both write a JSON report to `docs/artifacts/eval-<mode>-<date>.json`. `--replay` serves every
+vision call from `data/cache/`; the `smoke` split runs live against the API.
 
 ## Expected output
 
-_TBD — what a successful run prints / produces (per-machine accuracy for baseline vs agent,
-tokens/cost per frame)._
+Console shows, per mode: determinate-observation count, **accuracy**, **harmful-error rate**,
+**coverage**, accuracy-on-covered, and a 3×3 confusion matrix. _Real values, runtime, and
+cost: TBD after the first cached run._

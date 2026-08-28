@@ -277,3 +277,47 @@ still comes from the calibration config; `site.machines.{washers,dryers}` is onl
 sanity-check split by type. P2 features default off (`reservation.enabled: false`,
 `agent.changeDetection.enabled: false`) — the other values in those groups are the intended
 production settings.
+
+---
+
+## D-0009 — Dataset pipeline and eval/agent code layout
+
+- **Date:** 2026-08-28
+- **Status:** Accepted
+
+**Context.** Real originals (phone photos + short videos) are large and carry EXIF/GPS/device
+metadata. The repo must ship a reproducible eval dataset without leaking any of that, and the
+code needs a place for the scoring harness, the baseline, and the agent pipeline.
+
+**Decision.**
+
+- **Dataset pipeline.** Originals live in git-ignored `data/raw/`. `scripts/prepare-dataset.ts`
+  (ffmpeg) produces `data/public/frames/`: stills downscaled ≤1600px, video frames at a
+  configurable `--fps` ≤1280px, every output run through `-map_metadata -1` **and** a JPEG
+  JPEG marker stripper that drops every APPn segment (EXIF/XMP/IPTC/ICC/Adobe) and the COM
+  comment ffmpeg writes, keeping a plain JFIF APP0 if present. The privacy gate
+  (`scripts/check-data-privacy.mjs`) now also rejects any video staged under `data/`.
+- **The produced frames are held out of git** (`/data/public/frames/` is git-ignored) until
+  the laundry-room manager's authorization to publish is confirmed and identifying details
+  (a vendor service phone-number sticker, outdoor window views, any apartment numbers) are
+  redacted. Only the pipeline, the splits/labels scaffolding, and `manifest.json`'s
+  description ship for now. This keeps a real-photo publish behind an explicit human check.
+- **Splits.** `data/splits/{calibration,evaluation,smoke}.txt` — plain frame-id lists, must
+  be disjoint. Labels: one `data/labels/<frameId>.json` per frame, shape-checked on load.
+- **Code layout.**
+  - `src/eval/` — `types.ts` (label schema), `dataset.ts` (loaders), `score.ts` (metrics:
+    accuracy over determinate GT, harmful-error rate, coverage, confusion).
+  - `src/agent/` — `types.ts` (`VisionClient`, `SiteConfig`), `vision.ts`
+    (`CachedVisionClient` with `--replay` = cache-only, `FakeVisionClient` for offline),
+    `parse.ts` (tolerant JSON extraction), `baseline.ts` (one whole-frame call),
+    `pipeline.ts` (calibrate → classify → verify → abstain; classify/verify stubbed).
+  - `scripts/run-eval.ts` — `npm run eval -- --mode --split [--replay]`, writes a JSON
+    report to `docs/artifacts/`.
+- **Vision cache** (`data/cache/`) is git-ignored while the pipeline is a skeleton; the
+  curated replay cache for the evaluation split is force-added once real runs exist.
+- Scripts and tests run via `tsx` with the `@/*` alias; `node:test` for unit tests.
+
+**Consequences.** The harness is testable now (20 unit tests) and runs end-to-end with the
+Fake client. The real `AnthropicVisionClient` and actual labels are the remaining gap before
+a first baseline number. Keeping the vision layer behind an interface is what makes
+`--replay` (key-free reproduction) and offline tests possible.
