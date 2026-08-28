@@ -22,15 +22,19 @@ export function loadSiteConfig(path = config.paths.siteConfig): SiteConfig | nul
  *      (stub: re-query with tighter crop; here: pass through)
  *   4. abstain (`unknown`) instead of guessing when still uncertain
  */
-export async function runAgent(frameId: string, vision: VisionClient): Promise<FramePrediction> {
+export async function runAgent(
+  frameId: string,
+  vision: VisionClient,
+  machineIds: string[],
+): Promise<FramePrediction> {
   const site = loadSiteConfig();
   let visionCalls = 0;
 
   // Step 2 (stub): single structured call; a real implementation loops per ROI.
   const res = await vision.analyze({
-    cacheKey: `agent:classify:${frameId}`,
+    cacheKey: `agent:classify:${frameId}:${machineIds.join(",")}`,
     imagePath: frameImagePath(frameId),
-    prompt: classifyPrompt(site),
+    prompt: classifyPrompt(site, machineIds),
   });
   visionCalls++;
   let assessments = parseAssessments(res.text);
@@ -73,17 +77,24 @@ function toPrediction(a: MachineAssessment): MachinePrediction {
   };
 }
 
-function classifyPrompt(site: SiteConfig | null): string {
+function classifyPrompt(site: SiteConfig | null, machineIds: string[]): string {
   const roster = site
-    ? `Known machines at this site: ${site.machines
+    ? `Calibration says these machines are in view: ${site.machines
         .map((m) => `${m.machineId} (${m.type})`)
         .join(", ")}.`
-    : "The site calibration config is not available; identify machines from the image.";
+    : "";
   return [
-    "You are monitoring a shared laundry room from a fixed camera.",
+    "You are monitoring a shared laundry room from a fixed camera. Washers are W-01, W-02, …",
+    "and dryers D-01, D-02, …, numbered left-to-right along each bank; for stacked units the",
+    "upper machine has the lower number.",
     roster,
-    "For each machine, decide: free, occupied, out_of_order (broken/taped off/hard error), or unknown (evidence not there — blocked indicator, glare, darkness).",
-    "Reply with JSON only:",
-    '{"machines":[{"machineId":"<label>","state":"free|occupied|out_of_order|unknown","confidence":0..1,"rationale":"<short>"}]}',
-  ].join("\n");
+    `Classify these machines visible in the frame: ${machineIds.join(", ")}.`,
+    "States: free (empty, not running); occupied (running / holding laundry / time on display);",
+    "out_of_order (broken, taped off, powered down, hard error); unknown (evidence not there —",
+    "blocked indicator, glare, darkness — say this rather than guessing).",
+    "Reply with JSON only, one entry per id:",
+    '{"machines":[{"machineId":"W-01","state":"free|occupied|out_of_order|unknown","confidence":0..1,"rationale":"<short>"}]}',
+  ]
+    .filter(Boolean)
+    .join("\n");
 }

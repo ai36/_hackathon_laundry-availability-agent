@@ -81,31 +81,39 @@ npm run label:check -- --split=evaluation # validate; npm run label:stats for co
 
 List frame ids in `data/splits/{calibration,evaluation,smoke}.txt` (must be disjoint).
 
-> **Pre-submission blocker (G10):** the sections below need real numbers — a filled
-> evaluation split and one cached run — before submission.
-
 ## Baseline
 
 Exactly one backend flag is required (guards against accidental API spend):
 
 ```bash
-npm run eval -- --mode=baseline --split=evaluation --live     # paid API call; needs ANTHROPIC_API_KEY in .env; writes data/cache/baseline/
-npm run eval -- --mode=baseline --split=evaluation --replay   # reproduce from cache, no key, no cost
+npm run eval -- --mode=baseline --split=evaluation --replay   # reproduce the recorded run — NO key, NO cost, ~1 s
+npm run eval -- --mode=baseline --split=evaluation --live     # re-sample: paid API call (~$0.08); needs ANTHROPIC_API_KEY in .env; rewrites data/cache/baseline/
 npm run eval -- --mode=baseline --split=evaluation --fake     # offline wiring check, no cache (empty predictions)
 ```
+
+`--replay` works from a clean checkout **without `data/public/frames/`** (the frames are
+held out of git) — the cache key is the semantic request, not the image bytes.
+
+**Recorded baseline run** (`data/cache/baseline/`, model `claude-sonnet-5`):
+
+| accuracy | harmful-error | coverage | acc-on-covered | cost | runtime |
+| --- | --- | --- | --- | --- | --- |
+| 31.1% | 11.1% | 60.0% | 51.9% | $0.081 (`--live`) / $0 (`--replay`) | ~40 s `--live`, ~1 s `--replay` |
+
+45 determinate observations over 9 frames. The model is stochastic — a fresh `--live` run
+shifts these a few points (see `docs/EVALUATION.md` limitations); `--replay` is exact.
 
 ## Evaluation (agent vs baseline)
 
 ```bash
-npm run eval -- --mode=agent --split=evaluation --replay
+npm run eval -- --mode=agent --split=evaluation --replay      # once the agent cache is committed
 ```
 
 Both write a JSON report to `docs/artifacts/eval-<mode>-<date>.json` (model from
-`laundry3.config.ts`). The `smoke` split is the one to run `--live`.
+`laundry3.config.ts`). The report carries no timestamp so it regenerates byte-identically.
 
 ## Expected output
 
-Console shows, per mode: determinate-observation count, **accuracy**, **harmful-error rate**,
-**coverage**, accuracy-on-covered, a 4×4 confusion matrix, and an aggregate line (vision
-calls, tokens, `$costUsd`); the JSON report carries the same in a `totals` block plus
-per-frame `meta`. _Real values, runtime, and cost: TBD after the first `--live` run._
+Console: determinate-observation count, **accuracy**, **harmful-error rate**, **coverage**,
+accuracy-on-covered, a 4×4 confusion matrix, and an aggregate line (vision calls, tokens,
+`$costUsd`); the JSON report carries the same in a `totals` block plus per-frame `meta`.

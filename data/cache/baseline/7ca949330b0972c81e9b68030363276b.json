@@ -1,0 +1,6 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"W-06\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Blurred area, cannot determine state\"},{\"machineId\":\"W-07\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Blurred area, cannot determine state\"},{\"machineId\":\"W-08\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display shows time remaining (2:25) indicating running cycle\"},{\"machineId\":\"W-09\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Blurred area, cannot determine state\"},{\"machineId\":\"W-10\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Blurred area, cannot determine state\"},{\"machineId\":\"W-11\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display shows time remaining (2:25) indicating running cycle\"},{\"machineId\":\"W-12\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Blurred area, cannot determine state\"},{\"machineId\":\"W-13\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Blurred area, cannot determine state\"},{\"machineId\":\"W-14\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Empty drum visible, no display info\"},{\"machineId\":\"W-15\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Blurred area, cannot determine state\"}]}",
+  "inputTokens": 2847,
+  "outputTokens": 483,
+  "costUsd": 0.010524
+}

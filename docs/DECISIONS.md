@@ -418,3 +418,32 @@ stub. Built per the `claude-api` skill.
 **Consequences.** A first real `npm run eval -- --mode=baseline --split=evaluation --live`
 needs `ANTHROPIC_API_KEY` in `.env` and a labelled split; it writes `data/cache/baseline/`
 which is force-added as the key-free reproduction artifact. Price table must be kept current.
+
+---
+
+## D-0012 — Baseline and agent are told which machine ids are in the frame
+
+- **Date:** 2026-08-28
+- **Status:** Accepted
+
+**Context.** The metric is per-machine accuracy keyed by `machineId`. On the first `--live`
+run the model returned its own positional labels ("center-washer") — nothing matched the
+`W-01…`/`D-01…` roster, so every observation scored as a missing prediction (0%).
+
+**Decision.**
+
+- Both the baseline (`baselinePrompt`) and the agent (`classifyPrompt`) are given, per
+  frame: the **list of machine ids present** and the **global numbering convention**
+  (W-/D-, left-to-right along each bank, stacked upper = lower number). The model maps ids
+  to machines and returns one entry per id.
+- This is applied **symmetrically** — the A/B comparison stays fair. It tells the model
+  *which* machines to report on, not their states.
+- The id list is derived from the ground-truth label
+  (`label.machines.map(m => m.machineId)` in `run-eval.ts`), so both sides also get
+  GT-derived frame membership (which machines are in view + their type). Symmetric, but an
+  unrealistic assist vs. a real deployment — listed as a limitation in `docs/EVALUATION.md`.
+
+**Consequences.** The baseline is no longer "the model with zero context" — it knows the
+roster and machine count for the frame. The agentic contribution to measure is therefore
+ROI cropping, verification, and memory — not machine discovery. If a later iteration adds a
+detection step, that becomes its own experiment with the id list withheld.

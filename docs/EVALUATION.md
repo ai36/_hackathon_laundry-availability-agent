@@ -82,11 +82,12 @@ see `docs/DECISIONS.md` D-0007.
 
 ## Baseline
 
-- **Primary baseline:** a single Claude vision prompt on the whole frame — "list each
-  machine and classify it `free` / `occupied` / `out_of_order` / `unknown`" (the same
-  4-state vocabulary the agent uses) — no per-machine ROI, no calibration config, no memory,
-  no verification pass. Exact text: `BASELINE_PROMPT` in `src/agent/baseline.ts`. Scored
-  with the same metric on the same frames.
+- **Primary baseline:** a single Claude vision prompt on the whole frame. It is given the
+  list of machine ids present in that frame plus the global numbering convention
+  (W-/D-, left-to-right, stacked upper = lower number) so its output is scorable per id, and
+  it classifies each into the 4-state vocabulary — but it gets **no per-machine ROI, no
+  calibration config, no memory, no verification pass**. Exact text: `baselinePrompt()` in
+  `src/agent/baseline.ts`. Scored with the same metric on the same frames as the agent.
 - **Contextual baseline:** the current manual process (walk to the room, look, walk back).
   Not scored on the dataset; used only to frame human-time / wasted-trip savings.
 - **Optional third point:** the same single prompt with an improved / few-shot prompt, to
@@ -140,6 +141,38 @@ Scoring (`src/eval/score.ts`, `src/eval/score.test.ts`):
 When the ground truth itself is borderline (door ajar, no laundry), the human labeller
 decides during dataset construction and the decision is recorded next to the frame.
 
+## Known limitations
+
+- **Single stochastic sample.** Each `--live` run is one model sample; `claude-sonnet-5`
+  is non-deterministic, so re-running shifts the numbers by a few points. The committed
+  `data/cache/` run is the sample of record for each mode; `--replay` reproduces *that
+  sample* exactly. Averaging N runs is future work.
+- **GT-derived frame membership (D-0012).** Both baseline and agent are told which machine
+  ids are in each frame (and their type), derived from the label. This is symmetric so the
+  A/B stays fair, but it is an unrealistic assist versus a real deployment where the system
+  must also work out which machines a camera sees.
+- **`off` = out of order.** The dataset author labelled powered-down machines `off`, mapped
+  to `out_of_order` (author-confirmed not usable, not merely "available and idle"). This
+  drives the `out_of_order` results and some harmful errors; applied identically to both
+  sides.
+- **Redaction over displays.** Some privacy blur bands sit over machine status displays,
+  making a few machines harder to read than a well-placed camera would. Same handicap for
+  both sides.
+- **9 frames.** Below the "10+ cases" guideline (45 per-machine determinate observations is
+  the effective N); video-derived frames are being added.
+
 ## Results
 
 _Populated as runs happen. Raw outputs under `docs/artifacts/`._
+
+### Baseline — 2026-08-28 (`data/cache/baseline/`, `--replay`-reproducible)
+
+| Metric | Value |
+| --- | --- |
+| Per-machine accuracy (determinate GT, n=45) | **31.1%** |
+| Harmful-error rate | 11.1% |
+| Coverage | 60.0% |
+| Accuracy on covered | 51.9% |
+| Cost | $0.081 (9 calls, 25.5k in / 3.0k out) |
+
+`out_of_order` recognised 0/8; 11/27 `free` machines answered `unknown`.

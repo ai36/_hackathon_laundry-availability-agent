@@ -20,8 +20,9 @@ decision it led to. Include experiments that were later removed and what they ta
   video frames are being added to reach ≥10.
 - **Baseline:** single Claude vision prompt on the whole frame (same metric, same frames);
   contextual baseline = the manual "walk over and check" process.
-- **Harness:** offline scoring script with a `--replay` mode (re-scores from cached model
-  responses, no API key). Exact command TBD once the harness exists.
+- **Harness:** `npm run eval -- --mode=baseline|agent --split=evaluation --live|--replay`.
+  `--replay` re-scores from `data/cache/<mode>/` with no API key — verified to reproduce the
+  baseline numbers exactly.
 
 ## Progression
 
@@ -29,8 +30,8 @@ decision it led to. Include experiments that were later removed and what they ta
 | --- | --- | --- | --- |
 | Setup | Bootstrapped project infra: Next.js 16 + TS + Tailwind v4 + MobX, skills `find-skills` + `grillme`, docs/logging scaffold. Not an iteration on the solution — the starting line. | `npm run typecheck` / `lint` / `build` results below | Infra in place; next step is to define the problem and build the baseline. |
 | Scoping | Ran the `grillme` Socratic-interview skill to turn "laundry3" into a defined problem, user, MVP, metric, baseline, dataset plan, and phased scope. | `docs/PROBLEM.md`, `docs/EVALUATION.md`, D-0005 | Problem pinned: per-machine free/occupied status from laundry-room frames; core = agent → verified status list. |
-| Baseline | _TBD — single Claude vision prompt on the whole frame, scored on per-machine accuracy over the labelled eval frames._ | _[baseline result]_ | _Establishes the starting point for the measured improvement._ |
-| Iteration 1 (P0) | _TBD — per-machine ROI calibration config from human-confirmed frames._ | _[new result]_ | _[kept / revised / removed]_ |
+| Baseline | Single `claude-sonnet-5` vision call per frame on the whole (downscaled + redacted) image; given the frame's machine-id list + numbering convention, no ROI / calibration / memory / verification. `npm run eval -- --mode=baseline --split=evaluation --live`. | **accuracy 31.1%**, harmful-error 11.1%, coverage 60.0%, acc-on-covered 51.9% (45 determinate obs, 9 frames). Report: `docs/artifacts/eval-baseline-2026-08-28.json`; replay cache: `data/cache/baseline/` (9 files, reproduces frames-absent). Cost $0.081, 25.5k in / 3.0k out tokens. Single sample — the model is stochastic (see `docs/EVALUATION.md` limitations). | Weak starting point, as expected: model abstains on 11/27 free machines, **never** identifies `out_of_order` (0/8), and makes 5 harmful errors (3 of them `out_of_order`→`free`). Redaction bands sit over some displays — same handicap for the agent, so the comparison stays fair. Lots of headroom. |
+| Iteration 1 (P0) | _TBD — per-machine ROI crop (agent gets a tight image per machine instead of the whole frame)._ | _[new result]_ | _[kept / revised / removed]_ |
 | Iteration 2 (P0) | _TBD — explicit verification pass for low-confidence machines._ | _[new result]_ | _[kept / revised / removed]_ |
 | Iteration 3 (P1) | _TBD — temporal memory / change-detection._ | _[new result]_ | _[kept / revised / removed]_ |
 | Final | _TBD — combine what worked._ | _[final result]_ | _Main contribution: …_ |
@@ -39,9 +40,11 @@ decision it led to. Include experiments that were later removed and what they ta
 
 | Metric | Simple baseline | Agent solution | Change |
 | --- | --- | --- | --- |
-| Primary outcome | _[value]_ | _[value]_ | _[change]_ |
+| Per-machine accuracy (determinate GT) | 31.1% | _[value]_ | _[change]_ |
+| Harmful-error rate | 11.1% | _[value]_ | _[change]_ |
+| Coverage | 60.0% | _[value]_ | _[change]_ |
+| Cost per frame | ~$0.009 | _[value]_ | _[change]_ |
 | Human time per task | _[value]_ | _[value]_ | _[change]_ |
-| Cost per task | _[value]_ | _[value]_ | _[change]_ |
 
 ## Verification runs
 
@@ -89,7 +92,19 @@ Record the result of each infra verification here (append, newest first).
 - `npm run typecheck` / `npm run lint` — **pass**; `npm test` — **23/23**.
 - `npm run label:check -- --split=evaluation` — **OK** (9 frames, 61 observations:
   27 free / 10 occupied / 8 out_of_order / 16 unknown).
-- Baseline number pending the author's spot-check + a `--live` run.
+- Author spot-check of the 9 label files: **approved as correct** (2026-08-28).
+
+### 2026-08-28 — first baseline run
+
+- `npm run eval -- --mode=baseline --split=evaluation --live` — 9 `claude-sonnet-5` calls,
+  $0.081. **accuracy 31.1% · harmful-error 11.1% · coverage 60.0% · acc-on-covered 51.9%**
+  (45 determinate obs). Confusion: `out_of_order` 0/8 correct; 11/27 free → `unknown`.
+- **`requestHash` no longer folds the image bytes into the cache key** (they did, which made
+  `--replay` need the git-ignored frames). Verified: `data/public/frames/` removed +
+  `ANTHROPIC_API_KEY` unset → `--replay` reproduces the identical numbers from
+  `data/cache/baseline/` (9 files, ~34 KB, committed). Report artifact drops its timestamp
+  so it regenerates byte-identically.
+- `typecheck` / `lint` pass; `npm test` **23/23**.
 
 ### 2026-08-28 — real Claude vision client
 

@@ -5,27 +5,41 @@ import type { FramePrediction } from "@/eval/types";
 import { parseAssessments } from "./parse";
 import type { VisionClient } from "./types";
 
-const BASELINE_PROMPT = [
-  "You are looking at a photo of a shared laundry room.",
-  "List every washing machine and dryer you can see and classify each:",
-  '  "free"         — available to use now',
-  '  "occupied"     — running or holding someone\'s laundry',
-  '  "out_of_order" — visibly broken, taped off, or showing a hard error',
-  '  "unknown"      — you cannot tell from this image (say this rather than guessing)',
-  "Reply with JSON only:",
-  '{"machines":[{"machineId":"<label>","state":"free|occupied|out_of_order|unknown","confidence":0..1,"rationale":"<short>"}]}',
-  'Use the printed machine number where visible, otherwise a stable position label like "row1-3".',
-].join("\n");
-
 /**
- * The fair baseline: ONE vision call on the whole frame, no calibration config, no
- * per-machine ROI, no verification, no memory.
+ * The fair baseline: ONE vision call on the whole frame. No calibration config, no
+ * per-machine ROI, no verification pass, no memory. It IS told which machine ids appear in
+ * the frame and the global numbering convention (so its output is scorable per id) — but
+ * not where each machine is or what state it is in.
  */
-export async function runBaseline(frameId: string, vision: VisionClient): Promise<FramePrediction> {
+export function baselinePrompt(machineIds: string[]): string {
+  return [
+    "You are looking at one photo of a shared laundry-room. Washing machines are labelled",
+    "W-01, W-02, … and dryers D-01, D-02, …, numbered left-to-right along each bank; for",
+    "stacked units the upper machine has the lower number.",
+    "",
+    `The machines visible in THIS photo are: ${machineIds.join(", ")}.`,
+    "Map each id to a machine using the left-to-right / top-to-bottom convention, then",
+    "classify its state:",
+    '  "free"         — available now (empty, not running)',
+    '  "occupied"     — running, or holding laundry / showing time remaining',
+    '  "out_of_order" — visibly broken, taped off, powered down, or a hard error on the display',
+    '  "unknown"      — you cannot tell from this image (say this rather than guessing)',
+    "",
+    "Reply with JSON only, one entry per id above:",
+    '{"machines":[{"machineId":"W-01","state":"free|occupied|out_of_order|unknown","confidence":0..1,"rationale":"<short>"}]}',
+  ].join("\n");
+}
+
+export async function runBaseline(
+  frameId: string,
+  vision: VisionClient,
+  machineIds: string[],
+): Promise<FramePrediction> {
+  const prompt = baselinePrompt(machineIds);
   const res = await vision.analyze({
-    cacheKey: `baseline:${frameId}`,
+    cacheKey: `baseline:${frameId}:${machineIds.join(",")}`,
     imagePath: frameImagePath(frameId),
-    prompt: BASELINE_PROMPT,
+    prompt,
   });
   const assessments = parseAssessments(res.text);
   return {
@@ -46,5 +60,4 @@ export async function runBaseline(frameId: string, vision: VisionClient): Promis
   };
 }
 
-export { BASELINE_PROMPT };
 export const baselineModel = config.agent.visionModel;

@@ -12,6 +12,29 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — First baseline number
+
+- Author confirmed the 9 label files correct (spot-check) and set `ANTHROPIC_API_KEY`.
+- **Bug 1:** the model returned its own positional ids ("center-washer") → 0%. Fixed:
+  `baselinePrompt(machineIds)` / `classifyPrompt(…, machineIds)` pass the frame's
+  machine-id list + the global numbering convention (fair — *which* machines, not their
+  states); `run-eval.ts` reads the ids from each frame's label. Methodology → D-0012.
+- **Bug 2 (G10 blocker, from the compliance review):** `requestHash` folded the frame image
+  bytes into the cache key → `--replay` failed on a clean checkout (frames are git-ignored).
+  Fixed: hash the semantic key only (`cacheKey` + prompt + crop). Report artifact dropped
+  its timestamp → regenerates byte-identically.
+- **Baseline:** `npm run eval -- --mode=baseline --split=evaluation --live` — 9
+  `claude-sonnet-5` calls, $0.081. **accuracy 31.1% · harmful-error 11.1% · coverage 60.0% ·
+  acc-on-covered 51.9%** (45 determinate obs). `out_of_order` never recognised (0/8);
+  11/27 free → `unknown`; 5 harmful errors. Single stochastic sample.
+- **`--replay` verified frames-absent:** `data/public/frames/` moved away + key unset →
+  reproduces 31.1% exactly from `data/cache/baseline/` (9 files, force-added past the
+  `data/cache/*` gitignore). Report: `docs/artifacts/eval-baseline-2026-08-28.json`.
+- `docs/EVALUATION.md`: added limitations (GT-derived frame membership = unrealistic but
+  symmetric assist; "off" = author-confirmed not-usable; single stochastic sample).
+  `docs/REPRODUCTION.md` baseline section filled with real numbers.
+- Verification: `typecheck` / `lint` pass; `npm test` **23/23**.
+
 ### 2026-08-28 — Initial ground-truth labels
 
 - Author annotated 9 reference frames (`data/raw/_reference/`) with global ids and supplied

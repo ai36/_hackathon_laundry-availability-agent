@@ -1,0 +1,6 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"W-13\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Top-loading washer with open lid, drum visible and empty\"},{\"machineId\":\"W-14\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Speed Queen commercial washer with display panel, but status unclear from image\"},{\"machineId\":\"W-15\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Partial view of top-loading unit, hard to determine state\"},{\"machineId\":\"W-16\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Partial view of top-loading unit, hard to determine state\"}]}",
+  "inputTokens": 2823,
+  "outputTokens": 222,
+  "costUsd": 0.007866
+}

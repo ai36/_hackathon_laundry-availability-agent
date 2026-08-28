@@ -1,0 +1,6 @@
+{
+  "text": "{\"machines\":[\n{\"machineId\":\"D-01\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display active with lit panel indicating in use\"},\n{\"machineId\":\"D-02\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display shows numbers/lights suggesting running cycle\"},\n{\"machineId\":\"D-03\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Panel lit with active display\"},\n{\"machineId\":\"D-04\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display shows time '41' indicating running\"},\n{\"machineId\":\"D-05\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Top unit, screen not clearly visible\"},\n{\"machineId\":\"D-06\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display active with lit interface\"},\n{\"machineId\":\"D-07\",\"state\":\"occupied\",\"confidence\":0.6,\"rationale\":\"Display shows time '41' indicating running\"},\n{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Screen partially visible, state unclear\"},\n{\"machineId\":\"W-15\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Not clearly visible in frame\"},\n{\"machineId\":\"W-16\",\"state\":\"unknown\",\"confidence\":0.3,\"rationale\":\"Not clearly visible in frame\"}\n]}",
+  "inputTokens": 2847,
+  "outputTokens": 477,
+  "costUsd": 0.010464
+}

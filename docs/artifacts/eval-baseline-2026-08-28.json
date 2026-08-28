@@ -1,0 +1,534 @@
+{
+  "mode": "baseline",
+  "split": "evaluation",
+  "model": "claude-sonnet-5",
+  "frames": [
+    "img_1819",
+    "img_1821",
+    "img_1822",
+    "img_1823",
+    "img_1824",
+    "img_1825",
+    "img_1826",
+    "img_8629",
+    "img_8633"
+  ],
+  "labelledFrames": 9,
+  "scores": {
+    "nDeterminate": 45,
+    "nIndeterminable": 16,
+    "accuracy": 0.3111111111111111,
+    "harmfulErrorRate": 0.1111111111111111,
+    "coverage": 0.6,
+    "accuracyOnCovered": 0.5185185185185185,
+    "confusion": {
+      "free": {
+        "free": 11,
+        "occupied": 5,
+        "unknown": 11,
+        "out_of_order": 0
+      },
+      "occupied": {
+        "free": 2,
+        "occupied": 3,
+        "unknown": 4,
+        "out_of_order": 1
+      },
+      "unknown": {
+        "free": 0,
+        "occupied": 0,
+        "unknown": 0,
+        "out_of_order": 0
+      },
+      "out_of_order": {
+        "free": 3,
+        "occupied": 2,
+        "unknown": 3,
+        "out_of_order": 0
+      }
+    },
+    "missingPredictions": 0
+  },
+  "totals": {
+    "visionCalls": 9,
+    "inputTokens": 25507,
+    "outputTokens": 3012,
+    "costUsd": 0.08113400000000001
+  },
+  "predictions": {
+    "img_1819": {
+      "frameId": "img_1819",
+      "machines": [
+        {
+          "machineId": "W-01",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Top-loader with closed lid, display on, no visible laundry"
+        },
+        {
+          "machineId": "W-02",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Closed lid, display panel active, appears idle"
+        },
+        {
+          "machineId": "W-03",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Closed lid, control panel lit, no indication of cycle running"
+        },
+        {
+          "machineId": "W-04",
+          "state": "free",
+          "confidence": 0.4,
+          "rationale": "Closed lid, display active, no visible occupancy"
+        },
+        {
+          "machineId": "W-05",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Open lid, empty drum visible"
+        },
+        {
+          "machineId": "W-06",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Open lid, empty drum visible"
+        },
+        {
+          "machineId": "W-07",
+          "state": "free",
+          "confidence": 0.4,
+          "rationale": "Partially visible open lid machine, appears empty"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "visionCalls": 1,
+        "inputTokens": 2835,
+        "outputTokens": 342,
+        "costUsd": 0.00909
+      }
+    },
+    "img_1821": {
+      "frameId": "img_1821",
+      "machines": [
+        {
+          "machineId": "D-01",
+          "state": "occupied",
+          "confidence": 0.6,
+          "rationale": "Display active with lit panel indicating in use"
+        },
+        {
+          "machineId": "D-02",
+          "state": "occupied",
+          "confidence": 0.6,
+          "rationale": "Display shows numbers/lights suggesting running cycle"
+        },
+        {
+          "machineId": "D-03",
+          "state": "occupied",
+          "confidence": 0.6,
+          "rationale": "Panel lit with active display"
+        },
+        {
+          "machineId": "D-04",
+          "state": "occupied",
+          "confidence": 0.6,
+          "rationale": "Display shows time '41' indicating running"
+        },
+        {
+          "machineId": "D-05",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Top unit, screen not clearly visible"
+        },
+        {
+          "machineId": "D-06",
+          "state": "occupied",
+          "confidence": 0.6,
+          "rationale": "Display active with lit interface"
+        },
+        {
+          "machineId": "D-07",
+          "state": "occupied",
+          "confidence": 0.6,
+          "rationale": "Display shows time '41' indicating running"
+        },
+        {
+          "machineId": "D-08",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Screen partially visible, state unclear"
+        },
+        {
+          "machineId": "W-15",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Not clearly visible in frame"
+        },
+        {
+          "machineId": "W-16",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Not clearly visible in frame"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "visionCalls": 1,
+        "inputTokens": 2847,
+        "outputTokens": 477,
+        "costUsd": 0.010464
+      }
+    },
+    "img_1822": {
+      "frameId": "img_1822",
+      "machines": [
+        {
+          "machineId": "D-01",
+          "state": "unknown",
+          "confidence": 0.4,
+          "rationale": "Top-left stacked unit, display not clearly visible"
+        },
+        {
+          "machineId": "D-02",
+          "state": "unknown",
+          "confidence": 0.4,
+          "rationale": "Bottom-left stacked unit, door closed but state unclear"
+        },
+        {
+          "machineId": "D-03",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Right bank top unit, partially visible"
+        },
+        {
+          "machineId": "D-04",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Right bank unit, display not legible"
+        },
+        {
+          "machineId": "D-05",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Right bank unit, insufficient detail"
+        },
+        {
+          "machineId": "D-06",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Right bank unit, insufficient detail"
+        },
+        {
+          "machineId": "D-07",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Right bank unit, insufficient detail"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "visionCalls": 1,
+        "inputTokens": 2835,
+        "outputTokens": 347,
+        "costUsd": 0.00914
+      }
+    },
+    "img_1823": {
+      "frameId": "img_1823",
+      "machines": [
+        {
+          "machineId": "D-01",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Top dryer door, no display info visible"
+        },
+        {
+          "machineId": "D-02",
+          "state": "occupied",
+          "confidence": 0.7,
+          "rationale": "Bottom dryer with display showing 225 time remaining"
+        },
+        {
+          "machineId": "D-03",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Top dryer door, no info visible"
+        },
+        {
+          "machineId": "D-04",
+          "state": "occupied",
+          "confidence": 0.7,
+          "rationale": "Bottom dryer with display showing 225 time remaining"
+        },
+        {
+          "machineId": "D-05",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Top dryer door, no info visible"
+        },
+        {
+          "machineId": "D-06",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Bottom dryer, display not clearly showing active run"
+        },
+        {
+          "machineId": "D-07",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Top dryer door, no info visible"
+        },
+        {
+          "machineId": "D-08",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Bottom dryer, no time shown, door closed"
+        },
+        {
+          "machineId": "D-09",
+          "state": "free",
+          "confidence": 0.4,
+          "rationale": "Top dryer door, no info visible"
+        },
+        {
+          "machineId": "D-10",
+          "state": "free",
+          "confidence": 0.4,
+          "rationale": "Bottom dryer, no active display visible"
+        },
+        {
+          "machineId": "W-16",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Top-load washer drum empty and door open"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "visionCalls": 1,
+        "inputTokens": 2851,
+        "outputTokens": 529,
+        "costUsd": 0.010992
+      }
+    },
+    "img_1824": {
+      "frameId": "img_1824",
+      "machines": [
+        {
+          "machineId": "D-04",
+          "state": "unknown",
+          "confidence": 0.4,
+          "rationale": "Display blurred, cannot determine status"
+        },
+        {
+          "machineId": "D-05",
+          "state": "unknown",
+          "confidence": 0.4,
+          "rationale": "Display blurred, cannot determine status"
+        },
+        {
+          "machineId": "D-06",
+          "state": "unknown",
+          "confidence": 0.4,
+          "rationale": "Display blurred, cannot determine status"
+        },
+        {
+          "machineId": "D-08",
+          "state": "unknown",
+          "confidence": 0.4,
+          "rationale": "Display blurred, cannot determine status"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "visionCalls": 1,
+        "inputTokens": 2823,
+        "outputTokens": 194,
+        "costUsd": 0.007586
+      }
+    },
+    "img_1825": {
+      "frameId": "img_1825",
+      "machines": [
+        {
+          "machineId": "D-04",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Display panel visible but no active countdown indicated, likely idle"
+        },
+        {
+          "machineId": "D-05",
+          "state": "occupied",
+          "confidence": 0.55,
+          "rationale": "Central display shows time value (40) suggesting active cycle"
+        },
+        {
+          "machineId": "D-06",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Panel visible with no clear running indication"
+        },
+        {
+          "machineId": "D-08",
+          "state": "unknown",
+          "confidence": 0.4,
+          "rationale": "Edge of frame, display not clearly visible"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "visionCalls": 1,
+        "inputTokens": 2823,
+        "outputTokens": 206,
+        "costUsd": 0.007706
+      }
+    },
+    "img_1826": {
+      "frameId": "img_1826",
+      "machines": [
+        {
+          "machineId": "D-04",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Display shows numeric time but no active running indicator visible; door closed"
+        },
+        {
+          "machineId": "D-05",
+          "state": "out_of_order",
+          "confidence": 0.6,
+          "rationale": "Display shows 'E' error code instead of normal readout"
+        },
+        {
+          "machineId": "D-06",
+          "state": "unknown",
+          "confidence": 0.4,
+          "rationale": "Payment display visible but dryer status unclear"
+        },
+        {
+          "machineId": "D-08",
+          "state": "unknown",
+          "confidence": 0.4,
+          "rationale": "Payment display visible but dryer status unclear"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "visionCalls": 1,
+        "inputTokens": 2823,
+        "outputTokens": 212,
+        "costUsd": 0.007766
+      }
+    },
+    "img_8629": {
+      "frameId": "img_8629",
+      "machines": [
+        {
+          "machineId": "W-06",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Blurred area, cannot determine state"
+        },
+        {
+          "machineId": "W-07",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Blurred area, cannot determine state"
+        },
+        {
+          "machineId": "W-08",
+          "state": "occupied",
+          "confidence": 0.6,
+          "rationale": "Display shows time remaining (2:25) indicating running cycle"
+        },
+        {
+          "machineId": "W-09",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Blurred area, cannot determine state"
+        },
+        {
+          "machineId": "W-10",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Blurred area, cannot determine state"
+        },
+        {
+          "machineId": "W-11",
+          "state": "occupied",
+          "confidence": 0.6,
+          "rationale": "Display shows time remaining (2:25) indicating running cycle"
+        },
+        {
+          "machineId": "W-12",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Blurred area, cannot determine state"
+        },
+        {
+          "machineId": "W-13",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Blurred area, cannot determine state"
+        },
+        {
+          "machineId": "W-14",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Empty drum visible, no display info"
+        },
+        {
+          "machineId": "W-15",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Blurred area, cannot determine state"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "visionCalls": 1,
+        "inputTokens": 2847,
+        "outputTokens": 483,
+        "costUsd": 0.010524
+      }
+    },
+    "img_8633": {
+      "frameId": "img_8633",
+      "machines": [
+        {
+          "machineId": "W-13",
+          "state": "free",
+          "confidence": 0.5,
+          "rationale": "Top-loading washer with open lid, drum visible and empty"
+        },
+        {
+          "machineId": "W-14",
+          "state": "unknown",
+          "confidence": 0.4,
+          "rationale": "Speed Queen commercial washer with display panel, but status unclear from image"
+        },
+        {
+          "machineId": "W-15",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Partial view of top-loading unit, hard to determine state"
+        },
+        {
+          "machineId": "W-16",
+          "state": "unknown",
+          "confidence": 0.3,
+          "rationale": "Partial view of top-loading unit, hard to determine state"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "visionCalls": 1,
+        "inputTokens": 2823,
+        "outputTokens": 222,
+        "costUsd": 0.007866
+      }
+    }
+  }
+}

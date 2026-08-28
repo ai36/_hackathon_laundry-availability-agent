@@ -1,0 +1,6 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"D-04\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Display shows numeric time but no active running indicator visible; door closed\"},{\"machineId\":\"D-05\",\"state\":\"out_of_order\",\"confidence\":0.6,\"rationale\":\"Display shows 'E' error code instead of normal readout\"},{\"machineId\":\"D-06\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Payment display visible but dryer status unclear\"},{\"machineId\":\"D-08\",\"state\":\"unknown\",\"confidence\":0.4,\"rationale\":\"Payment display visible but dryer status unclear\"}]}",
+  "inputTokens": 2823,
+  "outputTokens": 212,
+  "costUsd": 0.007766
+}

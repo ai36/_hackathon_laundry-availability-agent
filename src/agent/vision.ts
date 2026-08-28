@@ -8,7 +8,12 @@ import { config } from "@/config";
 
 import type { VisionClient, VisionRequest, VisionResponse } from "./types";
 
-/** Stable hash of the request's semantic content, used as the on-disk cache filename. */
+/**
+ * Stable hash of the request's *semantic* content, used as the on-disk cache filename.
+ * Deliberately does NOT read the image bytes: `--replay` must resolve from a clean checkout
+ * where `data/public/frames/` is absent (held out pending redaction). `cacheKey` already
+ * encodes the frame id + machine list, so a re-run with the same inputs hits the same file.
+ */
 export function requestHash(req: VisionRequest): string {
   const h = createHash("sha256");
   h.update(req.cacheKey);
@@ -16,9 +21,6 @@ export function requestHash(req: VisionRequest): string {
   h.update(req.prompt);
   h.update("\0");
   h.update(req.crop ? req.crop.join(",") : "full");
-  h.update("\0");
-  // include image bytes so a re-shot frame invalidates the entry
-  if (existsSync(req.imagePath)) h.update(readFileSync(req.imagePath));
   return h.digest("hex").slice(0, 32);
 }
 

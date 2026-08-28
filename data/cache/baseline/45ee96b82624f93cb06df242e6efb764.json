@@ -1,0 +1,6 @@
+{
+  "text": "{\"machines\":[{\"machineId\":\"W-01\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Top-loader with closed lid, display on, no visible laundry\"},{\"machineId\":\"W-02\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Closed lid, display panel active, appears idle\"},{\"machineId\":\"W-03\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Closed lid, control panel lit, no indication of cycle running\"},{\"machineId\":\"W-04\",\"state\":\"free\",\"confidence\":0.4,\"rationale\":\"Closed lid, display active, no visible occupancy\"},{\"machineId\":\"W-05\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Open lid, empty drum visible\"},{\"machineId\":\"W-06\",\"state\":\"free\",\"confidence\":0.5,\"rationale\":\"Open lid, empty drum visible\"},{\"machineId\":\"W-07\",\"state\":\"free\",\"confidence\":0.4,\"rationale\":\"Partially visible open lid machine, appears empty\"}]}",
+  "inputTokens": 2835,
+  "outputTokens": 342,
+  "costUsd": 0.00909
+}

@@ -75,8 +75,16 @@ async function main(): Promise<void> {
 
   const predictions = new Map<string, FramePrediction>();
   for (const frameId of frameIds) {
+    const label = labels.get(frameId);
+    if (!label) {
+      console.warn(`! ${frameId}: no label — skipping (nothing to ask the model about)`);
+      continue;
+    }
+    const machineIds = label.machines.map((m) => m.machineId);
     const pred =
-      mode === "baseline" ? await runBaseline(frameId, vision) : await runAgent(frameId, vision);
+      mode === "baseline"
+        ? await runBaseline(frameId, vision, machineIds)
+        : await runAgent(frameId, vision, machineIds);
     predictions.set(frameId, pred);
   }
 
@@ -107,10 +115,9 @@ async function main(): Promise<void> {
     outPath,
     JSON.stringify(
       {
+        // No timestamp: the committed report must regenerate byte-identically from --replay.
         mode,
         split,
-        backend,
-        generatedAt: new Date().toISOString(),
         model: config.agent.visionModel,
         frames: frameIds,
         labelledFrames: labelled,
