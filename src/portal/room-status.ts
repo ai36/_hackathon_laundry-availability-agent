@@ -100,10 +100,12 @@ export function buildRoomStatus(
       view.correction = { scope: c.scope, note: c.note };
     }
 
-    // A hold only applies to a machine the room still shows as free.
+    // A hold only applies to a machine the room still shows as free — and it then reads as
+    // `occupied` to everyone (D-0007). `reservedBy` lets the owner's client show a badge.
     if (!view.corrected && view.state === "free") {
       const held = reservations.find((r) => r.machineId === machineId);
       if (held) {
+        view.state = "occupied";
         view.reserved = true;
         view.reservedUntil = held.expiresAt;
         view.reservedBy = held.by;

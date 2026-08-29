@@ -103,6 +103,17 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-29 — reservations: reworked mechanic
+
+- A held machine now reads `occupied` to everyone (`buildRoomStatus` flips the state);
+  owner-only "your reservation · until HH:MM" badge. `DELETE /api/reservations` removed (no
+  cancel); `POST` rejects a 2nd hold by the same `by` up front. `machine-card.tsx`: reserve
+  affordance only on a truly-free card and only while I hold nothing (`iHaveAHold`); cancel
+  UI gone.
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **61/61**;
+  `check:data` — **pass**. Curl: reserve → occupied; same-`by` 2nd → 409; other `by` → ok;
+  `DELETE` → 405. D-0007 amendment + README updated.
+
 ### 2026-08-29 — live status: tenant machine reservations
 
 - New `src/portal/reservations.ts` + `src/portal/client-id.ts`; `POST/DELETE/GET

@@ -345,25 +345,36 @@ of non-app tenants — reported separately from the P0 accuracy metric, never mi
 This reconciliation is one of the concrete "conflict handling" jobs that justify an agent
 over a single classifier call.
 
-**Amendment (2026-08-29) — the tenant-facing hold is now wired.** Live status: tapping a
-free machine opens a confirm dialog (Radix `AlertDialog`) → `POST /api/reservations`. A hold
-is stored in `data/reservations.json` (git-ignored), auto-expires after
-`reservation.holdMinutes`, and is filtered on read once expired. Guards enforced server-side:
-the feature must be enabled (`config.reservation.enabled`, off by default — the integrator
-flips it on in Settings → Configuration), the machine must still read `free`,
-`maxActivePerUser` per anonymous browser id, and `maxReservedFractionOfFree` of the free
-count. `buildRoomStatus` overlays `reserved` / `reservedUntil` / `reservedBy` onto a free
-machine; the tenant "washers free" figure excludes held machines. Pre-emption reconciliation
-(a walk-in taking a held machine) is still P2 — a hold simply vanishes when the machine stops
-reading `free`.
+**Amendment (2026-08-29) — the tenant-facing hold is wired.** Live status: tapping a **free**
+machine opens a confirm dialog (Radix `AlertDialog`) → `POST /api/reservations`. A hold is
+stored in `data/reservations.json` (git-ignored), auto-expires after
+`reservation.holdMinutes`, and is filtered on read once expired.
 
-The per-user cap is **best-effort, not a lock**: `by` is an unauthenticated localStorage id,
-so a client that rotates it can exceed `maxActivePerUser`. `maxReservedFractionOfFree` is the
-real backstop against one party holding the room. This matches this decision's stance that
-reservations are advisory — the camera, not a reservation, is the source of truth. The
-`data/reservations.json` read-modify-write is also unlocked (fine at laundry-room request
-rates; noted in the code). No eval impact: reservations are portal-only, the file is never
-read by `src/agent/*` / `src/eval/*`.
+Mechanic (owner requirements, 2026-08-29):
+
+- **A held machine reads `occupied` to everyone.** `buildRoomStatus` flips the state and
+  attaches `reservedUntil` / `reservedBy`; the owner's client shows a "your reservation ·
+  until HH:MM" badge, everyone else just sees "In use". This means the "washers free" figure
+  and `counts.free` already exclude held machines — no special-casing.
+- **No cancel, no move.** There is no `DELETE` route. A user cannot release a hold or shift
+  it; it only lapses on its own. `maxActivePerUser` (default 1) is then the whole story:
+  while you hold a machine, every other free card is non-interactive; once your hold ends
+  you can reserve again. **Accepted tradeoff:** a mis-confirmed reservation is unrecoverable
+  for the full `reservation.holdMinutes` (default 5) — the confirm dialog says so, and the
+  short window keeps the cost bounded. The `release()` primitive is kept in
+  `reservations.ts` (tested) for a future admin/expiry-sweep tool, but no route exposes it.
+- **Only free machines are interactive.** Reserved (now `occupied`), in-use, out-of-order,
+  unknown, and corrected machines are plain `<div>`s.
+- Server guards: feature enabled (`config.reservation.enabled`, off by default — the
+  integrator flips it on in Settings → Configuration); `maxActivePerUser` per anonymous
+  browser id (best-effort — id rotation bypasses it); the machine must still read `free`;
+  `maxReservedFractionOfFree` of the free count is the real backstop against one party
+  holding the room. Pre-emption reconciliation (a walk-in taking a held machine) is still
+  P2 — a hold simply vanishes when the machine stops reading `free`.
+
+The `data/reservations.json` read-modify-write is unlocked (fine at laundry-room request
+rates; self-correcting via expiry; noted in the code). No eval impact: reservations are
+portal-only, the file is never read by `src/agent/*` / `src/eval/*`.
 
 ---
 

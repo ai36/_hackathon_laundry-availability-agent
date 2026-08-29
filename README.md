@@ -65,8 +65,9 @@ camera angle and **overlay the integrator corrections** (`src/portal/room-status
 
 - **`/tenant`** — the tenant room view: current state per machine, plus per-kind
   free counts. Tapping a free machine opens a confirm dialog to **reserve** it (a short
-  auto-expiring hold); your own hold has a **release** dialog. Server-rendered per request
-  (holds expire on a timer). `/` redirects here.
+  auto-expiring hold). A held machine reads **In use** for everyone; the owner's view adds a
+  "your reservation" badge. No cancel — a hold only lapses, and you can hold one machine at a
+  time. Server-rendered per request. `/` redirects here.
 - **`/integrator`** — the integrator console: per-card agent confidence + source frame + a
   **“✕ mark wrong”** control and a **“↻ refresh recognition”** button.
 - **`/integrator/settings`** — Machines + Cameras CRUD + a site overview.

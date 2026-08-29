@@ -74,7 +74,11 @@ export function reserve(
   return res;
 }
 
-/** Drop the hold on `machineId` if it belongs to `by`. Returns true if one was removed. */
+/**
+ * Drop the hold on `machineId` if it belongs to `by`. Returns true if one was removed.
+ * No route exposes this — deliberate: tenants cannot cancel a hold (D-0007). It stays as a
+ * tested primitive for a future admin / expiry-sweep tool.
+ */
 export function release(machineId: string, by: string, path = file()): boolean {
   const list = readAll(path);
   const next = list.filter((r) => !(r.machineId === machineId && r.by === by));

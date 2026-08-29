@@ -12,6 +12,39 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Reservations: reworked mechanic (occupied, no cancel, one-at-a-time)
+
+- Owner: (1) the user cannot cancel a hold or move it to another machine; (2) once their
+  `maxActivePerUser` is used up they can only wait for it to lapse, then reserve again;
+  (3) a held machine reads **In use** to everyone — the owner just gets a badge; (4) only
+  free machines are interactive.
+- **`buildRoomStatus`**: a still-`free` machine with an active hold now becomes
+  `state: "occupied"` (keeps `reservedUntil` / `reservedBy`). `counts.free` / the "washers
+  free" figure exclude it automatically; the `room-view.tsx` `!m.reserved` guard reverted to
+  a plain `state === "free"`.
+- **`/api/reservations`**: `DELETE` handler **removed** (405 now). `POST` checks
+  `maxActivePerUser` per `by` *first* — "you already have a reservation — wait for it to
+  end". The "machine not free" 409 now also covers double-booking (a held machine reads
+  occupied). `release` stays in `reservations.ts` (lib primitive, still tested) but is not
+  exposed.
+- **`machine-card.tsx`**: dropped the cancel dialog + `canCancel` + the `DELETE` path. New
+  `iHaveAHold` = any machine in the room `reserved` by my `clientId` → suppresses the
+  reserve affordance on every card. The reserve card is a `<button>` only when
+  `state === "free"` and I hold nothing. Owner badge "your reservation · until HH:MM"
+  (time gated on `clientId`, so hydration-safe). Non-owners see plain "In use".
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` —
+  **61/61**; `check:data` — **pass**. Curl: reserve W-05 → `state: occupied, reservedBy`;
+  same `by` on W-06 → 409 "already have a reservation"; a different `by` on W-06 → ok;
+  `DELETE` → **405**. Chrome (as the W-05 owner): W-05 "In use" + "YOUR RESERVATION · UNTIL
+  08:09" badge, W-06 (held by another) plain "In use", and no "tap to reserve" on any free
+  card. README + D-0007 amendment updated.
+- **Compliance** (`hackathon-compliance`): **PASS WITH RISKS** — no eligibility blockers
+  (G4 holds without `DELETE`: confirm dialog + off-by-default + auto-expiry; eval
+  decoupling grep-confirmed). Three fixed before push: (1) D-0007 names the mis-click cost
+  an accepted tradeoff; (2) trajectory saved
+  (`docs/trajectories/compliance/2026-08-29-reservations-rework.md`); (3) `release()`
+  docstring explains why no route calls it.
+
 ### 2026-08-29 — Live status: tenant machine reservations
 
 - Owner: reservations exist in the config but do nothing — a tenant should be able to hold
