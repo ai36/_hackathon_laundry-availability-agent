@@ -386,7 +386,7 @@ case without letting one party lock the room (`maxReservedFractionOfFree` still 
 holds). This supersedes the earlier "one at a time" framing in this decision — the UI no
 longer hard-blocks a second hold; it counts active holds against `maxActivePerUser`, the
 same ceiling the server enforces. Reproduction is unaffected: the eval never reads this
-config group, and the 9 committed frames carry no reservation state.
+config group, and the committed frames carry no reservation state.
 
 ---
 
@@ -518,9 +518,19 @@ reference and its label file — every determinate machine's status display stay
 the 9 are now committed under `data/public/frames/` (`.gitignore` allows them by name).
 Video-derived and unlabelled frames stay local.
 
+**Amendment (2026-08-29) — recalibrated to 5 stills + annotated + mask.** The eval was
+rebuilt around the D-0015 calibration model. Four close-up frames that no camera covered
+(`img_1824`, `img_1825`, `img_1826`, `img_8629`) were removed; the remaining five
+(`img_1819`, `img_1821`, `img_1822`, `img_1823`, `img_8633`) were **re-retouched by the
+author** — same by-eye-then-verify method, wider redaction — and each now ships two siblings:
+`<id>.annotated.jpg` (machine ids painted on the view, a location key — not a photo) and
+`<id>.mask.png` (transparent over the panels that decide state, opaque elsewhere). All 15
+images pass the metadata gate and were checked against their label; `.gitignore` allows them
+by name. The 2026-08-28 nine-frame set and its numbers are retired.
+
 **Publish basis (resolved 2026-08-28).** The first amendment's plan listed "written
 authorization from whoever manages the laundry room" as a handling step. **That was not
-obtained and will not be pursued.** The author's basis for publishing these 9 frames instead:
+obtained and will not be pursued.** The author's basis for publishing these frames instead:
 
 - The room is a **shared common area open to every resident of the building** — not a private
   or access-controlled space.
@@ -713,11 +723,13 @@ system and spends time confirming its output. That human is the missing signal.
   `corrections` count.
 
 **Consequences.** **3 `machine`-scope corrections** — `W-04`, `D-02`, `D-06`, each "this unit
-is out of service" — applied across the 9 frames (10 cells, 8 of them determinate) take the
-agent from **57.8% → 75.6%** accuracy and **`out_of_order` recall 0/8 → 8/8**, at **no extra
-model cost** (corrections are applied post-hoc). Harmful-error stays 0.0%, coverage 100%.
-The remaining 11 errors are all `free`→`occupied` over-calls, which are `observation`-scope
-and time-varying — correcting those is per-frame hand-labelling, not durable learning, so
+is out of service" — cover **5 determinate observations** across cameras C-01–C-04 on the
+recalibrated 5-frame set and take the baseline from **45.5% → 68.2%** accuracy, **`out_of_
+order` recall 0/5 → 5/5**, and **harmful-error 9.1% → 4.5%**, at **no extra model cost**
+(applied post-hoc). Coverage 100%. _(On the retired 9-frame set the same corrections took the
+agent 57.8% → 75.6%, `out_of_order` 0/8 → 8/8.)_ The remaining errors are `free`→`occupied`
+over-calls plus one occupied read as `free`, which are `observation`-scope and time-varying —
+correcting those is per-frame hand-labelling, not durable learning, so
 they are left as the honest ceiling of this mechanism. **This is the shipped improvement
 path**, not the verification pass (D-0013). Portal write-UI for corrections: D-0015.
 
@@ -896,14 +908,24 @@ inputs when a camera has them:
   regions are not the operator's machines and must be ignored.
 
 The mask is applied **as a reference image + prompt instruction**, not composited onto the
-feed — that was the D-0016 "compositing before analysis" task, deliberately skipped here to
-avoid a native image dependency (`sharp`). `requestHash` folds `extraImagePaths` in **only
-when the array is non-empty**, so every committed `data/cache/{baseline,agent}` entry keeps
-its filename and `npm run eval -- --replay` reproduces byte-for-byte (verified: agent 57.8%,
-baseline 62.2%, unchanged). None of the 5 seeded cameras carry a fragment / annotated shot /
-mask yet, so today this path degrades to the baseline wording — **its accuracy effect is
-unmeasured**; the frozen 9-frame eval scores the CLI agent, not this route, and measuring it
-would need a new `--live` run.
+feed — that was the D-0016 "compositing before analysis" task, deliberately skipped to avoid
+a native image dependency (`sharp`). `requestHash` folds `extraImagePaths` in **only when the
+array is non-empty**, so a request without them keeps the exact cache filename it had before.
+
+**Amendment (2026-08-29) — measured; annotated shot + mask as vision inputs are a dead-end.**
+All five cameras were given a real annotated shot + mask, and a new eval mode
+`--mode=calibrated` (`src/agent/calibrated.ts`) runs the same one-call classify with those
+two images attached. On the recalibrated 5-frame / 22-observation set it scored **31.8%**
+accuracy — **−13.7 pp** below the plain baseline (45.5%). Failure mode: the model reads
+state off the flat-colour annotation ("Red washer, panel visible → occupied"), and the
+mostly-black mask image collapses it onto `occupied` for every machine (`free` recall 0/10).
+Reproduced on `claude-sonnet-5` (31.8%) and across four prompt phrasings (27–36%); none beat
+the baseline. **Kept in-tree** (`--mode=calibrated`, `data/cache/calibrated/` committed) as a
+reproducible negative result, like the D-0014 verification pass. What survives from
+calibration in the eval: per-camera machine **scoping** (neutral). The portal / `/api/refresh`
+path still sends the images — it is a live operator tool, not a scored claim — but the
+integrator should treat annotated shot + mask as optional and low-value on current models.
+Full write-up: `docs/CHANGELOG.md` "Recalibrated evaluation".
 
 ---
 
@@ -961,7 +983,7 @@ committed-eval-report read in `buildRoomStatus`).
 
 ### Phasing
 - **P0 — minimal submission (must ship).** No container required to *evaluate* it. The judge
-  can walk the **entire integrator path key-free**, operating on the 9 committed frames with
+  can walk the **entire integrator path key-free**, operating on the 5 committed frames with
   `--replay`: pick `img_1821` as "camera 1's feed" → see the agent's cached per-machine
   states → mark `D-02` wrong → `out_of_order` (writes a D-0014 correction via `/api/corrections`,
   which works under `npm run dev` / any Node host) → re-fuse → the portal shows it fixed. The

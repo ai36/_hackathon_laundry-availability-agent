@@ -40,11 +40,16 @@ function isHarmful(predicted: MachineState, truth: MachineState): boolean {
  * Score predictions against labels for the given frame ids. A prediction missing for a
  * labelled machine is treated as `unknown` (no answer given) and counted in
  * `missingPredictions`.
+ *
+ * `scope`, when given, restricts scoring per frame to the listed machine ids — used by the
+ * calibrated eval, where a camera is only responsible for its own machines and the rest of
+ * the frame's label is another camera's job.
  */
 export function scoreAll(
   predictions: Map<string, FramePrediction>,
   labels: Map<string, FrameLabel>,
   frameIds: string[],
+  scope?: Map<string, Set<string>>,
 ): Scores {
   const confusion = emptyConfusion();
   let nDeterminate = 0;
@@ -60,8 +65,10 @@ export function scoreAll(
     if (!label) continue;
     const pred = predictions.get(frameId);
     const predByMachine = new Map((pred?.machines ?? []).map((m) => [m.machineId, m]));
+    const inScope = scope?.get(frameId);
 
     for (const gt of label.machines) {
+      if (inScope && !inScope.has(gt.machineId)) continue;
       const p = predByMachine.get(gt.machineId);
       const predState: MachineState = p?.state ?? "unknown";
       if (!p) missingPredictions++;

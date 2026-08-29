@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"W-01\",\n      \"state\": \"free\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Leftmost washing machine, door closed, no visible display activity or laundry visible\"\n    },\n    {\n      \"machineId\": \"W-02\",\n      \"state\": \"free\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Second washing machine from left, door closed, no visible display activity or laundry visible\"\n    },\n    {\n      \"machineId\": \"W-03\",\n      \"state\": \"free\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Third washing machine from left, door closed, no visible display activity or laundry visible\"\n    },\n    {\n      \"machineId\": \"W-04\",\n      \"state\": \"free\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Rightmost visible washing machine, appears to be empty and available, though slightly obscured by angle\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1831,
+  "outputTokens": 270,
+  "costUsd": 0.003181
+}

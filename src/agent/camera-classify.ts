@@ -32,34 +32,58 @@ export interface CameraClassifyInput {
 export function cameraClassifyPrompt(input: CameraClassifyInput): string {
   const { machineIds, fragments = {}, hasAnnotatedShot = false, hasMask = false } = input;
 
+  // Number the images so the model can't confuse the live photo with the reference layers.
+  let n = 1;
+  const liveNo = n++;
+  const annotatedNo = hasAnnotatedShot ? n++ : 0;
+  const maskNo = hasMask ? n++ : 0;
+
   const lines: string[] = [
     "You are monitoring a shared laundry room from one fixed camera. Washers are labelled",
     "W-01, W-02, … and dryers D-01, D-02, …, numbered left-to-right along each bank; for",
     "stacked units the upper machine has the lower number.",
     "",
-    `Classify these machines visible in the frame: ${machineIds.join(", ")}.`,
-    '  "free"         — available now (empty, not running)',
-    '  "occupied"     — running, holding laundry, or showing time remaining',
-    '  "out_of_order" — visibly broken, taped off, powered down, or a hard error on the display',
-    '  "unknown"      — you cannot tell from this image (say this rather than guessing)',
+    `IMAGE ${liveNo} is the live camera photo. It is the ONLY source of truth for every`,
+    "machine's state — read each machine's display, indicator lights, lid and drum from it.",
   ];
 
   if (hasAnnotatedShot) {
     lines.push(
       "",
-      "The image after the main frame is an ANNOTATED reference: the same camera view with",
-      "machine ids drawn on it. Use it only to match each id to a physical machine — it may",
-      "be an older capture, so never read a machine's state from it.",
+      `IMAGE ${annotatedNo} is a LOCATION MAP, not a photo: the same camera view with each`,
+      'machine painted a flat solid colour and its id (e.g. "W-01") printed on it. Its ONLY',
+      "purpose is to tell you which machine sits at which position. Never read state, lights,",
+      `displays, or activity from IMAGE ${annotatedNo} — a flat colour block carries no`,
+      "information about whether that machine is running.",
     );
   }
   if (hasMask) {
     lines.push(
       "",
-      `The ${hasAnnotatedShot ? "next" : "image after the main frame"} is an ANALYSIS MASK:`,
-      "solid black regions are not your machines (a doorway, a neighbouring bank, glare).",
-      "Ignore anything that falls under a black region.",
+      `IMAGE ${maskNo} is an analysis mask with IMAGE ${liveNo}'s exact framing (it is not`,
+      `laid over the photo and hides nothing). Each clear / transparent window marks the one`,
+      `region of IMAGE ${liveNo} that decides a machine's state — its control panel and`,
+      "display. Everything under solid black is another bank, background, or a redaction —",
+      "do not analyse it.",
     );
   }
+  if (hasAnnotatedShot && hasMask) {
+    lines.push(
+      "",
+      `To tell which machine a transparent window belongs to: take that window's position in`,
+      `IMAGE ${maskNo} and read the id at the same position in IMAGE ${annotatedNo}. Then`,
+      `judge that machine only from the matching region of IMAGE ${liveNo}.`,
+    );
+  }
+
+  lines.push(
+    "",
+    `Classify these machines, reading state only from IMAGE ${liveNo}: ${machineIds.join(", ")}.`,
+    '  "free"         — available now (empty, not running)',
+    '  "occupied"     — running, holding laundry, or showing time remaining',
+    '  "out_of_order" — visibly broken, taped off, powered down, or a hard error on the display',
+    '  "unknown"      — you cannot tell from the live photo (say this rather than guessing)',
+  );
 
   const notes = machineIds
     .filter((id) => fragments[id]?.trim())

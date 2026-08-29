@@ -12,6 +12,50 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Recalibrated eval: 5 camera-scoped frames; calibration-images tested negative; new baseline
+
+- **Owner-driven.** Built the D-0015 calibration set camera by camera: for each of C-01…C-05
+  the owner supplied a re-retouched source, an annotated shot (ids painted on the view), and
+  an analysis mask; each `data/site-config.json` camera was rescoped to the machines it owns
+  and its label got a `camera` field. Dropped the 4 close-up frames (`img_1824/1825/1826/
+  8629`) no camera covered + their labels; `data/splits/evaluation.txt` → 5. Old 9-frame
+  numbers (62.2 / 57.8 / 75.6 / 80.0) retired.
+- **New eval code:** `src/agent/calibrated.ts` `runCalibrated` (one call + annotated + mask
+  via `cameraClassifyPrompt`); `src/eval/calibration.ts` `cameraForFrame`; `scoreAll(…,
+  scope)` scores only the camera's machines; `run-eval.ts` gets `--mode=calibrated` and
+  scopes baseline + calibrated identically. `AnthropicVisionClient` `max_tokens` 1500 →
+  4000 (1500 truncated sonnet mid-JSON on the bigger banks → whole frames lost to a parse
+  error). Prompt reworked twice to stop the model reading state off the annotation.
+- **Experiment log (7 `--live` runs, ~$0.7):** haiku baseline **45.5%** / harmful 9.1%;
+  haiku calibrated 27–36% across prompt variants; sonnet baseline 27–36% / calibrated
+  18–32%. Calibration via annotated shot + mask is **net-negative on every model and
+  phrasing** — the model reads state off the flat-colour annotation, and the mask image
+  collapses it onto `occupied` (`free` recall 0/10). **Documented dead-end**, kept in-tree
+  (`--mode=calibrated`, `data/cache/calibrated/`) so it reproduces.
+- **Result that carries over:** baseline + the 3 existing `machine`-scope corrections
+  (`W-04`/`D-02`/`D-06`) = **68.2%** (+22.7 pp), `out_of_order` **5/5**, harmful 9.1% →
+  4.5%. This is the headline. `docs/artifacts/eval-{baseline,baseline-corrected,calibrated,
+  calibrated-corrected}-2026-08-29.json`; all 4 reproduce byte-for-byte from `--replay`.
+- Removed the 2026-08-28 reports + `data/cache/agent/`. `laundry3.config.ts` `visionModel`
+  ends on `claude-haiku-4-5` (tried sonnet, reverted).
+- Docs: README Results + failure-mode/hot-take, `docs/CHANGELOG.md` (new Progression rows +
+  "Recalibrated evaluation" section + historical table), `docs/EVALUATION.md` Results,
+  `docs/DECISIONS.md` (D-0009 + D-0015 amendments), `docs/REPRODUCTION.md`, `data/README.md`,
+  `data/public/README.md`.
+- Verification: `typecheck` / `lint` / `format:check` — pass; `npm test` — **75/75**;
+  `check:data` — pass; `npm run build` — pass.
+- **Compliance:** `hackathon-compliance` → **PASS WITH RISKS**
+  (`docs/trajectories/compliance/2026-08-29-recalibrated-eval.md`). No blockers; reviewer
+  reproduced both replay runs byte-for-byte. Six risks, all handled before push: (1)
+  `docs/EVALUATION.md` gained a "what the 5 frames actually cover" table + the unbuilt-case
+  list; (2) the four `eval-*-2026-08-28.json` restored under `docs/artifacts/historical/` and
+  the historical Progression rows repointed (no more dangling paths / false replay claims);
+  (3) README + EVALUATION now also report the model-capability number (10/17 = 58.8% on
+  uncorrected cells) next to the 68.2%; (4) per-camera scope rationale + C-02/C-03 multi-view
+  overlap documented in `docs/EVALUATION.md`; (5) trajectory
+  `docs/trajectories/baseline/2026-08-29-recalibrated.md` added, old one annotated; (6)
+  `check:data` `--diff-filter=d` fix so deletions don't print a stray `fatal:`.
+
 ### 2026-08-29 — `/api/refresh`: camera-aware classify prompt (fragments + annotated shot + mask)
 
 - Owner ask: the seeded cameras only have stub screenshots — no annotated shots, no masks,

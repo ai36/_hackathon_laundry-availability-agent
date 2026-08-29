@@ -14,15 +14,17 @@ decision it led to. Include experiments that were later removed and what they ta
   labelled laundry-room frame set. Secondary: **harmful-error rate** (false free/occupied),
   **coverage**, tokens / cost per frame. Full plan in `docs/EVALUATION.md`.
 - **Cases:** target ≥10 P0 single-frame cases across states × conditions (`out_of_order`,
-  low-light, occlusion, a synthetic "person in frame" hard case — full list in
-  `docs/EVALUATION.md`) + 3 P1/P2 sequence cases. **Actual so far:** 9 labelled still frames
-  (`data/splits/evaluation.txt`) = 61 machine-observations, 45 determinate; the dryer-wall
-  video frames are being added to reach ≥10.
-- **Baseline:** single Claude vision prompt on the whole frame (same metric, same frames);
-  contextual baseline = the manual "walk over and check" process.
-- **Harness:** `npm run eval -- --mode=baseline|agent --split=evaluation --live|--replay`.
-  `--replay` re-scores from `data/cache/<mode>/` with no API key — verified to reproduce the
-  baseline numbers exactly.
+  low-light, occlusion — full list in `docs/EVALUATION.md`). **Actual (recalibrated
+  2026-08-29):** 5 labelled still frames, one per calibrated camera C-01…C-05
+  (`data/splits/evaluation.txt`) = 24 machine-observations, 22 determinate. Each camera
+  scopes its frame to the machines it is responsible for; baseline and calibrated are scored
+  on that same scope. _(The earlier set was 9 unscoped frames / 45 determinate — see the
+  "Recalibrated evaluation" section for what changed and why.)_
+- **Baseline:** single Claude vision prompt on the whole frame, told the camera's machine-id
+  list; contextual baseline = the manual "walk over and check" process.
+- **Harness:** `npm run eval -- --mode=baseline|agent|calibrated --split=evaluation
+  --live|--replay [--corrections]`. `--replay` re-scores from `data/cache/<mode>/` with no
+  API key — verified to reproduce the committed reports byte-for-byte.
 
 ## Progression
 
@@ -30,78 +32,127 @@ decision it led to. Include experiments that were later removed and what they ta
 | --- | --- | --- | --- |
 | Setup | Bootstrapped project infra: Next.js 16 + TS + Tailwind v4 + MobX, skills `find-skills` + `grillme`, docs/logging scaffold. Not an iteration on the solution — the starting line. | `npm run typecheck` / `lint` / `build` results below | Infra in place; next step is to define the problem and build the baseline. |
 | Scoping | Ran the `grillme` Socratic-interview skill to turn "laundry3" into a defined problem, user, MVP, metric, baseline, dataset plan, and phased scope. | `docs/PROBLEM.md`, `docs/EVALUATION.md`, D-0005 | Problem pinned: per-machine free/occupied status from laundry-room frames; core = agent → verified status list. |
-| Baseline | Single `claude-haiku-4-5` vision call per frame on the whole downscaled + author-redacted image; given the frame's machine-id list + numbering convention, no ROI / calibration / memory / verification. `npm run eval -- --mode=baseline --split=evaluation --live`. | **accuracy 62.2%**, harmful-error 2.2%, coverage 95.6%, acc-on-covered 65.1% (45 determinate obs, 9 frames). Report: `docs/artifacts/eval-baseline-2026-08-28.json`; replay cache: `data/cache/baseline/` (9 files, reproduces frames-absent). Cost $0.035, 16.6k in / 3.7k out. Single sample. | The model reads lit displays confidently: it gets the genuinely-occupied machines right (10/10) but **over-calls `free` machines with a lit standby panel as `occupied`** (7/27) and **never identifies `out_of_order`** (0/8 — the "E" error code reads as an active cycle). One harmful error (an `out_of_order` machine called `free`). Headroom is in `free` precision and in `out_of_order`. |
+| Baseline (9-frame set — retired) | Single `claude-haiku-4-5` vision call per frame on the whole downscaled + author-redacted image; given the frame's machine-id list + numbering convention, no ROI / calibration / memory / verification. | **accuracy 62.2%**, harmful-error 2.2%, coverage 95.6%, acc-on-covered 65.1% (45 determinate obs, 9 frames). Report kept at `docs/artifacts/historical/eval-baseline-2026-08-28.json` (the run's `data/cache/baseline/` is recoverable at the pre-2026-08-29 git history). Cost $0.035. Single sample. | The model reads lit displays confidently: gets the genuinely-occupied machines right (10/10) but **over-calls `free` machines with a lit standby panel as `occupied`** (7/27) and **never identifies `out_of_order`** (0/8 — the "E" error code reads as an active cycle). One harmful error. |
 | Iteration 1 (P0) | **Verification pass**: after the whole-frame classify, a second focused vision call on the machines that came back `unknown` or low-confidence, naming them and listing explicit out-of-order / occupied / free cues (incl. "dim or dead 7-segment segments — read the shape, don't over-read"). Its answers override pass 1. `npm run eval -- --mode=agent --split=evaluation`. | accuracy **57.8%** (baseline 62.2% — **−4.4 pp**), **harmful-error 0.0%** (baseline 2.2%), coverage **100%** (baseline 95.6%), acc-on-covered 57.8% (baseline 65.1%), `out_of_order` **0/8** (unchanged). 14 calls, $0.051 (1.4× baseline). Single sample. | **Mixed — net-negative on the primary metric.** The verify pass resolves the 2 baseline `unknown`s and clears the one harmful error, but it *over-commits*: it flips 4 correctly-`free` machines to `occupied`, so raw accuracy drops. It still cannot tell a broken machine from a running one. On `claude-sonnet-5` (archived at commit `e8de845`, on the earlier lightly-blurred frames) the same pass looked better — harmful 11.1%→8.9%, `out_of_order` 0/8→2/8 — but on the cost-appropriate model it is not a clear win. **Not shipped as the final answer.** Next: a human-in-the-loop correction store (Iteration 2), which is what actually moves `out_of_order`. |
-| Iteration 2 (P0) | **Integrator corrections** (D-0014). The integrator marks a machine wrong once; the correction is stored (`data/corrections/`) and applied as an authoritative override. `observation`-scope fixes one (frame, machine); `machine`-scope (for durable properties like `out_of_order`) applies to that machine in **every** frame. `npm run eval -- --mode=agent --corrections`. | **3 `machine`-scope corrections** (`W-04`, `D-02`, `D-06` = "out of service") → accuracy **57.8% → 75.6%**, **`out_of_order` recall 0/8 → 8/8**, harmful-error 0.0% (unchanged), coverage 100% (unchanged), **no extra model cost** (post-hoc). Report: `docs/artifacts/eval-agent-corrected-2026-08-28.json`; `--replay --corrections` reproduces it. | **Kept — the shipped improvement path.** The vision model can't distinguish a hard-error display from a running cycle; one durable fact per broken machine fixes it in every angle and every future capture. Ceiling: the remaining 11 errors are all `free`→`occupied` over-calls, which are time-varying (`observation`-scope) — correcting those is per-frame hand-labelling, not learning, so they're left as the honest limit. |
-| Iteration 3 (P1) | _TBD — temporal memory / change-detection to cut the `free`→`occupied` over-calls._ | _[new result]_ | _[kept / revised / removed]_ |
-| Final | _TBD — combine what worked._ | _[final result]_ | _Main contribution: …_ |
+| Iteration 2 (P0) | **Integrator corrections** (D-0014). The integrator marks a machine wrong once; the correction is stored (`data/corrections/`) and applied as an authoritative override. `observation`-scope fixes one (frame, machine); `machine`-scope (for durable properties like `out_of_order`) applies to that machine in **every** frame. | **3 `machine`-scope corrections** (`W-04`, `D-02`, `D-06` = "out of service"). On the 9-frame set: accuracy **57.8% → 75.6%**, **`out_of_order` recall 0/8 → 8/8**, no extra model cost (post-hoc). Report kept at `docs/artifacts/historical/eval-agent-corrected-2026-08-28.json`. The same 3 corrections carry to the recalibrated set — see the row below. | **Kept — the improvement.** The vision model can't distinguish a hard-error display from a running cycle; one durable fact per broken machine fixes it in every angle and every future capture. Ceiling: the remaining errors are `free`→`occupied` over-calls, time-varying (`observation`-scope) — per-frame hand-labelling, not learning, left as the honest limit. |
+| Recalibration (2026-08-29) — dataset | Rebuilt the eval around the D-0015 calibration model: 5 committed stills, one per camera C-01…C-05, each re-retouched, each with a `camera` field in its label. `data/site-config.json` scopes every camera to the machines it owns + carries its annotated shot and analysis mask. Dropped the 4 close-up frames that no camera covered. New eval mode `--mode=calibrated`; baseline re-run on the new scoped set. | Baseline (`claude-haiku-4-5`, whole frame + scoped id list): **accuracy 45.5%**, harmful-error 9.1%, coverage 100%, `out_of_order` 0/5 (22 determinate obs / 5 frames). `docs/artifacts/eval-baseline-2026-08-29.json`, cache `data/cache/baseline/` (5). | Smaller, harder set — the 5 frames concentrate the dryer-wall panels and every `out_of_order` case. `free`→`occupied` over-call (6/10) and `out_of_order` 0/5 are the same failures as before, sharper. The old 9-frame numbers (62.2 / 57.8 / 75.6 / 80.0) do not carry over and are retired. |
+| Recalibration (2026-08-29) — calibrated agent | **Feed the camera's annotated shot + analysis mask as extra vision inputs**, with a prompt that names them ("IMAGE 2 is a location map — never read state from it; IMAGE 3 is a mask — its clear windows are the panels to read in IMAGE 1"). `npm run eval -- --mode=calibrated`. | accuracy **31.8%** (baseline 45.5% — **−13.7 pp**), harmful-error 0.0%, coverage 100%, `out_of_order` 0/5. `docs/artifacts/eval-calibrated-2026-08-29.json`, cache `data/cache/calibrated/` (5). Also tried on `claude-sonnet-5` (31.8%) and across four prompt phrasings (27–36%); none beat the plain baseline. | **Removed — a documented dead-end.** The model reads state off the flat-colour annotation ("Red washer… control panel visible → occupied"), and the mostly-black mask image drives it to answer `occupied` for every machine (`free` recall 0/10). The 0% harmful rate is an artefact of never saying `free`, not a safety gain. Kept in-tree (`--mode=calibrated`, cache committed) so the negative result reproduces. What calibration *did* leave: per-camera machine scoping, which is neutral. |
+| Recalibration (2026-08-29) — integrator corrections | **Same 3 `machine`-scope corrections** (`W-04`, `D-02`, `D-06` = "out of service"), re-scored on the new set. `--replay --corrections`. | Baseline + corrections: accuracy **45.5% → 68.2%** (+22.7 pp), `out_of_order` recall **0/5 → 5/5**, harmful-error **9.1% → 4.5%**, coverage 100%, no extra model cost. `docs/artifacts/eval-baseline-corrected-2026-08-29.json`. (Calibrated + corrections: 54.5%, from the lower calibrated base.) | **Kept — the improvement.** Unchanged conclusion from the old set: the vision model cannot tell a hard-error display from a running cycle, and one durable fact per broken unit clears it in every camera at no model cost. Now also halves the harmful-error rate. Remaining error is `free`→`occupied` over-calls, which are time-varying and out of scope for durable corrections. |
 
-## Baseline → Iteration 1 → Iteration 2
+## Recalibrated evaluation (2026-08-29)
 
-**One sample per mode** (`claude-haiku-4-5`; stochastic, so a single run shifts these a few
-points — multi-sample averaging deferred on API budget). All score the same 45 determinate
-observations on the same 9 committed frames; all `--replay`-reproducible from `data/cache/`.
+The eval was rebuilt around the D-0015 calibration model. **What changed:** the frame set
+went from 9 unscoped stills to **5 stills, one per calibrated camera** (`C-01…C-05`), each
+re-retouched by the author and each scoped — via `data/site-config.json` — to the machines
+that camera is responsible for. The 4 close-up frames no camera covered were dropped. A new
+`--mode=calibrated` feeds each camera's annotated shot + analysis mask as extra images.
 
-| Metric | Baseline | Iter 1 (verify) | Iter 2 (verify + corr.) | **Final: classify + corr.** |
+**Why the old numbers do not carry over:** different frames, different (author-redrawn)
+redactions, and per-camera scoping change the observation set entirely (45 determinate → 22).
+The 2026-08-28 reports and the 62.2 / 57.8 / 75.6 / 80.0 figures are **retired**; the
+Progression rows above them are kept as history.
+
+**One sample per mode** (`claude-haiku-4-5`; stochastic — a single run shifts these several
+points, and n = 22 is small; treat magnitudes as indicative). All score the same 22
+determinate observations on the same 5 committed frames; all `--replay`-reproducible from
+`data/cache/` byte-for-byte.
+
+| Metric | Baseline | Calibrated | **Baseline + corr.** | Calibrated + corr. |
 | --- | --- | --- | --- | --- |
-| Per-machine accuracy (determinate GT, n=45) | 62.2% | 57.8% | 75.6% | **80.0%** |
-| Harmful-error rate | 2.2% | 0.0% | 0.0% | **0.0%** |
+| Per-machine accuracy (determinate GT, n=22) | 45.5% | 31.8% | **68.2%** | 54.5% |
+| Harmful-error rate | 9.1% | 0.0% | **4.5%** | 0.0% |
+| Coverage | 100% | 100% | 100% | 100% |
+| Accuracy on covered | 45.5% | 31.8% | **68.2%** | 54.5% |
+| `out_of_order` recall | 0/5 | 0/5 | **5/5** | 5/5 |
+| Model cost per frame | ~$0.003 | ~$0.007 | ~$0.003 | ~$0.007 |
+
+**Calibrated** (annotated shot + mask as vision inputs) is a **documented dead-end**: −13.7 pp
+vs baseline, the model reads state off the annotation layer, and the mask image collapses it
+onto `occupied` (`free` recall 0/10 — hence the misleading 0% harmful). Not shipped; kept
+in-tree for reproducibility. **Baseline + integrator corrections** is the improvement:
++22.7 pp, `out_of_order` 0/5 → 5/5, harmful-error halved.
+
+### Historical — Baseline → Iteration 1 → Iteration 2 (9-frame set, retired 2026-08-29)
+
+**One sample per mode** (`claude-haiku-4-5`). Scored 45 determinate observations on 9
+committed frames; superseded by the recalibrated set above. The four reports are kept under
+`docs/artifacts/historical/`; the matching `data/cache/{baseline,agent}/` from that run were
+removed in the recut and are recoverable from git history before 2026-08-29 (the reports
+carry the full per-frame predictions, so they stand as the evidence without the cache).
+
+| Metric | Baseline | Iter 1 (verify) | Iter 2 (verify + corr.) | Final: classify + corr. |
+| --- | --- | --- | --- | --- |
+| Per-machine accuracy (determinate GT, n=45) | 62.2% | 57.8% | 75.6% | 80.0% |
+| Harmful-error rate | 2.2% | 0.0% | 0.0% | 0.0% |
 | Coverage | 95.6% | 100% | 100% | 95.6% |
-| Accuracy on covered | 65.1% | 57.8% | 75.6% | **83.7%** |
-| `out_of_order` recall | 0/8 | 0/8 | 8/8 | **8/8** |
-| Model cost per frame | ~$0.004 | ~$0.006 | ~$0.006 | **~$0.004** |
+| Accuracy on covered | 65.1% | 57.8% | 75.6% | 83.7% |
+| `out_of_order` recall | 0/8 | 0/8 | 8/8 | 8/8 |
+| Model cost per frame | ~$0.004 | ~$0.006 | ~$0.006 | ~$0.004 |
 
-**Iteration 1 (verification pass)** is *not* an improvement on this model — it over-commits,
-flipping correctly-`free` machines to `occupied`, so accuracy drops 4.4 pp. Kept in-tree,
-config-gated (`agent.verification.enabled`), as a studied negative result.
-
-**Iteration 2 (integrator corrections)** is the improvement — but stacked on the regressive
-verify pass it only reaches 75.6%. The **strongest config drops the verify pass**:
-`npm run eval -- --mode=baseline --split=evaluation --replay --corrections` →
-**80.0%** (`docs/artifacts/eval-baseline-corrected-2026-08-28.json`). For deployment, set
-`agent.verification.enabled = false` and keep the corrections.
-
-**How to read the delta.** The corrections are **human-supplied ground truth applied as an
-override**, not a model capability gain — and the Iter 2 / Final columns get a resource the
-Baseline / Iter 1 columns do not. A correction always scores perfectly on its own cell *by
-construction* (its value is label-consistent), so "+13.4 / +17.8 pp" is really "an integrator
-chose to override 8 of 45 cells to their known-correct value." The honest reading: (a) the
-`out_of_order`-recall failure is real and the model doesn't fix it, (b) one durable fact per
-broken unit removes it in every angle and every future capture at zero model cost, (c) there
-is no repo-external proof (service ticket, photo) that `W-04` / `D-02` / `D-06` are physically
-out of service — only the eval label and the author's `note`. The remaining 11 errors are all
-time-varying `free`→`occupied` over-calls, which `machine`-scope corrections can't help.
+On this set, **Iteration 1 (verification pass)** was net-negative (−4.4 pp, over-commits
+`free`→`occupied`) and **Iteration 2 (integrator corrections)** was the improvement, taking
+the classify-only config to 80.0% / `out_of_order` 8/8. Both conclusions held on the
+recalibrated set — the verify pass is still config-gated off (`agent.verification.enabled`),
+the corrections are still the win — so the 2026-08-29 numbers above are the ones to cite.
 
 ## Main contribution, failure mode, and hot take
 
-**Main contribution.** Two things. (1) The **evaluation frame** that made a plausible-looking
-agent step (the verification pass) show up as a regression instead of shipping: `unknown` +
-`out_of_order` as first-class states, `harmful`-error scored separately (D-0006), a fair
-symmetric baseline (D-0012), key-free `--replay`. (2) The **integrator-correction store**
-(D-0014) — the mechanism that actually moved the metric the model can't: 3 durable "out of
-service" facts an integrator records once take accuracy 62.2% → 75.6% and `out_of_order`
-recall 0/8 → 8/8 at no extra model cost. The agentic win here is *knowing when to stop
-asking the model and let a human write one authoritative fact.*
+**Main contribution.** Two things. (1) The **evaluation frame** that made two plausible-looking
+agent steps — a verification pass, and image-based per-camera calibration — show up as
+regressions instead of shipping: `unknown` + `out_of_order` as first-class states,
+`harmful`-error scored separately (D-0006), a fair baseline told the same machine list
+(D-0012), key-free `--replay`. (2) The **integrator-correction store** (D-0014) — the
+mechanism that actually moved the metric the model can't: 3 durable "out of service" facts an
+integrator records once take accuracy 45.5% → 68.2% and `out_of_order` recall 0/5 → 5/5 at no
+extra model cost. The agentic win here is *knowing when to stop asking the model and let a
+human write one authoritative fact.*
 
-**Main failure mode.** The verification pass *over-commits*. Asked to re-examine a
-low-confidence machine, `claude-haiku-4-5` resolves the doubt by picking the more eventful
-label — a lit standby panel becomes `occupied`, an "E" error code becomes `occupied` — so
-the pass trades 2 recovered `unknown`s for 4 new `free`→`occupied` errors and never reaches
-`out_of_order`. On `claude-sonnet-5` (archived, earlier frames) the same prompt behaved
-better; the regression is model-specific and only shows up when you actually run the cheaper
-model you intend to deploy.
+**Main failure mode.** The model reads the price panel, not the cycle. `claude-haiku-4-5`
+treats the always-lit `2.25` price display as an active countdown, so it over-calls `free` as
+`occupied` (6/10), and it reads a hard-error display (`E rot`) as a running cycle, so
+`out_of_order` recall is 0/5. Handing it the D-0015 calibration images made this *worse*: it
+reads state off the flat-colour annotation, and the mostly-black mask image pushes it to
+answer `occupied` for everything (`free` recall 0/10). Two models, four prompt phrasings —
+none beat the plain whole-frame call.
 
 **Hot take.** The highest-leverage work here was not any agent change — it was building the
-metric before building the agent. A verification pass that looked like a safety win on a
-strong model turned out **net-negative on accuracy** on the model we'd actually ship. Only
-because `harmful` error, coverage, and `out_of_order` were scored separately could we see
-that clearly and decline to ship it, instead of celebrating a −4-point regression as
-"more cautious". Decide what each error costs the user, encode it in the metric, then let
-the metric — not the demo — tell you whether the agent is better.
+metric before building the agent, and being willing to log a negative result. A verification
+pass and then a richer calibrated input both *looked* like progress; separate `harmful` /
+coverage / `out_of_order` scoring is what showed each was a regression on the model we'd
+actually ship, instead of a demo we'd celebrate. What moved the metric was not a cleverer
+prompt or a richer input — it was letting an integrator write three authoritative facts the
+model kept getting wrong. Decide what each error costs the user, encode it in the metric,
+then let the metric — not the demo — tell you whether the agent is better.
 
 ## Verification runs
 
 Record the result of each infra verification here (append, newest first).
+
+### 2026-08-29 — recalibrated eval: 5 camera-scoped frames; calibration images = dead-end; new baseline
+
+- **Dataset:** 9 unscoped frames → 5 stills, one per camera `C-01…C-05`, each re-retouched by
+  the author, each with a `camera` field in its label + a scoped `machineIds` list + an
+  annotated shot + an analysis mask in `data/site-config.json`. Dropped `img_1824/1825/1826/
+  8629` (close-ups no camera covered) and their labels; `data/splits/evaluation.txt` → 5.
+- **New code:** `--mode=calibrated` (`src/agent/calibrated.ts`, `runCalibrated` — one call +
+  annotated + mask via `cameraClassifyPrompt`); `src/eval/calibration.ts` `cameraForFrame`;
+  `scoreAll(…, scope)` restricts scoring to the camera's machines; `run-eval.ts` resolves
+  the camera per frame and scopes baseline + calibrated identically. `AnthropicVisionClient`
+  `max_tokens` 1500 → 4000 (1500 truncated sonnet mid-JSON on the larger banks, losing whole
+  frames to parse errors). `laundry3.config.ts` `visionModel` stays `claude-haiku-4-5`.
+- **`--live` runs** (`claude-haiku-4-5`, 5 calls each): baseline **45.5%** / harmful 9.1% /
+  cov 100% / oo 0/5; calibrated **31.8%** / harmful 0.0% / cov 100% / oo 0/5. `--replay
+  --corrections`: baseline+corr **68.2%** / harmful 4.5% / oo **5/5**; calibrated+corr 54.5%.
+  Also tried calibrated on `claude-sonnet-5` (31.8%) and four prompt phrasings (27–36%) —
+  none beat baseline. ~$0.7 total API across the iteration.
+- Reports `docs/artifacts/eval-{baseline,baseline-corrected,calibrated,calibrated-corrected}
+  -2026-08-29.json`; caches `data/cache/{baseline,calibrated}/` (5 each, force-added). All
+  four reports reproduce byte-for-byte from `--replay`. Removed the 2026-08-28 reports +
+  `data/cache/agent/`.
+- `typecheck` / `lint` / `format:check` — pass; `npm test` — **75/75** (`calibrated.test.ts`,
+  `calibration.test.ts` added); `check:data` — pass; `npm run build` — pass.
+- **Verdict:** calibration-via-images is a documented dead-end (kept in-tree for
+  reproducibility); the integrator-correction result carries over and is the improvement.
 
 ### 2026-08-29 — `/api/refresh` camera-aware prompt (fragments + annotated + mask); eval unchanged
 

@@ -24,7 +24,11 @@ const VIDEO_RE = /\.(mov|mp4|m4v|avi|mkv|webm)$/i;
 function stagedFiles() {
   let out;
   try {
-    out = execFileSync("git", ["diff", "--cached", "--name-only", "-z"], { encoding: "buffer" });
+    // --name-status with --diff-filter=d drops deletions, so we never `git show` a path that
+    // no longer exists (which prints a stray `fatal:` even though it is caught below).
+    out = execFileSync("git", ["diff", "--cached", "--diff-filter=d", "--name-only", "-z"], {
+      encoding: "buffer",
+    });
   } catch {
     return []; // not a git repo / no index — nothing to gate
   }

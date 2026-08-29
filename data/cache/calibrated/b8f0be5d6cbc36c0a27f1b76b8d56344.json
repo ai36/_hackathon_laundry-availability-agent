@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-01\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Red dryer with illuminated display panel showing active cycle information and time remaining visible on screen\"\n    },\n    {\n      \"machineId\": \"D-02\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Yellow dryer with illuminated display panel showing active cycle information and time remaining visible on screen\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 5199,
+  "outputTokens": 144,
+  "costUsd": 0.005919
+}

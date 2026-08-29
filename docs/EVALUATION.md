@@ -67,6 +67,34 @@ Each case's `condition` maps to `frameConditions` (frame-wide) and/or `observati
 Case 15 reveals whether the agent abstains (or, under P1, holds the prior state) for the
 machines the person blocks, instead of guessing.
 
+### What the committed set actually covers (2026-08-29)
+
+The delivered eval is **5 frames / 22 determinate observations** — one still per calibrated
+camera, chosen so every camera is exercised end-to-end, not to hit every row above. Coverage:
+
+| Committed frame (camera) | Conditions it exercises | Cases |
+| --- | --- | --- |
+| `img_1819` (C-01, W-01–W-04) | nominal wide shot; one taped-off unit | 1, 14 |
+| `img_1821` (C-02, D-01–D-07) | dryer bank, near-full, two hard errors | 4, 13, 14 |
+| `img_1822` (C-03, D-01–D-02) | close-up of the same stack from another angle; hard error | 2, 14 |
+| `img_1823` (C-04, D-03–D-10) | dryer wall, mixed phases, hard error, two indeterminate | 2, 4, 11(partial), 14 |
+| `img_8633` (C-05, W-14–W-16) | washer close-up, low occupancy | 3, 12 |
+
+**Not yet built:** cases 5–10, 9b, 15 (occlusion, glare, low light / lights-off, partial or
+dead-segment indicator, open idle door, person-in-frame). These need the deferred dryer-wall
+video frames or additional cameras over the close-up views that were dropped in the recut.
+`out_of_order` (case 14) is over-represented — 5 of 22 observations — which is deliberate:
+it is the failure the corrections target, and the small set concentrates it.
+
+**Why each camera scopes the machines it does** (`data/site-config.json`) — the scope is the
+machines whose control panel is actually readable in that camera's frame, not a selection
+drawn to flatter the score. C-01: the four front-row washers (W-01–W-04) whose panels face
+the lens. C-02: the full dryer bank D-01–D-07 visible along the left wall. C-03: a tight
+close-up of the D-01/D-02 stack only. C-04: the dryer wall D-03–D-10 head-on. C-05: the
+three washers W-14–W-16 nearest the sink. **C-02 and C-03 overlap on D-01/D-02 on purpose**
+— it is the multi-view case (case 2): the same two machines scored from a wall shot and from
+a close-up, so D-01 and D-02 each contribute two independent observations.
+
 ### P1 / P2 sequence cases (only if the relevant feature is built)
 
 | # | Tier | Sequence | What it tests |
@@ -153,10 +181,11 @@ decides during dataset construction and the decision is recorded next to the fra
   lightly-blurred pre-redaction frames is preserved at commit `e8de845`; it is **not**
   comparable point-for-point (model *and* frames differ) and is kept only to show the
   verification pass behaving differently on a stronger model.
-- **GT-derived frame membership (D-0012).** Both baseline and agent are told which machine
-  ids are in each frame (and their type), derived from the label. This is symmetric so the
-  A/B stays fair, but it is an unrealistic assist versus a real deployment where the system
-  must also work out which machines a camera sees.
+- **Camera-declared machine membership (D-0012 / D-0015).** Both baseline and calibrated are
+  told which machine ids the camera covers — from `data/site-config.json`, which an
+  integrator authors during calibration. This is symmetric so the A/B stays fair, and in a
+  real deployment the integrator would declare it too; but it does hand both sides the
+  machine list rather than making them discover it from the frame.
 - **`off` = out of order.** The dataset author labelled powered-down machines `off`, mapped
   to `out_of_order` (author-confirmed not usable, not merely "available and idle"). This
   drives the `out_of_order` results and some harmful errors; applied identically to both
@@ -166,88 +195,95 @@ decides during dataset construction and the decision is recorded next to the fra
   would. Same handicap for both sides. Every *determinate* machine's status display was
   verified still legible before the frame was committed, and the cache now matches the
   committed frames (both runs recorded against them).
-- **9 frames.** Below the "10+ cases" guideline (45 per-machine determinate observations is
-  the effective N); video-derived frames are being added.
-- **Corrections are measured against the same labels they were derived from.** The
-  Iteration 2 corrections set each cell to its label-consistent value, so a correction
-  *always* scores 100% on its own cell by construction. "+13.4 pp" therefore means "an
-  integrator overrode 8 of 45 cells to their known-correct value", not an independent
-  capability gain, and the Iter 2 / Final configs get a resource (human ground-truth
-  overrides) the Baseline / Iter 1 configs do not. What the number honestly shows: the
-  model's `out_of_order` blindness is real and unfixed by prompting, and one durable fact
-  per broken unit removes it everywhere at zero model cost. There is no repo-external
-  evidence (service ticket, photo) that `W-04` / `D-02` / `D-06` are physically out of
-  service — only the eval label and the author's `note`.
+- **5 frames, 22 determinate observations.** One still per calibrated camera (`C-01…C-05`),
+  each scoped to the machines that camera owns. Well below the "10+ cases" guideline and
+  small enough that a single stochastic run shifts the numbers several points — read the
+  magnitudes as indicative, not precise. Multi-sample averaging deferred on API budget.
+- **Calibration images tested negative.** The `--mode=calibrated` run feeds each camera's
+  annotated shot + analysis mask as extra vision inputs; it scored −13.7 pp vs the plain
+  baseline and is retained only as a reproducible dead-end (see Results). The reported
+  improvement is from integrator corrections, not from calibration.
+- **Corrections are measured against the same labels they were derived from.** A `machine`
+  correction sets each of its cells to its label-consistent value, so it *always* scores
+  100% on its own cell by construction. "+22.7 pp" therefore means "an integrator overrode
+  5 of 22 cells to their known-correct value", not an independent capability gain — the
+  corrected configs get a resource (human ground-truth overrides) the others do not. What
+  the number honestly shows: the model's `out_of_order` blindness is real and unfixed by
+  prompting or by image calibration, and one durable fact per broken unit removes it
+  everywhere at zero model cost. There is no repo-external evidence (service ticket, photo)
+  that `W-04` / `D-02` / `D-06` are physically out of service — only the eval label and the
+  author's `note`.
 
 ## Results
 
-Model `claude-haiku-4-5`, 9 committed frames, 45 determinate observations, single sample per
-mode. Both `--replay`-reproducible from `data/cache/`. Raw outputs under `docs/artifacts/`.
+Model `claude-haiku-4-5`, 5 committed frames (one per calibrated camera), 22 determinate
+observations, single sample per mode. All `--replay`-reproducible from `data/cache/`
+byte-for-byte. Raw outputs under `docs/artifacts/eval-*-2026-08-29.json`.
 
-### Baseline — 2026-08-28 (`data/cache/baseline/`)
+_(The earlier 9-frame / 45-observation results — baseline 62.2%, verify pass 57.8%,
++corrections 75.6–80.0% — are retired; see `docs/CHANGELOG.md` "Historical".)_
+
+### Baseline — 2026-08-29 (`data/cache/baseline/`)
+
+`npm run eval -- --mode=baseline --split=evaluation --live`. One whole-frame call, told the
+camera's machine-id list.
 
 | Metric | Value |
 | --- | --- |
-| Per-machine accuracy (determinate GT, n=45) | **62.2%** |
-| Harmful-error rate | 2.2% |
-| Coverage | 95.6% |
-| Accuracy on covered | 65.1% |
-| Cost | $0.035 (9 calls, 16.6k in / 3.7k out) |
+| Per-machine accuracy (determinate GT, n=22) | **45.5%** |
+| Harmful-error rate | 9.1% |
+| Coverage | 100% |
+| `out_of_order` recall | 0/5 |
+| Cost | ~$0.017 (5 calls, ~9.2k in / 1.6k out) |
 
-Confusion (gt → free / occupied / unknown / out_of_order): free 18/7/2/0, occupied 0/10/0/0,
-out_of_order 1/7/0/0. Gets every occupied machine right; over-calls 7/27 `free` (lit standby
-panel → `occupied`); `out_of_order` 0/8 (the "E" error code reads as an active cycle).
+Confusion (gt → free / occupied / out_of_order / unknown): free 4/6/0/0, occupied 1/6/0/0,
+out_of_order 1/4/0/0. Over-calls 6/10 `free` (the always-lit `2.25` price display reads as an
+active countdown); `out_of_order` 0/5 (the `E rot` error code reads as a running cycle). Two
+harmful errors (an occupied and an out-of-order machine each called `free`).
 
-### Agent — Iteration 1, verification pass — 2026-08-28 (`data/cache/agent/`)
+### Calibrated — 2026-08-29 (`data/cache/calibrated/`) — documented dead-end
+
+`npm run eval -- --mode=calibrated --split=evaluation --live`. Baseline call + the camera's
+annotated shot ("location map") and analysis mask, with a prompt that names each image.
 
 | Metric | Value | vs baseline |
 | --- | --- | --- |
-| Per-machine accuracy (determinate GT, n=45) | 57.8% | **−4.4 pp** |
-| Harmful-error rate | **0.0%** | −2.2 pp |
-| Coverage | **100%** | +4.4 pp |
-| Accuracy on covered | 57.8% | −7.3 pp |
-| `out_of_order` recall | 0/8 | ±0 |
-| Cost | $0.051 (14 calls: 9 classify + 5 verify) | ×1.4 |
+| Per-machine accuracy (determinate GT, n=22) | 31.8% | **−13.7 pp** |
+| Harmful-error rate | 0.0% | −9.1 pp |
+| Coverage | 100% | ±0 |
+| `out_of_order` recall | 0/5 | ±0 |
+| Cost | ~$0.034 (5 calls, ~26k in / 1.6k out) | ×2 |
 
-Confusion (gt → free / occupied / unknown / out_of_order): free 16/11/0/0, occupied 0/10/0/0,
-out_of_order 0/8/0/0. The verify pass clears both baseline `unknown`s and the one harmful
-error, but flips 4 correctly-`free` machines to `occupied` — **net-negative on accuracy**.
-Kept config-gated (`agent.verification.enabled`) as a studied negative result. See
-`docs/CHANGELOG.md` for the write-up and the archived `claude-sonnet-5` contrast (`e8de845`).
+Confusion (gt → …): free 0/10/0/0, occupied 0/7/0/0, out_of_order 0/5/0/0. The model calls
+**every** machine `occupied`: it reads state off the flat-colour annotation, and the
+mostly-black mask image pushes it toward "panel visible → running". The 0% harmful rate is an
+artefact of never saying `free`. Also tried on `claude-sonnet-5` (31.8%) and four prompt
+phrasings (27–36%); none beat the plain baseline. **Not shipped** — kept in-tree
+(`--mode=calibrated`, cache committed) so the negative result reproduces.
 
-### Agent + integrator corrections — Iteration 2 (D-0014) — 2026-08-28 (`data/corrections/`)
-
-`npm run eval -- --mode=agent --split=evaluation --replay --corrections`. Report:
-`docs/artifacts/eval-agent-corrected-2026-08-28.json`.
-
-| Metric | Value | vs agent (Iter 1) | vs baseline |
-| --- | --- | --- | --- |
-| Per-machine accuracy (determinate GT, n=45) | **75.6%** | +17.8 pp | +13.4 pp |
-| Harmful-error rate | 0.0% | ±0 | −2.2 pp |
-| Coverage | 100% | ±0 | +4.4 pp |
-| `out_of_order` recall | **8/8** | +8 | +8 |
-| Model cost | $0.051 (unchanged — corrections applied post-hoc) | — | — |
-
-Corrections on file: **3**, all `machine`-scope (`W-04`, `D-02`, `D-06` = "out of service"),
-10 applications across the 9 frames (8 on determinate cells). Confusion (gt → …): free
-16/11/0/0, occupied 0/10/0/0, out_of_order 0/0/0/8. The remaining 11 errors are all
-`free`→`occupied` over-calls — time-varying, so `observation`-scope only; correcting them
-would be per-frame hand-labelling, the honest ceiling of a durable-fact mechanism.
-
-### Final (recommended) — classify + corrections, no verify pass — 2026-08-28
+### Baseline + integrator corrections (D-0014) — 2026-08-29 — recommended
 
 `npm run eval -- --mode=baseline --split=evaluation --replay --corrections`. Report:
-`docs/artifacts/eval-baseline-corrected-2026-08-28.json`. Dropping the regressive
-verification pass and keeping the 3 corrections:
+`docs/artifacts/eval-baseline-corrected-2026-08-29.json`.
 
 | Metric | Value | vs baseline |
 | --- | --- | --- |
-| Per-machine accuracy (determinate GT, n=45) | **80.0%** | +17.8 pp |
-| Harmful-error rate | 0.0% | −2.2 pp |
-| Coverage | 95.6% | ±0 |
-| Accuracy on covered | 83.7% | +18.6 pp |
-| `out_of_order` recall | **8/8** | +8 |
-| Model cost | $0.035 (9 calls, no verify) | ×1 |
+| Per-machine accuracy (determinate GT, n=22) | **68.2%** | +22.7 pp |
+| Harmful-error rate | **4.5%** | −4.5 pp |
+| Coverage | 100% | ±0 |
+| `out_of_order` recall | **5/5** | +5 |
+| Model cost | ~$0.017 (unchanged — corrections applied post-hoc) | ×1 |
 
-For deployment: `agent.verification.enabled = false`, corrections on. (Same circularity
-caveat as above applies to the delta.)
+Corrections on file: **3**, all `machine`-scope (`W-04`, `D-02`, `D-06` = "out of service"),
+covering **5** determinate observations across cameras C-01–C-04 (all 5 were baseline errors).
+Confusion (gt → …): free 4/6/0/0, occupied 1/6/0/0, out_of_order 0/0/5/0.
+
+**Model capability, corrections excluded:** on the **17** observations no correction touches,
+the baseline model scores **10/17 = 58.8%** — that is the honest "what the model can do"
+number. The 68.2% is that plus 5 human-supplied overrides. The remaining model error is
+`free`→`occupied` over-calls plus one occupied machine read as `free` — time-varying, so
+`observation`-scope only; correcting those would be per-frame hand-labelling, the honest
+ceiling of a durable-fact mechanism.
+
+_(Calibrated + the same 3 corrections: 54.5% — the corrections lift the lower calibrated base
+by the same 5 cells but cannot undo the "everything occupied" collapse.)_

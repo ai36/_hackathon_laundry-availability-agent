@@ -51,15 +51,13 @@ npm start        # serve the production build
 >
 > **`POST /api/refresh`** (the "refresh" button + auto toggle) is **key-optional**:
 > with no `ANTHROPIC_API_KEY` it only re-fuses the committed report + corrections — **free**,
-> and this is the default. `data/site-config.json` ships **5 seeded cameras** (`C-01…C-05`,
-> stub images = the committed eval frames), so **with a key** a manual click runs ~5
-> Anthropic vision calls (one per camera feed) and fuses the live reads below corrections.
-> The prompt is `cameraClassifyPrompt` (roster `promptFragment` hints + a camera's annotated
-> shot / mask as extra reference images when calibrated — none of the seeds carry those, so
-> today it matches the baseline wording). The auto toggle is off by default and stops itself
-> after **20 cycles** (~100 calls worst case). Results are cached under `data/cache/live/`
-> (git-ignored), so re-runs are free. This route is **not** part of the scored eval — its
-> accuracy effect is unmeasured.
+> and this is the default. `data/site-config.json` ships **5 calibrated cameras** (`C-01…C-05`,
+> stub = the committed eval frames, each with an annotated shot + mask), so **with a key** a
+> manual click runs ~5 vision calls (one per camera feed) via `cameraClassifyPrompt` and
+> fuses the live reads below corrections. The auto toggle is off by default and stops after
+> **20 cycles**. Results cache to `data/cache/live/` (git-ignored). Note the scored eval
+> found this calibrated prompt **net-negative** (see "Calibrated agent" below) — the route
+> is a live operator tool, not a results claim.
 
 ## Checks
 
@@ -67,7 +65,7 @@ npm start        # serve the production build
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint (flat config)
 npm run format:check # prettier
-npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations, calibration-config guard, requestHash + camera-classify prompt (expect: 70/70 pass)
+npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations, calibration-config guard, requestHash, camera-classify + calibrated eval (expect: 75/75 pass)
 npm run check:data   # dataset privacy gate (also runs as the pre-commit hook)
 ```
 
@@ -118,51 +116,55 @@ consistent (both recorded against the committed author-redacted frames on `claud
 A fresh `--live` run re-samples the model and shifts the numbers a few points; `--replay` is
 exact.
 
-**Recorded baseline run** (`data/cache/baseline/`, model `claude-haiku-4-5`):
+**Recorded baseline run** (`data/cache/baseline/`, model `claude-haiku-4-5`, 2026-08-29):
 
-| accuracy | harmful-error | coverage | acc-on-covered | cost | runtime |
+| accuracy | harmful-error | coverage | `out_of_order` | cost | runtime |
 | --- | --- | --- | --- | --- | --- |
-| 62.2% | 2.2% | 95.6% | 65.1% | $0.035 (`--live`) / $0 (`--replay`) | ~20 s `--live`, ~1 s `--replay` |
+| 45.5% | 9.1% | 100% | 0/5 | ~$0.017 (`--live`) / $0 (`--replay`) | ~15 s `--live`, ~1 s `--replay` |
 
-45 determinate observations over 9 frames.
+22 determinate observations over 5 frames (one per camera). Confusion (gt → free / occupied /
+out_of_order / unknown): free 4/6/0/0, occupied 1/6/0/0, out_of_order 1/4/0/0.
 
-## Agent (Iteration 1 — verification pass)
+## Calibrated agent — documented dead-end
 
 ```bash
-npm run eval -- --mode=agent --split=evaluation --replay      # NO key, NO cost — reproduces the recorded run
-npm run eval -- --mode=agent --split=evaluation --live        # re-sample: paid (~14 calls)
+npm run eval -- --mode=calibrated --split=evaluation --replay   # NO key, NO cost — reproduces the recorded run
+npm run eval -- --mode=calibrated --split=evaluation --live     # re-sample: paid (~5 calls)
 ```
 
-**Recorded agent run** (`data/cache/agent/`, model `claude-haiku-4-5`):
+The baseline call plus the camera's annotated shot + analysis mask as extra vision inputs
+(`data/cache/calibrated/`, `claude-haiku-4-5`, 2026-08-29):
 
-| accuracy | harmful-error | coverage | acc-on-covered | `out_of_order` | cost |
-| --- | --- | --- | --- | --- | --- |
-| 57.8% | 0.0% | 100% | 57.8% | 0/8 | $0.051 (`--live`) / $0 (`--replay`) |
+| accuracy | harmful-error | coverage | `out_of_order` | cost |
+| --- | --- | --- | --- | --- |
+| 31.8% | 0.0% | 100% | 0/5 | ~$0.034 (`--live`) / $0 (`--replay`) |
 
-Confusion (gt → pred): free 16/11/0/0, occupied 0/10/0/0, out_of_order 0/8/0/0. The verify
-pass is **net-negative on accuracy** here (−4.4 pp vs baseline) — kept config-gated as a
-studied result. Same 45 determinate observations / 9 frames as the baseline; see
-`docs/CHANGELOG.md` for the A/B and the archived `claude-sonnet-5` contrast (`e8de845`).
+**−13.7 pp vs baseline** — the model reads state off the flat-colour annotation and the mask
+image collapses it onto `occupied` for every machine (`free` recall 0/10; the 0% harmful is
+an artefact of never saying `free`). Reproduced on `claude-sonnet-5` and four prompt
+phrasings; none beat the baseline. Kept only so the negative result reproduces — see
+`docs/CHANGELOG.md` "Recalibrated evaluation".
 
-## Agent + integrator corrections (Iteration 2 — D-0014)
+## Baseline + integrator corrections (D-0014) — recommended
 
 ```bash
-npm run eval -- --mode=agent --split=evaluation --replay --corrections   # NO key, NO cost
-npm run correct -- --list                                               # the 3 corrections on file
+npm run eval -- --mode=baseline --split=evaluation --replay --corrections   # NO key, NO cost
+npm run correct -- --list                                                   # the 3 corrections on file
 ```
 
 Overlays `data/corrections/` (3 `machine`-scope entries: `W-04`, `D-02`, `D-06` = out of
-service) on the agent predictions before scoring. Report:
-`docs/artifacts/eval-agent-corrected-2026-08-28.json`.
+service) on the baseline predictions before scoring. Report:
+`docs/artifacts/eval-baseline-corrected-2026-08-29.json`.
 
 | accuracy | harmful-error | coverage | `out_of_order` | model cost |
 | --- | --- | --- | --- | --- |
-| **75.6%** | 0.0% | 100% | **8/8** | $0.051 (corrections are free) |
+| **68.2%** | **4.5%** | 100% | **5/5** | ~$0.017 (corrections are free) |
 
-+13.4 pp accuracy over baseline at no extra model cost. Confusion (gt → pred): free
-16/11/0/0, occupied 0/10/0/0, out_of_order 0/0/0/8.
++22.7 pp accuracy over baseline at no extra model cost; the 3 corrections cover 5 determinate
+observations across cameras C-01–C-04. Confusion (gt → pred): free 4/6/0/0, occupied 1/6/0/0,
+out_of_order 0/0/5/0. `--mode=calibrated … --corrections` gives 54.5% from the lower base.
 
-Both modes write a JSON report to `docs/artifacts/eval-<mode>-<date>.json`. Its `model`
+Each mode writes a JSON report to `docs/artifacts/eval-<mode>-<date>.json`. Its `model`
 field is read from the cached responses (so a `--replay` of the recorded runs reports
 `claude-haiku-4-5`), not from config. The report carries no timestamp so it regenerates
 byte-identically.

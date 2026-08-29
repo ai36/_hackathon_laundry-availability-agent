@@ -20,9 +20,9 @@ export default defineConfig({
     },
   },
   agent: {
-    // haiku-4-5 ($1/$5 per MTok) is ~half the cost of sonnet-5 for this vision task.
-    // The recorded baseline/agent runs used claude-sonnet-5 (see docs/CHANGELOG.md);
-    // this is the default for new --live runs.
+    // claude-haiku-4-5 ($1/$5 per MTok). The naive baseline holds up well on it; the judge's
+    // reproduction path is --replay (cache only, no key, no cost), so the model choice only
+    // bills a fresh --live run.
     visionModel: "claude-haiku-4-5",
   },
   reservation: {

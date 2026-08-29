@@ -132,7 +132,9 @@ export class AnthropicVisionClient implements VisionClient {
 
     const res = await this.client.messages.create({
       model: this.model,
-      max_tokens: 1500,
+      // Enough headroom for ~12 machines with a sentence of rationale each — 1500 truncated
+      // sonnet mid-JSON on the larger camera banks, losing the whole frame to a parse error.
+      max_tokens: 4000,
       ...(config.agent.visionEffort !== "none"
         ? { output_config: { effort: config.agent.visionEffort } }
         : {}),

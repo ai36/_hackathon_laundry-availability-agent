@@ -1,7 +1,0 @@
-{
-  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-04\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Display shows '48' and 'oF' with active control panel lit up, indicating running cycle\"\n    },\n    {\n      \"machineId\": \"D-05\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Digital display screen is illuminated showing time/status information, machine appears active\"\n    },\n    {\n      \"machineId\": \"D-06\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Digital display screen is illuminated and showing information, indicating active operation\"\n    },\n    {\n      \"machineId\": \"D-08\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Digital display screen is illuminated showing information, machine appears to be in use\"\n    }\n  ]\n}\n```",
-  "model": "claude-haiku-4-5",
-  "inputTokens": 1831,
-  "outputTokens": 260,
-  "costUsd": 0.003131
-}

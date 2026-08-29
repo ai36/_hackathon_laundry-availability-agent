@@ -21,13 +21,16 @@ import { dirname } from "node:path";
 
 import { config } from "@/config";
 import { runBaseline } from "@/agent/baseline";
+import { runCalibrated } from "@/agent/calibrated";
 import { runAgent } from "@/agent/pipeline";
 import { AnthropicVisionClient, CachedVisionClient, FakeVisionClient } from "@/agent/vision";
 import type { VisionClient } from "@/agent/types";
+import { cameraForFrame } from "@/eval/calibration";
 import { applyCorrections, loadCorrections } from "@/eval/corrections";
 import { loadFrameLabels, loadSplit } from "@/eval/dataset";
 import { formatScores, scoreAll } from "@/eval/score";
 import type { FramePrediction } from "@/eval/types";
+import { loadSiteConfig } from "@/eval/site-config";
 
 const args = new Map(
   process.argv.slice(2).map((a) => {
@@ -35,7 +38,7 @@ const args = new Map(
     return [k, v ?? "true"] as const;
   }),
 );
-const mode = (args.get("mode") ?? "baseline") as "baseline" | "agent";
+const mode = (args.get("mode") ?? "baseline") as "baseline" | "agent" | "calibrated";
 const split = args.get("split") ?? "evaluation";
 const replay = args.has("replay");
 const fake = args.has("fake");
@@ -46,8 +49,8 @@ const outPath =
   args.get("out") ??
   `docs/artifacts/eval-${mode}${withCorrections ? "-corrected" : ""}-${today}.json`;
 
-if (mode !== "baseline" && mode !== "agent") {
-  console.error(`--mode must be "baseline" or "agent"`);
+if (mode !== "baseline" && mode !== "agent" && mode !== "calibrated") {
+  console.error(`--mode must be "baseline", "agent", or "calibrated"`);
   process.exit(1);
 }
 if (Number(replay) + Number(fake) + Number(live) !== 1) {
@@ -79,18 +82,37 @@ async function main(): Promise<void> {
     console.log(`split "${split}" is empty — add frame ids to data/splits/${split}.txt`);
   }
 
+  const cameras = loadSiteConfig().cameras;
   const predictions = new Map<string, FramePrediction>();
+  // Per-frame scoring scope: when a frame belongs to a calibrated camera, every mode is
+  // asked about (and scored on) exactly that camera's machines, so baseline vs calibrated
+  // is an exact A/B.
+  const scope = new Map<string, Set<string>>();
+
   for (const frameId of frameIds) {
     const label = labels.get(frameId);
     if (!label) {
       console.warn(`! ${frameId}: no label — skipping (nothing to ask the model about)`);
       continue;
     }
-    const machineIds = label.machines.map((m) => m.machineId);
-    const pred =
-      mode === "baseline"
-        ? await runBaseline(frameId, vision, machineIds)
-        : await runAgent(frameId, vision, machineIds);
+    const camera = cameraForFrame(frameId, cameras, labels);
+    const machineIds = camera
+      ? camera.machineIds.filter((id) => label.machines.some((m) => m.machineId === id))
+      : label.machines.map((m) => m.machineId);
+    if (camera) scope.set(frameId, new Set(machineIds));
+
+    let pred: FramePrediction;
+    if (mode === "calibrated") {
+      if (!camera) {
+        console.warn(`! ${frameId}: label has no camera — skipping (calibrated mode needs one)`);
+        continue;
+      }
+      pred = await runCalibrated(frameId, vision, camera);
+    } else if (mode === "baseline") {
+      pred = await runBaseline(frameId, vision, machineIds);
+    } else {
+      pred = await runAgent(frameId, vision, machineIds);
+    }
     predictions.set(frameId, pred);
   }
 
@@ -107,7 +129,7 @@ async function main(): Promise<void> {
     );
   }
 
-  const scores = scoreAll(predictions, labels, frameIds);
+  const scores = scoreAll(predictions, labels, frameIds, scope.size ? scope : undefined);
   const labelled = frameIds.filter((id) => labels.has(id)).length;
 
   const totals = [...predictions.values()].reduce(

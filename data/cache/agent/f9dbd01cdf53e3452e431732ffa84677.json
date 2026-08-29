@@ -1,7 +1,0 @@
-{
-  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"W-05\",\n      \"state\": \"free\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Display appears blank or shows price only; lid is closed; drum is empty and dark; control panel is lit and operational like neighboring machines; no error codes visible; no laundry present.\"\n    },\n    {\n      \"machineId\": \"W-06\",\n      \"state\": \"free\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Display appears blank or shows price only; lid is closed; drum is empty and dark; control panel is lit and operational; no error indicators; no laundry visible in drum.\"\n    },\n    {\n      \"machineId\": \"W-07\",\n      \"state\": \"free\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Display appears blank or shows price only; lid is closed; drum is empty and dark; control panel is lit and functional; no error codes or warning signs; empty ready state.\"\n    }\n  ]\n}\n```",
-  "model": "claude-haiku-4-5",
-  "inputTokens": 1887,
-  "outputTokens": 261,
-  "costUsd": 0.003192
-}

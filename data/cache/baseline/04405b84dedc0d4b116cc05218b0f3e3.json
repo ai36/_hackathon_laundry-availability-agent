@@ -1,7 +1,0 @@
-{
-  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"W-13\",\n      \"state\": \"free\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Leftmost washer, lid open, no visible laundry or active display\"\n    },\n    {\n      \"machineId\": \"W-14\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.9,\n      \"rationale\": \"Second from left, digital display showing time (39), control panel lit and active\"\n    },\n    {\n      \"machineId\": \"W-15\",\n      \"state\": \"free\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Second from right washer, lid closed, no visible activity or display indication\"\n    },\n    {\n      \"machineId\": \"W-16\",\n      \"state\": \"free\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Rightmost washer, lid closed, no visible activity or display indication\"\n    }\n  ]\n}\n```",
-  "model": "claude-haiku-4-5",
-  "inputTokens": 1831,
-  "outputTokens": 259,
-  "costUsd": 0.003126
-}

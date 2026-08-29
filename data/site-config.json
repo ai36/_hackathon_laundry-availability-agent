@@ -6,41 +6,14 @@
         "W-01",
         "W-02",
         "W-03",
-        "W-04",
-        "W-05",
-        "W-06",
-        "W-07"
+        "W-04"
       ],
-      "stubImage": "data/public/frames/img_1819.jpg"
+      "stubImage": "data/public/frames/img_1819.jpg",
+      "annotatedShot": "data/public/frames/img_1819.annotated.jpg",
+      "mask": "data/public/frames/img_1819.mask.png"
     },
     {
       "id": "C-02",
-      "machineIds": [
-        "W-06",
-        "W-07",
-        "W-08",
-        "W-09",
-        "W-10",
-        "W-11",
-        "W-12",
-        "W-13",
-        "W-14",
-        "W-15"
-      ],
-      "stubImage": "data/public/frames/img_8629.jpg"
-    },
-    {
-      "id": "C-03",
-      "machineIds": [
-        "W-13",
-        "W-14",
-        "W-15",
-        "W-16"
-      ],
-      "stubImage": "data/public/frames/img_8633.jpg"
-    },
-    {
-      "id": "C-04",
       "machineIds": [
         "D-01",
         "D-02",
@@ -48,23 +21,48 @@
         "D-04",
         "D-05",
         "D-06",
+        "D-07"
+      ],
+      "stubImage": "data/public/frames/img_1821.jpg",
+      "annotatedShot": "data/public/frames/img_1821.annotated.jpg",
+      "mask": "data/public/frames/img_1821.mask.png"
+    },
+    {
+      "id": "C-03",
+      "machineIds": [
+        "D-01",
+        "D-02"
+      ],
+      "stubImage": "data/public/frames/img_1822.jpg",
+      "annotatedShot": "data/public/frames/img_1822.annotated.jpg",
+      "mask": "data/public/frames/img_1822.mask.png"
+    },
+    {
+      "id": "C-04",
+      "machineIds": [
+        "D-03",
+        "D-04",
+        "D-05",
+        "D-06",
         "D-07",
         "D-08",
         "D-09",
-        "D-10",
-        "W-16"
+        "D-10"
       ],
-      "stubImage": "data/public/frames/img_1823.jpg"
+      "stubImage": "data/public/frames/img_1823.jpg",
+      "annotatedShot": "data/public/frames/img_1823.annotated.jpg",
+      "mask": "data/public/frames/img_1823.mask.png"
     },
     {
       "id": "C-05",
       "machineIds": [
-        "D-04",
-        "D-05",
-        "D-06",
-        "D-08"
+        "W-14",
+        "W-15",
+        "W-16"
       ],
-      "stubImage": "data/public/frames/img_1824.jpg"
+      "stubImage": "data/public/frames/img_8633.jpg",
+      "annotatedShot": "data/public/frames/img_8633.annotated.jpg",
+      "mask": "data/public/frames/img_8633.mask.png"
     }
   ]
 }

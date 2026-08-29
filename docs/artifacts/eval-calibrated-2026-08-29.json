@@ -1,0 +1,265 @@
+{
+  "mode": "calibrated",
+  "split": "evaluation",
+  "model": "claude-haiku-4-5",
+  "frames": [
+    "img_1819",
+    "img_1821",
+    "img_1822",
+    "img_1823",
+    "img_8633"
+  ],
+  "labelledFrames": 5,
+  "scores": {
+    "nDeterminate": 22,
+    "nIndeterminable": 2,
+    "accuracy": 0.3181818181818182,
+    "harmfulErrorRate": 0,
+    "coverage": 1,
+    "accuracyOnCovered": 0.3181818181818182,
+    "confusion": {
+      "free": {
+        "free": 0,
+        "occupied": 10,
+        "unknown": 0,
+        "out_of_order": 0
+      },
+      "occupied": {
+        "free": 0,
+        "occupied": 7,
+        "unknown": 0,
+        "out_of_order": 0
+      },
+      "unknown": {
+        "free": 0,
+        "occupied": 0,
+        "unknown": 0,
+        "out_of_order": 0
+      },
+      "out_of_order": {
+        "free": 0,
+        "occupied": 5,
+        "unknown": 0,
+        "out_of_order": 0
+      }
+    },
+    "missingPredictions": 0
+  },
+  "totals": {
+    "visionCalls": 5,
+    "inputTokens": 26051,
+    "outputTokens": 1584,
+    "costUsd": 0.033971
+  },
+  "predictions": {
+    "img_1819": {
+      "frameId": "img_1819",
+      "machines": [
+        {
+          "machineId": "W-01",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Red washer displays active cycle information on control panel; lid appears closed with drum engaged"
+        },
+        {
+          "machineId": "W-02",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Orange washer displays active cycle information on control panel; lid appears closed with drum engaged"
+        },
+        {
+          "machineId": "W-03",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Yellow washer displays active cycle information on control panel; lid appears closed with drum engaged"
+        },
+        {
+          "machineId": "W-04",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Green washer displays active cycle information on control panel; lid appears closed with drum engaged"
+        }
+      ],
+      "meta": {
+        "mode": "calibrated",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 1,
+        "inputTokens": 5207,
+        "outputTokens": 264,
+        "costUsd": 0.006527
+      }
+    },
+    "img_1821": {
+      "frameId": "img_1821",
+      "machines": [
+        {
+          "machineId": "D-01",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Control panel shows active display with blue screen lit; machine appears to be running or holding laundry"
+        },
+        {
+          "machineId": "D-02",
+          "state": "occupied",
+          "confidence": 0.8,
+          "rationale": "Control panel displays active blue screen; indicates running cycle or laundry present"
+        },
+        {
+          "machineId": "D-03",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Control panel shows illuminated display with active indicators; machine is running or holding clothes"
+        },
+        {
+          "machineId": "D-04",
+          "state": "occupied",
+          "confidence": 0.8,
+          "rationale": "Control panel displays active blue screen; appears to be running or occupied"
+        },
+        {
+          "machineId": "D-05",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Control panel shows illuminated active display; machine is running or holding laundry"
+        },
+        {
+          "machineId": "D-06",
+          "state": "occupied",
+          "confidence": 0.8,
+          "rationale": "Control panel displays active blue screen with indicators lit; machine is running or occupied"
+        },
+        {
+          "machineId": "D-07",
+          "state": "occupied",
+          "confidence": 0.75,
+          "rationale": "Control panel visible with active display; appears to be running or holding laundry"
+        }
+      ],
+      "meta": {
+        "mode": "calibrated",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 1,
+        "inputTokens": 5219,
+        "outputTokens": 439,
+        "costUsd": 0.007414
+      }
+    },
+    "img_1822": {
+      "frameId": "img_1822",
+      "machines": [
+        {
+          "machineId": "D-01",
+          "state": "occupied",
+          "confidence": 0.9,
+          "rationale": "Red dryer with illuminated display panel showing active cycle information and time remaining visible on screen"
+        },
+        {
+          "machineId": "D-02",
+          "state": "occupied",
+          "confidence": 0.9,
+          "rationale": "Yellow dryer with illuminated display panel showing active cycle information and time remaining visible on screen"
+        }
+      ],
+      "meta": {
+        "mode": "calibrated",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 1,
+        "inputTokens": 5199,
+        "outputTokens": 144,
+        "costUsd": 0.005919
+      }
+    },
+    "img_1823": {
+      "frameId": "img_1823",
+      "machines": [
+        {
+          "machineId": "D-03",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Display shows active cycle time remaining (225 visible on panel), indicating machine is running with laundry inside."
+        },
+        {
+          "machineId": "D-04",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Display shows active cycle with time remaining visible on control panel, machine is actively drying."
+        },
+        {
+          "machineId": "D-05",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Display shows active cycle time remaining (40 visible), indicating machine is currently running."
+        },
+        {
+          "machineId": "D-06",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Display shows active cycle with time remaining visible on control panel, machine is in operation."
+        },
+        {
+          "machineId": "D-07",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Display shows active cycle time remaining visible on control panel, machine is currently running."
+        },
+        {
+          "machineId": "D-08",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Display shows active cycle with time remaining visible on control panel, machine is drying."
+        },
+        {
+          "machineId": "D-09",
+          "state": "occupied",
+          "confidence": 0.9,
+          "rationale": "Control panel shows active cycle indicators; machine appears to be running with time remaining."
+        },
+        {
+          "machineId": "D-10",
+          "state": "occupied",
+          "confidence": 0.9,
+          "rationale": "Control panel displays suggest active cycle with time remaining, machine is currently in operation."
+        }
+      ],
+      "meta": {
+        "mode": "calibrated",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 1,
+        "inputTokens": 5223,
+        "outputTokens": 504,
+        "costUsd": 0.007743
+      }
+    },
+    "img_8633": {
+      "frameId": "img_8633",
+      "machines": [
+        {
+          "machineId": "W-14",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Orange-colored washer with lid closed and drum visible inside. Display panel shows active state with digital readout indicating time remaining on cycle."
+        },
+        {
+          "machineId": "W-15",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Lime-green colored washer with lid closed. Display panel illuminated and shows active cycle with time remaining visible on digital display."
+        },
+        {
+          "machineId": "W-16",
+          "state": "occupied",
+          "confidence": 0.9,
+          "rationale": "Blue-colored washer with lid closed and drum visible. Display panel shows illuminated state with time/cycle information displayed, indicating active operation."
+        }
+      ],
+      "meta": {
+        "mode": "calibrated",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 1,
+        "inputTokens": 5203,
+        "outputTokens": 233,
+        "costUsd": 0.006368
+      }
+    }
+  }
+}

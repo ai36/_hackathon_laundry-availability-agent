@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"W-01\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Red washer displays active cycle information on control panel; lid appears closed with drum engaged\"\n    },\n    {\n      \"machineId\": \"W-02\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Orange washer displays active cycle information on control panel; lid appears closed with drum engaged\"\n    },\n    {\n      \"machineId\": \"W-03\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Yellow washer displays active cycle information on control panel; lid appears closed with drum engaged\"\n    },\n    {\n      \"machineId\": \"W-04\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Green washer displays active cycle information on control panel; lid appears closed with drum engaged\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 5207,
+  "outputTokens": 264,
+  "costUsd": 0.006527
+}

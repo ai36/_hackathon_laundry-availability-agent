@@ -5,27 +5,33 @@ import { cameraClassifyPrompt } from "./camera-classify";
 
 test("bare input degrades to a baseline-style instruction", () => {
   const p = cameraClassifyPrompt({ machineIds: ["W-01", "W-02"] });
-  assert.match(p, /classify these machines visible in the frame: W-01, W-02/i);
-  assert.doesNotMatch(p, /ANNOTATED reference/);
+  assert.match(p, /Classify these machines, reading state only from IMAGE 1: W-01, W-02/);
+  assert.doesNotMatch(p, /LOCATION MAP/);
   assert.doesNotMatch(p, /ANALYSIS MASK/);
   assert.doesNotMatch(p, /Per-machine notes/);
   assert.match(p, /Reply with JSON only/);
 });
 
-test("annotated + mask instructions appear in send order", () => {
+test("annotated + mask are numbered in send order after the live photo", () => {
   const p = cameraClassifyPrompt({
     machineIds: ["W-01"],
     hasAnnotatedShot: true,
     hasMask: true,
   });
-  assert.ok(p.indexOf("ANNOTATED reference") < p.indexOf("ANALYSIS MASK"));
-  assert.match(p, /never read a machine's state from it/);
-  assert.match(p, /Ignore anything that falls under a black region/);
+  assert.match(p, /IMAGE 1 is the live camera photo/);
+  assert.match(p, /IMAGE 2 is a LOCATION MAP/);
+  assert.match(p, /IMAGE 3 is an analysis mask/);
+  assert.ok(p.indexOf("LOCATION MAP") < p.indexOf("analysis mask"));
+  assert.match(p, /Never read state,[\s\S]*from IMAGE 2/);
+  // cross-reference procedure only appears when both images are present
+  assert.match(p, /read the id at the same position in IMAGE 2/);
 });
 
-test("mask-only wording points at the image right after the main frame", () => {
+test("mask without an annotated shot is IMAGE 2 and has no cross-reference step", () => {
   const p = cameraClassifyPrompt({ machineIds: ["W-01"], hasMask: true });
-  assert.match(p, /The image after the main frame is an ANALYSIS MASK/);
+  assert.match(p, /IMAGE 2 is an analysis mask/);
+  assert.doesNotMatch(p, /IMAGE 3/);
+  assert.doesNotMatch(p, /same position in IMAGE/);
 });
 
 test("only fragments for listed machines with non-empty text are included", () => {

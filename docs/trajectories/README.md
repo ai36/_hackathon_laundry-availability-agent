@@ -7,9 +7,9 @@ ground rule 9 (every claim tied to evidence).
 
 | Sub-folder | Contents | Present |
 | --- | --- | --- |
-| `baseline/` | The single-prompt baseline on one frame (the fair-comparison reference). | `2026-08-28-img_1823.md` |
-| `runtime/` | The solution agent (`runAgent`) on one frame: classify → verification pass → override → abstain. | `2026-08-28-img_1825.md` |
-| `compliance/` | Each `hackathon-compliance` review run — verdict, blockers, risks, and the fixes applied. | 13 files |
+| `baseline/` | The single-prompt baseline on one frame (the fair-comparison reference), and the calibrated-agent dead-end. | `2026-08-29-recalibrated.md` (current); `2026-08-28-img_1823.md` (historical) |
+| `runtime/` | The verification-pass agent (`runAgent`) — retired 2026-08-29 as net-negative; see `docs/CHANGELOG.md` "Historical". | — |
+| `compliance/` | Each `hackathon-compliance` review run — verdict, blockers, risks, and the fixes applied. | 14 files |
 | `calibration/` | The calibration agent (per-site ROI config from human-confirmed frames). | — (P1, not built) |
 
 Every trajectory here is reproducible offline: the `baseline/` and `runtime/` runs replay

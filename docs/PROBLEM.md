@@ -125,7 +125,7 @@ day, plus a short time-ordered series. Handling:
 - Blur or exclude any incidental person, apartment numbers, notices with names, or other
   identifying details.
 - **Authorization:** none was obtained from the room's management, and none will be pursued.
-  The 9 committed frames rest on: a shared common area open to all residents, no people or
+  The committed frames rest on: a shared common area open to all residents, no people or
   third-party belongings in frame, and redaction of every location-identifying element. This
   is the author's own risk assessment (not a legal opinion) — full reasoning in
   `docs/DECISIONS.md` D-0009 ("Publish basis"). If challenged, the frames are pulled and the

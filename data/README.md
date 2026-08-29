@@ -11,8 +11,9 @@ data/
   raw/            Local only (git-ignored). Original photos/videos straight off the camera.
   public/
     frames/       Cleaned frame set — downscaled JPEGs, ALL metadata stripped. Produced by
-                  `npm run dataset:prepare`. Only the 9 labelled P0 evaluation stills are
-                  committed (see "Committed frames" below); everything else stays local.
+                  `npm run dataset:prepare`. Only the 5 labelled evaluation stills (one per calibrated camera), each
+                  with its .annotated.jpg + .mask.png, are committed (see "Committed frames"
+                  below); everything else stays local.
     README.md     Committed.
   machines.json   Committed. Canonical machine roster (ids + types). See docs/LABELING.md.
   labels/         Committed. One `<frameId>.json` per labelled frame (schema: labels/README.md).
@@ -78,11 +79,12 @@ by connected-component analysis and writes `redactions.json`. Re-run it then
 
 ## Committed frames
 
-Only the **9 labelled P0 evaluation stills** are committed —
-`img_1819`, `img_1821`–`img_1826`, `img_8629`, `img_8633` — each with the author's
-redaction boxes burned in. Every determinate machine's status display stays legible; the
-boxes cover décor-free identifying content only. Video-derived frames and unlabelled stills
-are **not** committed (`.gitignore` allows the 9 by name). `frames/manifest.json` is local.
+Only the **5 labelled evaluation stills**, one per calibrated camera, are committed —
+`img_1819` (C-01), `img_1821` (C-02), `img_1822` (C-03), `img_1823` (C-04), `img_8633` (C-05)
+— each with the author's redaction boxes burned in, plus a `<id>.annotated.jpg` (machine ids
+drawn on the view) and `<id>.mask.png` (transparent over the panels that decide state). Every
+determinate machine's status display stays legible. Video-derived and unlabelled frames are
+**not** committed (`.gitignore` allows the 15 files by name). `frames/manifest.json` is local.
 
 ## Enforcement
 

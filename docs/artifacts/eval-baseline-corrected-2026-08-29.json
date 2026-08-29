@@ -1,0 +1,266 @@
+{
+  "mode": "baseline",
+  "split": "evaluation",
+  "model": "claude-haiku-4-5",
+  "corrections": 5,
+  "frames": [
+    "img_1819",
+    "img_1821",
+    "img_1822",
+    "img_1823",
+    "img_8633"
+  ],
+  "labelledFrames": 5,
+  "scores": {
+    "nDeterminate": 22,
+    "nIndeterminable": 2,
+    "accuracy": 0.6818181818181818,
+    "harmfulErrorRate": 0.045454545454545456,
+    "coverage": 1,
+    "accuracyOnCovered": 0.6818181818181818,
+    "confusion": {
+      "free": {
+        "free": 4,
+        "occupied": 6,
+        "unknown": 0,
+        "out_of_order": 0
+      },
+      "occupied": {
+        "free": 1,
+        "occupied": 6,
+        "unknown": 0,
+        "out_of_order": 0
+      },
+      "unknown": {
+        "free": 0,
+        "occupied": 0,
+        "unknown": 0,
+        "out_of_order": 0
+      },
+      "out_of_order": {
+        "free": 0,
+        "occupied": 0,
+        "unknown": 0,
+        "out_of_order": 5
+      }
+    },
+    "missingPredictions": 0
+  },
+  "totals": {
+    "visionCalls": 5,
+    "inputTokens": 9171,
+    "outputTokens": 1561,
+    "costUsd": 0.016975999999999998
+  },
+  "predictions": {
+    "img_1819": {
+      "frameId": "img_1819",
+      "machines": [
+        {
+          "machineId": "W-01",
+          "state": "free",
+          "confidence": 0.95,
+          "rationale": "Leftmost washing machine, door closed, no visible display activity or laundry visible"
+        },
+        {
+          "machineId": "W-02",
+          "state": "free",
+          "confidence": 0.95,
+          "rationale": "Second washing machine from left, door closed, no visible display activity or laundry visible"
+        },
+        {
+          "machineId": "W-03",
+          "state": "free",
+          "confidence": 0.95,
+          "rationale": "Third washing machine from left, door closed, no visible display activity or laundry visible"
+        },
+        {
+          "machineId": "W-04",
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): taped off, powered down across all frames"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 1,
+        "inputTokens": 1831,
+        "outputTokens": 270,
+        "costUsd": 0.003181
+      }
+    },
+    "img_1821": {
+      "frameId": "img_1821",
+      "machines": [
+        {
+          "machineId": "D-01",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Display panel is lit with blue screen visible, indicating active operation or cycle in progress"
+        },
+        {
+          "machineId": "D-02",
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): hard error code on display, not a running cycle"
+        },
+        {
+          "machineId": "D-03",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Display panel is lit with blue screen visible, indicating active operation or cycle in progress"
+        },
+        {
+          "machineId": "D-04",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Display panel is lit with blue screen visible, indicating active operation or cycle in progress"
+        },
+        {
+          "machineId": "D-05",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Display panel is lit with blue screen visible, indicating active operation or cycle in progress"
+        },
+        {
+          "machineId": "D-06",
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): out of service every frame it appears in"
+        },
+        {
+          "machineId": "D-07",
+          "state": "occupied",
+          "confidence": 0.75,
+          "rationale": "Display panel appears to be lit, though partially visible at edge of frame"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 1,
+        "inputTokens": 1843,
+        "outputTokens": 438,
+        "costUsd": 0.004033
+      }
+    },
+    "img_1822": {
+      "frameId": "img_1822",
+      "machines": [
+        {
+          "machineId": "D-01",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Left dryer shows active display with illuminated screen and appears to have a cycle running or time remaining displayed"
+        },
+        {
+          "machineId": "D-02",
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): hard error code on display, not a running cycle"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 1,
+        "inputTokens": 1823,
+        "outputTokens": 150,
+        "costUsd": 0.002573
+      }
+    },
+    "img_1823": {
+      "frameId": "img_1823",
+      "machines": [
+        {
+          "machineId": "D-03",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Display shows '225' (likely temperature or cycle indicator), screen is lit and active"
+        },
+        {
+          "machineId": "D-04",
+          "state": "occupied",
+          "confidence": 0.8,
+          "rationale": "Display is illuminated with blue screen visible, appears to be in operation or holding laundry"
+        },
+        {
+          "machineId": "D-05",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Display shows 'E-roL' or error code, screen is lit indicating active state or error condition"
+        },
+        {
+          "machineId": "D-06",
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): out of service every frame it appears in"
+        },
+        {
+          "machineId": "D-07",
+          "state": "occupied",
+          "confidence": 0.75,
+          "rationale": "Display is lit with blue screen showing, consistent with running or occupied state"
+        },
+        {
+          "machineId": "D-08",
+          "state": "occupied",
+          "confidence": 0.8,
+          "rationale": "Display is illuminated showing active operation with blue screen visible"
+        },
+        {
+          "machineId": "D-09",
+          "state": "occupied",
+          "confidence": 0.75,
+          "rationale": "Display is lit with active screen showing, appears to be in use"
+        },
+        {
+          "machineId": "D-10",
+          "state": "occupied",
+          "confidence": 0.7,
+          "rationale": "Display is illuminated on the far right, appears active though partially visible"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 1,
+        "inputTokens": 1847,
+        "outputTokens": 497,
+        "costUsd": 0.004332
+      }
+    },
+    "img_8633": {
+      "frameId": "img_8633",
+      "machines": [
+        {
+          "machineId": "W-14",
+          "state": "free",
+          "confidence": 0.9,
+          "rationale": "Leftmost washing machine, lid open, no visible laundry or running cycle"
+        },
+        {
+          "machineId": "W-15",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Center washing machine, digital display visible showing time/cycle information, appears to be in use"
+        },
+        {
+          "machineId": "W-16",
+          "state": "free",
+          "confidence": 0.9,
+          "rationale": "Rightmost washing machine, lid/door closed but no active cycle indicators visible, appears idle"
+        }
+      ],
+      "meta": {
+        "mode": "baseline",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 1,
+        "inputTokens": 1827,
+        "outputTokens": 206,
+        "costUsd": 0.002857
+      }
+    }
+  }
+}

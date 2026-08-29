@@ -70,7 +70,7 @@ export interface FramePrediction {
   machines: MachinePrediction[];
   /** How the prediction was produced, for the trajectory record. */
   meta?: {
-    mode: "baseline" | "agent";
+    mode: "baseline" | "agent" | "calibrated";
     /** Model(s) that produced the vision responses for this frame. */
     model?: string;
     visionCalls: number;
