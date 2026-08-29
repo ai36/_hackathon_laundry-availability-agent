@@ -12,6 +12,40 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Fix: portal 500'd after the recalibration; `/api/refresh` realigned to baseline
+
+- **Break:** `buildRoomStatus` (`src/portal/room-status.ts`) hard-coded its default report to
+  `docs/artifacts/eval-baseline-2026-08-28.json`, which commit `9a99250` moved to
+  `docs/artifacts/historical/`. `readFileSync` → ENOENT → every portal page and `/api/*`
+  route returned 500 (`/tenant`, `/integrator`, `/integrator/settings`, `/api/room`,
+  `/api/refresh`, `/api/corrections`, `/api/reservations`).
+- **Fix:** default report → `eval-baseline-2026-08-29.json` (the current raw baseline
+  predictions; `buildRoomStatus` overlays the 3 committed `machine`-scope corrections
+  itself — verified `data/corrections/` still holds exactly `W-04`/`D-02`/`D-06` = out of
+  service, unchanged).
+- **Concept alignment:** `POST /api/refresh` was still wiring `cameraClassifyPrompt` +
+  `promptFragment` + `annotatedShot` + `camera.mask` as vision inputs — but `--mode=calibrated`
+  was measured a −13.7 pp dead-end and `camera.mask` is now a colour region map, not a
+  transparent mask. Reverted the route to **one `baselinePrompt` whole-frame call per
+  camera**, matching the shipped "baseline + corrections" config. Dropped the unused `refs`
+  field from the response (`refresh-control.tsx` never read it). `cameraClassifyPrompt` stays
+  — only the eval's `--mode=calibrated` uses it now.
+- Cameras editor copy relabelled: `mask` field → "region map — each machine's panel painted
+  one colour (see maskLegend)"; the blurb now says annotated shot + region map are offline
+  calibration inputs and `refresh` does a baseline call. No behaviour change.
+- Docs: README (2 lines — portal report path + 68.2% artifact citation + `promptFragment`
+  wording), `docs/REPRODUCTION.md` (`/api/refresh` note), `docs/DECISIONS.md` D-0015
+  (reversion amendment + marked the earlier "calibration inputs consumed" amendment
+  superseded), `docs/CHANGELOG.md` (reverted-note on the camera-aware verification entry).
+- Verification: `typecheck` / `lint` / `format:check` — pass; `npm test` — **82/82**;
+  `check:data` — pass; `npm run build` — pass. `npm start` + `curl`: `/` 307, `/tenant` /
+  `/integrator` / `/integrator/settings` / `/api/room` → **200** (were 500).
+- **Compliance:** `hackathon-compliance` → **PASS WITH RISKS**
+  (`docs/trajectories/compliance/2026-08-29-portal-fix.md`). No blockers — the change fixes a
+  regression and removes a demo-vs-evidence divergence. All doc-consistency risks handled
+  above (WORKLOG entry, D-0015 reversion amendment, CHANGELOG note, README artifact
+  citation, `promptFragment` wording); corrections file confirmed unchanged.
+
 ### 2026-08-29 — `--mode=roi`: per-machine crops from a colour-coded region map
 
 - **Owner-driven.** After the annotated-shot + mask-as-image calibration failed, the owner

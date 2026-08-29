@@ -179,14 +179,14 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
           onChange={(p) => patch({ stubImage: p })}
         />
         <ImageField
-          label="annotated shot — machine ids drawn on the view"
+          label="annotated shot — machine ids drawn on the view (calibration reference)"
           kind="camera-annotated"
           ownerId={cam.id}
           current={cam.annotatedShot}
           onChange={(p) => patch({ annotatedShot: p })}
         />
         <ImageField
-          label="mask — black regions are ignored during analysis"
+          label="region map — each machine's panel painted one colour (see maskLegend)"
           kind="camera-mask"
           ownerId={cam.id}
           current={cam.mask}
@@ -250,9 +250,13 @@ export function CamerasEditor() {
         <span className="font-mono">C-02</span>… to match <span className="font-mono">W-</span>/
         <span className="font-mono">D-</span> machines), the machine ids it observes (free text),
         and — optionally — a <em>stub image</em> for its feed, an <em>annotated shot</em>, and a{" "}
-        <em>mask</em> (black regions the agent ignores). The stub image is what{" "}
-        <span className="font-mono">refresh</span> analyses; the annotated shot and mask are saved
-        but not yet applied.
+        <em>region map</em> (each machine&apos;s panel painted one colour; the{" "}
+        <span className="font-mono">maskLegend</span> in{" "}
+        <span className="font-mono">site-config.json</span> maps colour → id). The stub image is
+        what <span className="font-mono">refresh</span> analyses (one whole-frame call per camera).
+        The annotated shot + region map are calibration inputs the offline eval uses (
+        <span className="font-mono">--mode=roi</span> /{" "}
+        <span className="font-mono">calibrated</span>).
       </p>
       {!loaded ? (
         <p className="text-on-surface-variant text-xs">loading…</p>

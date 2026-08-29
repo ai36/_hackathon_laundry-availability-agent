@@ -894,10 +894,10 @@ produced). Seeding the camera list broke `npm run eval -- --mode=agent --replay`
 byte-for-byte. A proper separation (a distinct path/file for calibration) is **deferred** —
 whoever finally authors a real calibration file must not reuse `config.paths.siteConfig`.
 
-**Amendment (2026-08-29) — calibration inputs are now consumed by the runtime prompt.**
-`POST /api/refresh` no longer sends the eval's frozen `baselinePrompt`. A new portal-only
-builder `cameraClassifyPrompt` (`src/agent/camera-classify.ts`) folds in three calibration
-inputs when a camera has them:
+**Amendment (2026-08-29) — calibration inputs wired into a runtime prompt.**
+_(Superseded — see the reversion two amendments down. Kept for the trail.)_ A portal-only
+builder `cameraClassifyPrompt` (`src/agent/camera-classify.ts`) was written to fold three
+calibration inputs into `POST /api/refresh`'s classify call, in place of `baselinePrompt`:
 
 - **per-machine `promptFragment`** (roster, `data/machines.json`) → a "Per-machine notes"
   block, one line per machine that has a fragment;
@@ -943,6 +943,18 @@ angled shots (C-02: 1/7). **Kept as an iteration** (`--mode=roi`, `data/cache/ro
 committed): the layout-independent per-machine architecture is the right one for a real
 deployment, but it does not beat the naive baseline here. The `--mode=calibrated` `--replay`
 cache is unaffected (path-keyed, not byte-keyed), so that dead-end still reproduces.
+
+**Amendment (2026-08-29) — `/api/refresh` reverted to the plain baseline call.** With
+`--mode=calibrated` measured as a dead-end and `camera.mask` repainted as a colour region
+map (not a transparent "analysis mask"), the live route was sending a wrong-content image
+with a dead-end prompt. `POST /api/refresh` now runs **one `baselinePrompt` whole-frame call
+per camera** again — matching the shipped "baseline + corrections" config it fuses into.
+`cameraClassifyPrompt` stays, but only the eval's `--mode=calibrated` uses it now; the
+`annotatedShot` / region map on each camera are calibration inputs for `--mode=roi` /
+`--mode=calibrated`, editable and previewable in the Cameras editor, not fed on the live
+path. (The `buildRoomStatus` default report was also repointed from the moved
+`eval-baseline-2026-08-28.json` to `eval-baseline-2026-08-29.json` — the portal 500'd
+without it.)
 
 ---
 

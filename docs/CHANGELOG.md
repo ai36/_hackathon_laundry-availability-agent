@@ -208,6 +208,14 @@ Record the result of each infra verification here (append, newest first).
 
 ### 2026-08-29 — `/api/refresh` camera-aware prompt (fragments + annotated + mask); eval unchanged
 
+> **Reverted 2026-08-29 (later).** Once `--mode=calibrated` was measured as a −13.7 pp
+> dead-end and `camera.mask` was repainted as a colour region map, feeding those to the live
+> model made no sense. `POST /api/refresh` is back to one `baselinePrompt` whole-frame call
+> per camera, matching the shipped "baseline + corrections" config. `cameraClassifyPrompt`
+> remains, used only by the eval's `--mode=calibrated`. (Same fix repointed
+> `buildRoomStatus`'s default report to `eval-baseline-2026-08-29.json` — the portal 500'd
+> when the 2026-08-28 report moved to `historical/`.)
+
 - New portal-only `cameraClassifyPrompt` (`src/agent/camera-classify.ts`) replaces
   `baselinePrompt` in `POST /api/refresh`. Folds in roster `promptFragment` hints and, when a
   camera has them, its `annotatedShot` + `mask` as extra reference images (`VisionRequest.

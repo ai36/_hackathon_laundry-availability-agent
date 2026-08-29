@@ -50,14 +50,14 @@ npm start        # serve the production build
 > `git checkout -- data/ && git clean -fd data/site-config/ && rm -f data/config-overrides.json data/reservations.json`.
 >
 > **`POST /api/refresh`** (the "refresh" button + auto toggle) is **key-optional**:
-> with no `ANTHROPIC_API_KEY` it only re-fuses the committed report + corrections — **free**,
-> and this is the default. `data/site-config.json` ships **5 calibrated cameras** (`C-01…C-05`,
-> stub = the committed eval frames, each with an annotated shot + mask), so **with a key** a
-> manual click runs ~5 vision calls (one per camera feed) via `cameraClassifyPrompt` and
-> fuses the live reads below corrections. The auto toggle is off by default and stops after
-> **20 cycles**. Results cache to `data/cache/live/` (git-ignored). Note the scored eval
-> found this calibrated prompt **net-negative** (see "Calibrated agent" below) — the route
-> is a live operator tool, not a results claim.
+> with no `ANTHROPIC_API_KEY` it only re-fuses the committed baseline report + corrections —
+> **free**, and this is the default. `data/site-config.json` ships **5 cameras** (`C-01…C-05`,
+> stub = the committed eval frames), so **with a key** a manual click runs ~5 vision calls
+> (one whole-frame `baselinePrompt` call per camera) and fuses the live reads below
+> corrections. The auto toggle is off by default and stops after **20 cycles**. Results cache
+> to `data/cache/live/` (git-ignored). The annotated shot / region map on each camera are
+> calibration inputs for the offline eval (`--mode=roi` / `--mode=calibrated`); the live
+> route uses the plain baseline call, matching the shipped "baseline + corrections" config.
 
 ## Checks
 

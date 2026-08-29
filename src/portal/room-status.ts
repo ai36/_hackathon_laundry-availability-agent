@@ -54,7 +54,7 @@ const ACTIONABLE: MachineState[] = ["free", "occupied", "out_of_order"];
  * it targets the frame the shown state came from.
  */
 export function buildRoomStatus(
-  reportPath = join("docs", "artifacts", "eval-baseline-2026-08-28.json"),
+  reportPath = join("docs", "artifacts", "eval-baseline-2026-08-29.json"),
   rosterPath = join(config.paths.dataset, "machines.json"),
   correctionsDir = join(config.paths.dataset, "corrections"),
   reservations: Reservation[] = [],
