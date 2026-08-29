@@ -76,19 +76,32 @@ export function writeOverrides(
   return resolved;
 }
 
+/** Dotted paths where `a` and `b` differ (recursing objects, comparing leaves). */
+export function diffPaths(a: unknown, b: unknown, prefix = ""): string[] {
+  if (a && b && typeof a === "object" && !Array.isArray(a)) {
+    return Object.keys(a as Record<string, unknown>).flatMap((k) =>
+      diffPaths(
+        (a as Record<string, unknown>)[k],
+        (b as Record<string, unknown>)[k],
+        prefix ? `${prefix}.${k}` : k,
+      ),
+    );
+  }
+  return a === b ? [] : [prefix];
+}
+
 /** Dotted paths whose value in `cfg` differs from `DEFAULT_CONFIG`. */
 export function overriddenPaths(cfg: Laundry3Config): string[] {
-  const walk = (a: unknown, b: unknown, prefix = ""): string[] => {
-    if (a && b && typeof a === "object" && !Array.isArray(a)) {
-      return Object.keys(a as Record<string, unknown>).flatMap((k) =>
-        walk(
-          (a as Record<string, unknown>)[k],
-          (b as Record<string, unknown>)[k],
-          prefix ? `${prefix}.${k}` : k,
-        ),
-      );
-    }
-    return a === b ? [] : [prefix];
-  };
-  return walk(cfg, DEFAULT_CONFIG);
+  return diffPaths(cfg, DEFAULT_CONFIG);
+}
+
+/** Base config = `DEFAULT_CONFIG ← laundry3.config.ts`, i.e. without the overrides file. */
+export function baseConfig(): Laundry3Config {
+  return loadConfig(userConfig as DeepPartial<Laundry3Config>);
+}
+
+/** Dotted paths the portal has changed *from `laundry3.config.ts`* (i.e. live in the
+ *  overrides file but not the committed source). */
+export function overrideFilePaths(): string[] {
+  return diffPaths(resolvePortalConfig(), baseConfig());
 }

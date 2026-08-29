@@ -12,6 +12,30 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Configuration: show what's in `config-overrides.json` vs `laundry3.config.ts`
+
+- Owner asked whether `laundry3.config.ts` is still the main config now that portal edits
+  don't touch it. Answer: yes — it stays canonical (and is the eval's config);
+  `config-overrides.json` is a portal-runtime layer on top. Chose to keep the split and make
+  it visible (vs. rewriting the commented `.ts` file or moving values to JSON).
+- **`GET/PATCH /api/config`** now also return **`base`** (`DEFAULT_CONFIG ← laundry3.config.ts`,
+  no overrides) and **`fromFile`** — the dotted paths where the resolved portal config
+  differs from `base`, i.e. what lives only in the git-ignored overrides file.
+  `overrides.ts` gains `diffPaths` (exported), `baseConfig()`, `overrideFilePaths()`.
+- **`ConfigView`**: a `•` is now **mint** for "differs from the built-in default" and
+  **amber** for "changed here but not yet in `laundry3.config.ts`". When any amber field
+  exists, a banner shows the count + a **"show laundry3.config.ts snippet"** button that
+  emits a `defineConfig({ … })` object literal for exactly those fields (paste in, then
+  `rm data/config-overrides.json`) with a `copy` button. Intro rewritten to explain the
+  layer model.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` —
+  **61/61**; `check:data` — **pass**. Curl: after a PATCH setting `reservation.enabled` +
+  `cycles.defaultWashMinutes`, `fromFile` lists exactly those two; `overridden` still lists
+  them plus the `site.machines.*` values that come from `laundry3.config.ts`. Chrome: the
+  banner reads "2 fields … not in laundry3.config.ts" and the snippet is the matching
+  nested object. `docs/assets/portal-settings.jpg` regenerated. Restored a stray
+  working-tree edit to `.gitignore` (`!.env.example` had been commented out).
+
 ### 2026-08-29 — Reservations: reworked mechanic (occupied, no cancel, one-at-a-time)
 
 - Owner: (1) the user cannot cancel a hold or move it to another machine; (2) once their

@@ -103,6 +103,17 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-29 — configuration: surface overrides-file vs laundry3.config.ts
+
+- `GET/PATCH /api/config` add `base` + `fromFile` (paths changed from `laundry3.config.ts`,
+  i.e. only in the git-ignored overrides file). `overrides.ts` exports `diffPaths`,
+  `baseConfig`, `overrideFilePaths`. `ConfigView`: amber `•` = "not yet in
+  `laundry3.config.ts`" (mint `•` stays "differs from default"); a banner + "show
+  laundry3.config.ts snippet" button emits a `defineConfig({…})` literal for those fields.
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **61/61**;
+  `check:data` — **pass**. Curl + Chrome verified (`fromFile` = exactly the PATCHed fields;
+  snippet matches). Screenshot regenerated.
+
 ### 2026-08-29 — reservations: reworked mechanic
 
 - A held machine now reads `occupied` to everyone (`buildRoomStatus` flips the state);

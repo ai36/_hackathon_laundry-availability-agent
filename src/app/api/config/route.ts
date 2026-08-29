@@ -1,8 +1,12 @@
 /**
  * Deployment config for the integrator console.
  *
- *   GET   /api/config              -> { ok, config, defaults, overridden, locked }
- *   PATCH /api/config  <patch>     -> { ok, config, overridden }   (400 on invalid merge)
+ *   GET   /api/config              -> { ok, config, defaults, base, overridden, fromFile, locked }
+ *   PATCH /api/config  <patch>     -> { ok, config, overridden, fromFile }   (400 on bad merge)
+ *
+ * `overridden` = paths differing from the built-in `DEFAULT_CONFIG`. `fromFile` = paths the
+ * portal has changed *from `laundry3.config.ts`* — i.e. what lives only in the git-ignored
+ * `data/config-overrides.json`, not the committed source.
  *
  * `config` is `src/config/defaults.ts` + `laundry3.config.ts` + `data/config-overrides.json`
  * (the last written by PATCH), merged and validated on every request. `patch` is a nested
@@ -22,7 +26,9 @@ import { NextResponse } from "next/server";
 import {
   DEFAULT_CONFIG,
   LOCKED_PREFIXES,
+  baseConfig,
   overriddenPaths,
+  overrideFilePaths,
   resolvePortalConfig,
   writeOverrides,
   type DeepPartial,
@@ -38,7 +44,9 @@ export function GET() {
     ok: true,
     config,
     defaults: DEFAULT_CONFIG,
+    base: baseConfig(),
     overridden: overriddenPaths(config),
+    fromFile: overrideFilePaths(),
     locked: LOCKED_PREFIXES,
   });
 }
@@ -55,7 +63,12 @@ export async function PATCH(req: Request) {
   }
   try {
     const config = writeOverrides(patch);
-    return NextResponse.json({ ok: true, config, overridden: overriddenPaths(config) });
+    return NextResponse.json({
+      ok: true,
+      config,
+      overridden: overriddenPaths(config),
+      fromFile: overrideFilePaths(),
+    });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "invalid config" },

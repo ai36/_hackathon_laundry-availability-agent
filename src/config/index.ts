@@ -8,6 +8,9 @@ export {
   readOverrides,
   writeOverrides,
   overriddenPaths,
+  overrideFilePaths,
+  baseConfig,
+  diffPaths,
   OVERRIDES_FILE,
   LOCKED_PREFIXES,
 } from "./overrides";

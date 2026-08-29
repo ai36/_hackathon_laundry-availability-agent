@@ -9,7 +9,13 @@ import { Switch } from "@/components/ui/switch";
 import type { Laundry3Config } from "@/config";
 
 type Cfg = Laundry3Config;
-type Payload = { config?: Cfg; defaults?: Cfg; overridden?: string[]; locked?: string[] };
+type Payload = {
+  config?: Cfg;
+  defaults?: Cfg;
+  overridden?: string[];
+  fromFile?: string[];
+  locked?: string[];
+};
 type Leaf = string | number | boolean;
 
 const GROUPS: { key: keyof Cfg; title: string }[] = [
@@ -184,9 +190,11 @@ export function ConfigView() {
   const [draft, setDraft] = useState<Cfg | null>(null);
   const [defaults, setDefaults] = useState<Cfg | null>(null);
   const [overridden, setOverridden] = useState<Set<string>>(new Set());
+  const [fromFile, setFromFile] = useState<Set<string>>(new Set());
   const [locked, setLocked] = useState<string[]>(["paths.", "site.machines."]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [snippet, setSnippet] = useState<string | null>(null);
 
   function apply(d: Payload) {
     if (d.config) {
@@ -195,7 +203,18 @@ export function ConfigView() {
     }
     if (d.defaults) setDefaults(d.defaults);
     setOverridden(new Set(d.overridden ?? []));
+    setFromFile(new Set(d.fromFile ?? []));
     if (d.locked) setLocked(d.locked);
+    setSnippet(null);
+  }
+
+  /** An object literal (JSON — quoted keys are valid TS) of the *saved* values that live
+   *  only in the overrides file. Paste into `defineConfig(…)`, then delete the file. */
+  function buildSnippet(): string {
+    if (!loaded) return "{}";
+    let obj: Record<string, unknown> = {};
+    for (const p of fromFile) obj = setPath(obj, p, getPath(loaded, p));
+    return JSON.stringify(obj, null, 2);
   }
 
   useEffect(() => {
@@ -253,16 +272,54 @@ export function ConfigView() {
 
   return (
     <Section title="Configuration">
-      <p className="text-on-surface-variant mb-4 text-xs">
+      <p className="text-on-surface-variant mb-3 text-xs">
         Deployment knobs, validated on load. Edits are saved to{" "}
-        <span className="font-mono">data/config-overrides.json</span> and apply to the portal
-        runtime — the offline eval always uses <span className="font-mono">laundry3.config.ts</span>
-        . A <span className="text-primary-container">•</span> marks a value overridden from the
-        built-in default; an amber field is an unsaved edit.{" "}
-        <span className="font-mono">paths.*</span> and{" "}
-        <span className="font-mono">site.machines.*</span> are read-only — the roster is managed in
-        the Machines section above.
+        <span className="font-mono">data/config-overrides.json</span> — a portal-runtime layer over
+        the committed <span className="font-mono">laundry3.config.ts</span> (which stays the
+        canonical config and the one the offline eval uses).{" "}
+        <span className="text-primary-container">•</span> = differs from the built-in default;{" "}
+        <span className="text-secondary-container">•</span> = changed here but not yet in{" "}
+        <span className="font-mono">laundry3.config.ts</span>; an amber field is an unsaved edit.{" "}
+        <span className="font-mono">paths.*</span> /{" "}
+        <span className="font-mono">site.machines.*</span> are read-only.
       </p>
+
+      {fromFile.size > 0 && draft && (
+        <div className="border-secondary-container/30 bg-secondary-container/[0.06] mb-4 rounded border p-3 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-on-surface-variant">
+              {fromFile.size} field{fromFile.size === 1 ? "" : "s"} in{" "}
+              <span className="font-mono">data/config-overrides.json</span> not in{" "}
+              <span className="font-mono">laundry3.config.ts</span>.
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => setSnippet((s) => (s === null ? buildSnippet() : null))}
+            >
+              {snippet === null ? "show laundry3.config.ts snippet" : "hide"}
+            </Button>
+          </div>
+          {snippet !== null && (
+            <>
+              <p className="text-on-surface-variant mt-2">
+                Merge into <span className="font-mono">defineConfig(&#123; … &#125;)</span> in{" "}
+                <span className="font-mono">laundry3.config.ts</span>, then{" "}
+                <span className="font-mono">rm data/config-overrides.json</span>.
+              </p>
+              <pre className="bg-surface text-2xs text-on-surface mt-2 overflow-x-auto rounded p-2 font-mono">
+                {snippet}
+              </pre>
+              <Button
+                variant="outline"
+                className="mt-2"
+                onClick={() => void navigator.clipboard?.writeText(snippet).catch(() => {})}
+              >
+                copy
+              </Button>
+            </>
+          )}
+        </div>
+      )}
 
       {!draft ? (
         <p className="text-on-surface-variant text-xs">loading…</p>
@@ -287,8 +344,15 @@ export function ConfigView() {
                         }`}
                       >
                         <dt className="text-on-surface-variant min-w-0 truncate font-mono text-xs">
-                          {overridden.has(path) && (
-                            <span className="text-primary-container mr-1" aria-hidden="true">
+                          {(fromFile.has(path) || overridden.has(path)) && (
+                            <span
+                              className={`mr-1 ${
+                                fromFile.has(path)
+                                  ? "text-secondary-container"
+                                  : "text-primary-container"
+                              }`}
+                              aria-hidden="true"
+                            >
                               •
                             </span>
                           )}

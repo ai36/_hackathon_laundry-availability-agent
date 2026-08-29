@@ -427,6 +427,11 @@ grouped, an input per field (`paths.*` read-only), a `•` on values that differ
   read the overrides file — the submitted eval config stays hand-edited in
   `laundry3.config.ts`. Only portal consumers opt in: `GET /api/config` and
   `src/app/integrator/page.tsx` (`refreshSeconds`). `to restore: rm data/config-overrides.json`.
+- **`laundry3.config.ts` stays canonical, and the split is made visible.** `GET /api/config`
+  returns `fromFile` (paths that differ from `DEFAULT_CONFIG ← laundry3.config.ts`), the
+  Configuration section marks those fields with an amber `•`, and a button emits a
+  `defineConfig({…})` snippet so an operator can fold portal edits back into the committed
+  file when they want them permanent, then delete the overrides file.
 
 **Amendment (2026-08-29) — config surface = deployment knobs only.** `frames.videoFps`
 (the video frame-sampling rate) was removed from the schema — it is a one-off dataset-prep
