@@ -63,8 +63,10 @@ for free. All runs `--replay`-reproducible offline. Full write-up: **`docs/CHANG
 camera angle and **overlay the integrator corrections** (`src/portal/room-status.ts` +
 `src/stores/machines-store.ts`, MobX):
 
-- **`/tenant`** — the tenant room view: current state per machine, nothing else. No API call,
-  so it prerenders (`○ /tenant`). `/` redirects here.
+- **`/tenant`** — the tenant room view: current state per machine, plus per-kind
+  free counts. Tapping a free machine opens a confirm dialog to **reserve** it (a short
+  auto-expiring hold); your own hold has a **release** dialog. Server-rendered per request
+  (holds expire on a timer). `/` redirects here.
 - **`/integrator`** — the integrator console: per-card agent confidence + source frame + a
   **“✕ mark wrong”** control and a **“↻ refresh recognition”** button.
 - **`/integrator/settings`** — Machines + Cameras CRUD + a site overview.
@@ -78,9 +80,12 @@ All three routes are built from one small in-repo UI kit (`src/components/ui/`, 
 scroll, and a left-rail / bottom-bar nav shell. The
 **“↻ refresh recognition”** control on `/integrator` has a manual button **and an auto
 toggle** — every cycle `POST /api/refresh` captures each camera's feed and (with a key) runs
-the agent, then re-fuses. Reservations and a live feed are P2, not wired.
+the agent, then re-fuses. Tenant **reservations** are wired (`POST /api/reservations`,
+git-ignored `data/reservations.json`), off until the integrator enables them in Settings →
+Configuration; pre-emption reconciliation (a walk-in taking a held machine) stays P2. A live
+camera feed is P2, not wired.
 
-![laundry3 portal — tenant view (/tenant): state only, "confirm on arrival"](docs/assets/portal-top.jpg)
+![laundry3 portal — tenant view (/tenant): per-kind free counts, per-machine state, tap a free machine to reserve](docs/assets/portal-top.jpg)
 ![laundry3 portal — integrator console (/integrator): agent confidence, source frame, "mark wrong" on every card, manual + auto refresh](docs/assets/portal-machines.jpg)
 ![laundry3 portal — settings (/integrator/settings): the Machines editor — id / type / prompt-fragment per machine](docs/assets/portal-settings.jpg)
 

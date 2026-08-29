@@ -345,6 +345,26 @@ of non-app tenants — reported separately from the P0 accuracy metric, never mi
 This reconciliation is one of the concrete "conflict handling" jobs that justify an agent
 over a single classifier call.
 
+**Amendment (2026-08-29) — the tenant-facing hold is now wired.** Live status: tapping a
+free machine opens a confirm dialog (Radix `AlertDialog`) → `POST /api/reservations`. A hold
+is stored in `data/reservations.json` (git-ignored), auto-expires after
+`reservation.holdMinutes`, and is filtered on read once expired. Guards enforced server-side:
+the feature must be enabled (`config.reservation.enabled`, off by default — the integrator
+flips it on in Settings → Configuration), the machine must still read `free`,
+`maxActivePerUser` per anonymous browser id, and `maxReservedFractionOfFree` of the free
+count. `buildRoomStatus` overlays `reserved` / `reservedUntil` / `reservedBy` onto a free
+machine; the tenant "washers free" figure excludes held machines. Pre-emption reconciliation
+(a walk-in taking a held machine) is still P2 — a hold simply vanishes when the machine stops
+reading `free`.
+
+The per-user cap is **best-effort, not a lock**: `by` is an unauthenticated localStorage id,
+so a client that rotates it can exceed `maxActivePerUser`. `maxReservedFractionOfFree` is the
+real backstop against one party holding the room. This matches this decision's stance that
+reservations are advisory — the camera, not a reservation, is the source of truth. The
+`data/reservations.json` read-modify-write is also unlocked (fine at laundry-room request
+rates; noted in the code). No eval impact: reservations are portal-only, the file is never
+read by `src/agent/*` / `src/eval/*`.
+
 ---
 
 ## D-0008 — Deployment configuration is a typed, validated TS module

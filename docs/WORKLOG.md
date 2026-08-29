@@ -12,6 +12,43 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Live status: tenant machine reservations
+
+- Owner: reservations exist in the config but do nothing — a tenant should be able to hold
+  a free machine from Live status via a "reserve? yes/no" modal.
+- **Data layer** (`src/portal/reservations.ts`, new): `data/reservations.json` (git-ignored)
+  holds `{ machineId, by, at, expiresAt }`. `activeReservations()` filters expired rows on
+  read; `reserve()` / `release()` write; ids are `[A-Za-z0-9_-]+`-checked. `by` is an
+  anonymous per-browser id (`src/portal/client-id.ts` → `localStorage`, `useSyncExternalStore`
+  for hydration safety) — there is no login.
+- **`POST/DELETE/GET /api/reservations`** (new): POST guards — `config.reservation.enabled`
+  (403 if off), machine must still read `free` (409), `maxActivePerUser` per `by` (409),
+  `maxReservedFractionOfFree` of the free count (`cap = max(1, floor(free × fraction))`,
+  409). Returns the updated room. Uses `resolvePortalConfig()` so the integrator can enable
+  it from Settings → Configuration without a restart.
+- **`buildRoomStatus`** gains a `reservations` param; a still-`free` machine gets
+  `reserved` / `reservedUntil` / `reservedBy`. `src/app/tenant/page.tsx` → `force-dynamic`,
+  builds the room with `activeReservations()`, passes `reservationEnabled` into the store
+  (`RootStoreHydration` + `MachinesStore.reservationEnabled`).
+- **UI**: `src/components/ui/confirm-dialog.tsx` (new, Radix `AlertDialog` wrapper).
+  `MachineCard` on the tenant view: a free machine is a `<button>` → "Reserve W-01?" dialog
+  → POST; your own held machine → "Release your hold on W-01?" dialog → DELETE. A held
+  machine shows an amber `RESERVED` (`· YOURS`) badge; the "washers/dryers free" headline
+  excludes held machines (`room-view.tsx`). Integrator view is unchanged.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` —
+  **61/61** (+5: `reservations.test.ts`); `check:data` — **pass**. Route table adds
+  `ƒ /api/reservations`. Curl: POST is 403 when disabled; after enabling — reserve holds
+  the machine, a 2nd hold by the same `by` is 409, DELETE releases. Chrome: free cards show
+  "tap to reserve", the dialog opens with the right title, the `RESERVED · YOURS` badge and
+  the per-user-cap error render, and "washers free" drops when a hold is placed.
+- **Compliance** (`hackathon-compliance`): **PASS WITH RISKS** — no eligibility blockers
+  (eval decoupling grep-confirmed; git-ignored file; default off). Three fixed before push:
+  (1) `README.md` `/tenant` "prerenders" / "reservations P2 not wired" lines + image alt
+  text corrected; (2) D-0007 amendment now states the per-user cap is best-effort (id
+  rotation bypasses it; the fraction cap is the real backstop); (3) `reservations.ts`
+  docstring records the unlocked read-modify-write assumption. Review:
+  `docs/trajectories/compliance/2026-08-29-tenant-reservations.md`.
+
 ### 2026-08-29 — Configuration: preset controls, machine-count locked, `frames.videoFps` dropped
 
 - Owner refinements to the editable Configuration section:

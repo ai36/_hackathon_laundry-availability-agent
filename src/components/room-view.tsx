@@ -8,7 +8,9 @@ import { PageShell } from "@/components/ui/page-shell";
 import { useStore } from "@/stores";
 import type { MachineView } from "@/portal/room-status";
 
-const freeCount = (list: MachineView[]) => list.filter((m) => m.state === "free").length;
+/** Available = physically free and not held by a reservation. */
+const freeCount = (list: MachineView[]) =>
+  list.filter((m) => m.state === "free" && !m.reserved).length;
 
 /** Tenant portal: current per-machine availability, nothing else. */
 export const RoomView = observer(function RoomView() {

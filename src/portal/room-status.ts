@@ -5,6 +5,7 @@ import { config } from "@/config";
 import { correctionFor, loadCorrections } from "@/eval/corrections";
 import { loadRoster } from "@/eval/roster";
 import type { MachineState, MachineType } from "@/eval/types";
+import type { Reservation } from "@/portal/reservations";
 
 /** One machine as the portal shows it, fused across every camera angle that sees it. */
 export interface MachineView {
@@ -20,6 +21,10 @@ export interface MachineView {
   corrected?: boolean;
   /** the correction's scope + note, when `corrected`. */
   correction?: { scope: "observation" | "machine"; note?: string };
+  /** a tenant has this free machine on hold — `reservedUntil` ISO, `reservedBy` client id. */
+  reserved?: boolean;
+  reservedUntil?: string;
+  reservedBy?: string;
 }
 
 export interface RoomStatus {
@@ -52,6 +57,7 @@ export function buildRoomStatus(
   reportPath = join("docs", "artifacts", "eval-baseline-2026-08-28.json"),
   rosterPath = join(config.paths.dataset, "machines.json"),
   correctionsDir = join(config.paths.dataset, "corrections"),
+  reservations: Reservation[] = [],
 ): RoomStatus {
   const report = JSON.parse(readFileSync(reportPath, "utf8")) as Report;
   const roster = loadRoster(rosterPath);
@@ -92,6 +98,16 @@ export function buildRoomStatus(
       view.confidence = 1;
       view.corrected = true;
       view.correction = { scope: c.scope, note: c.note };
+    }
+
+    // A hold only applies to a machine the room still shows as free.
+    if (!view.corrected && view.state === "free") {
+      const held = reservations.find((r) => r.machineId === machineId);
+      if (held) {
+        view.reserved = true;
+        view.reservedUntil = held.expiresAt;
+        view.reservedBy = held.by;
+      }
     }
     return view;
   });

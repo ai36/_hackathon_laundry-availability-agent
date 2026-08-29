@@ -5,7 +5,9 @@ import { observer } from "mobx-react-lite";
 import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Label, TextInput } from "@/components/ui/field";
+import { useClientId } from "@/portal/client-id";
 import { useStore } from "@/stores";
 import type { MachineState } from "@/eval/types";
 import type { MachineView } from "@/portal/room-status";
@@ -151,7 +153,8 @@ function MarkWrong({ m }: { m: MachineView }) {
   );
 }
 
-/** One machine tile. `integrator` adds provenance + the mark-wrong control. */
+/** One machine tile. `integrator` adds provenance + the mark-wrong control; on the tenant
+ *  view a free machine can be reserved (and your own hold cancelled) via a confirm dialog. */
 export const MachineCard = observer(function MachineCard({
   m,
   integrator = false,
@@ -160,10 +163,51 @@ export const MachineCard = observer(function MachineCard({
   integrator?: boolean;
 }) {
   const s = STATE_STYLE[m.state];
-  return (
-    <div
-      className={`bg-surface-container-high hover:bg-surface-container-highest flex min-w-0 flex-col gap-3 rounded-lg border p-4 transition-colors ${s.card}`}
-    >
+  const { machines } = useStore();
+  const clientId = useClientId();
+  const [dialog, setDialog] = useState<null | "reserve" | "cancel">(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  const mine = Boolean(m.reserved && clientId && m.reservedBy === clientId);
+  const canReserve =
+    !integrator &&
+    !m.reserved &&
+    !m.corrected &&
+    m.state === "free" &&
+    machines.reservationEnabled &&
+    Boolean(clientId);
+  const canCancel = !integrator && mine;
+  const clickable = canReserve || canCancel;
+
+  async function act(method: "POST" | "DELETE") {
+    setBusy(true);
+    setErr(null);
+    try {
+      const res = await fetch("/api/reservations", {
+        method,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ machineId: m.machineId, by: clientId }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string; room?: unknown };
+      if (!res.ok || !data.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+      machines.applyRoom(data.room as Parameters<typeof machines.applyRoom>[0]);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "failed");
+    } finally {
+      setBusy(false);
+      setDialog(null);
+    }
+  }
+
+  const cls = `flex min-w-0 flex-col gap-3 rounded-lg border bg-surface-container-high p-4 transition-colors ${s.card} ${
+    clickable
+      ? "cursor-pointer text-left hover:bg-surface-container-highest"
+      : "hover:bg-surface-container-highest"
+  }`;
+
+  const inner = (
+    <>
       <div className="flex items-center justify-between gap-2">
         <span className="truncate text-lg font-bold">{m.machineId}</span>
         <span className={`h-3 w-3 shrink-0 rounded-full ${s.dot} ${s.glow}`} aria-hidden="true" />
@@ -175,8 +219,23 @@ export const MachineCard = observer(function MachineCard({
             {m.correction?.scope === "machine" ? "integrator · durable" : "integrator"}
           </span>
         )}
-        {(m.state === "free" || m.state === "unknown") && !m.corrected && (
+        {m.reserved && (
+          <span className="bg-secondary-container/20 text-2xs text-secondary-container w-fit rounded px-1.5 py-0.5 font-bold tracking-wide uppercase">
+            reserved{mine ? " · yours" : ""}
+          </span>
+        )}
+        {m.state === "free" && !m.corrected && !m.reserved && (
+          <span className="text-on-surface-variant text-sm opacity-80">
+            {canReserve ? "tap to reserve · confirm on arrival" : "confirm on arrival"}
+          </span>
+        )}
+        {m.state === "unknown" && !m.corrected && (
           <span className="text-on-surface-variant text-sm opacity-80">confirm on arrival</span>
+        )}
+        {canCancel && (
+          <span className="text-on-surface-variant text-sm opacity-80">
+            tap to cancel your hold
+          </span>
         )}
       </div>
       {integrator && (
@@ -191,6 +250,46 @@ export const MachineCard = observer(function MachineCard({
           <MarkWrong m={m} />
         </div>
       )}
-    </div>
+      {err && (
+        <span role="alert" className="text-error text-xs break-words">
+          {err}
+        </span>
+      )}
+    </>
+  );
+
+  return (
+    <>
+      {clickable ? (
+        <button
+          type="button"
+          className={cls}
+          onClick={() => setDialog(canCancel ? "cancel" : "reserve")}
+        >
+          {inner}
+        </button>
+      ) : (
+        <div className={cls}>{inner}</div>
+      )}
+
+      <ConfirmDialog
+        open={dialog === "reserve"}
+        onOpenChange={(v) => !v && setDialog(null)}
+        title={`Reserve ${m.machineId}?`}
+        description="It's held for you for a short window and released automatically if you don't start it."
+        confirmLabel="reserve"
+        busy={busy}
+        onConfirm={() => act("POST")}
+      />
+      <ConfirmDialog
+        open={dialog === "cancel"}
+        onOpenChange={(v) => !v && setDialog(null)}
+        title={`Release your hold on ${m.machineId}?`}
+        confirmLabel="release"
+        confirmVariant="danger"
+        busy={busy}
+        onConfirm={() => act("DELETE")}
+      />
+    </>
   );
 });

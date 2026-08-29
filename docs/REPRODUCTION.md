@@ -40,13 +40,14 @@ npm run build    # production build
 npm start        # serve the production build
 ```
 
-> The `/integrator` console writes to the repo: `data/corrections/` (mark-wrong),
-> `data/machines.json` (Machines editor), `data/site-config.json` + `data/site-config/`
-> (Cameras editor; the image dir is git-ignored), and `data/config-overrides.json`
-> (Settings → Configuration; git-ignored, portal-runtime only — the offline eval always
-> uses `laundry3.config.ts`). This is expected — the container in D-0016 owns that state on
-> a writable volume. To restore the submitted state:
-> `git checkout -- data/ && git clean -fd data/site-config/ && rm -f data/config-overrides.json`.
+> The portal writes to the repo: `data/corrections/` (mark-wrong), `data/machines.json`
+> (Machines editor), `data/site-config.json` + `data/site-config/` (Cameras editor; the
+> image dir is git-ignored), `data/config-overrides.json` (Settings → Configuration), and
+> `data/reservations.json` (Live status holds). The last two are git-ignored and
+> portal-runtime only — the offline eval always uses `laundry3.config.ts` and never reads
+> reservations. This is expected — the container in D-0016 owns that state on a writable
+> volume. To restore the submitted state:
+> `git checkout -- data/ && git clean -fd data/site-config/ && rm -f data/config-overrides.json data/reservations.json`.
 >
 > **`POST /api/refresh`** (the "refresh" button + auto toggle) is **key-optional**:
 > with no `ANTHROPIC_API_KEY` it only re-fuses the committed report + corrections — **free**,
@@ -62,7 +63,7 @@ npm start        # serve the production build
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint (flat config)
 npm run format:check # prettier
-npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides (expect: 56/56 pass)
+npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations (expect: 61/61 pass)
 npm run check:data   # dataset privacy gate (also runs as the pre-commit hook)
 ```
 

@@ -82,6 +82,8 @@ next-env.d.ts
 /laundry3.config.local.ts
 # portal-edited config layer (Settings → Configuration) — local runtime only, not the eval
 /data/config-overrides.json
+# tenant reservations (Live status) — ephemeral runtime state
+/data/reservations.json
 
 # agent skills — declared in skills-lock.json (committed); vendored copies + symlinks are
 # fetched with `npx skills install`, not committed.

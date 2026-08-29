@@ -16,17 +16,20 @@ export class MachinesStore {
   role: PortalRole = "tenant";
   /** Auto-refresh period (seconds) — from runtime.stateRefreshSeconds. */
   refreshSeconds = 30;
+  /** Whether tenants may reserve a free machine (config.reservation.enabled). */
+  reservationEnabled = false;
 
   constructor(public root: RootStore) {
     makeAutoObservable(this, { root: false }, { autoBind: true });
   }
 
-  hydrate(room: RoomStatus, refreshSeconds?: number) {
+  hydrate(room: RoomStatus, refreshSeconds?: number, reservationEnabled?: boolean) {
     this.machines = room.machines;
     this.model = room.provenance.model;
     this.reportPath = room.provenance.report;
     this.correctedCount = room.provenance.corrections;
     if (refreshSeconds && refreshSeconds > 0) this.refreshSeconds = refreshSeconds;
+    if (reservationEnabled !== undefined) this.reservationEnabled = reservationEnabled;
   }
 
   setRole(role: PortalRole) {

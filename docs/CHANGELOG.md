@@ -103,6 +103,19 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-29 — live status: tenant machine reservations
+
+- New `src/portal/reservations.ts` + `src/portal/client-id.ts`; `POST/DELETE/GET
+  /api/reservations` (enable / free / per-user / fraction guards, all server-side);
+  `buildRoomStatus` overlays `reserved`/`reservedUntil`/`reservedBy`; `/tenant` →
+  `force-dynamic`. New `ConfirmDialog` (Radix `AlertDialog`); `MachineCard` tenant view =
+  reserve / release via the dialog, amber `RESERVED` badge, held machines excluded from the
+  "free" headline. `data/reservations.json` git-ignored; not read by the eval. D-0007
+  amendment.
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **61/61** (+5);
+  `check:data` — **pass**. Route table adds `ƒ /api/reservations`. Curl round-trip verified
+  (403 disabled → reserve → per-user 409 → release).
+
 ### 2026-08-29 — configuration: preset controls, machine-count locked, `videoFps` dropped
 
 - `site.machines.*` read-only (`LOCKED_PREFIXES` += `"site.machines."`; `stripLocked` fixed
