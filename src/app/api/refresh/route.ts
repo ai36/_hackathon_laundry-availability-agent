@@ -5,10 +5,15 @@
  *
  * One cycle of the runtime loop: for every declared camera, "capture" its current frame
  * (P0: the uploaded stub image — a StaticImageFrameSource, D-0016) and, when
- * `ANTHROPIC_API_KEY` is set, run the vision agent on it for that camera's machine ids. Live
- * per-machine states are **fused into the returned room** (below D-0014 corrections, which
- * stay authoritative). Key-free, the endpoint degrades to a plain re-fusion of the committed
- * report + `data/corrections/` — no model call, no cost.
+ * `ANTHROPIC_API_KEY` is set, run the vision agent on it for that camera's machine ids. The
+ * prompt is `cameraClassifyPrompt` (`src/agent/camera-classify.ts`), NOT the eval's frozen
+ * `baselinePrompt` — it folds in the roster's per-machine `promptFragment` hints and, when
+ * the camera has them, an annotated "spatial key" still and an analysis mask as extra
+ * reference images (D-0015). With none of those calibrated it degrades to the baseline
+ * wording. Its accuracy effect is UNMEASURED — the frozen 9-frame eval scores the CLI agent,
+ * not this route. Live per-machine states are **fused into the returned room** (below D-0014
+ * corrections, which stay authoritative). Key-free, the endpoint degrades to a plain
+ * re-fusion of the committed report + `data/corrections/` — no model call, no cost.
  *
  * COST: the live branch calls the Anthropic API once per camera-with-a-feed. It only fires
  * when `ANTHROPIC_API_KEY` is set; the key-free default (the judge's path) makes zero calls.
@@ -24,11 +29,12 @@ import { join } from "node:path";
 
 import { NextResponse } from "next/server";
 
-import { baselinePrompt } from "@/agent/baseline";
+import { cameraClassifyPrompt } from "@/agent/camera-classify";
 import { parseAssessments } from "@/agent/parse";
 import { AnthropicVisionClient, CachedVisionClient } from "@/agent/vision";
-import type { MachineState } from "@/eval/types";
+import { loadRoster } from "@/eval/roster";
 import { loadSiteConfig } from "@/eval/site-config";
+import type { MachineState } from "@/eval/types";
 import { buildRoomStatus } from "@/portal/room-status";
 
 export const runtime = "nodejs";
@@ -36,15 +42,31 @@ export const dynamic = "force-dynamic";
 
 const ACTIONABLE: MachineState[] = ["free", "occupied", "out_of_order"];
 
+/** Resolve a repo-relative calibration asset to an absolute path, or null if absent. */
+function assetPath(rel?: string): string | null {
+  if (!rel) return null;
+  const abs = join(process.cwd(), rel);
+  return existsSync(abs) ? abs : null;
+}
+
 export async function POST() {
   const cameras = loadSiteConfig().cameras;
   const haveKey = !!process.env.ANTHROPIC_API_KEY;
+
+  // Per-machine hints from the roster (D-0015) — folded into each camera's prompt.
+  const fragments: Record<string, string> = {};
+  for (const m of loadRoster().machines) {
+    if (m.promptFragment?.trim()) fragments[m.machineId] = m.promptFragment.trim();
+  }
 
   const capture = cameras.map((cam) => ({
     camera: cam.id,
     machineIds: cam.machineIds,
     feed: cam.stubImage && existsSync(join(process.cwd(), cam.stubImage)) ? cam.stubImage : null,
+    annotatedPath: assetPath(cam.annotatedShot),
+    maskPath: assetPath(cam.mask),
     classified: 0,
+    refs: 0,
     error: undefined as string | undefined,
   }));
 
@@ -59,11 +81,19 @@ export async function POST() {
     const vision = new CachedVisionClient(new AnthropicVisionClient(), "data/cache/live", false);
     for (const c of capture) {
       if (!c.feed || c.machineIds.length === 0) continue;
+      const extraImagePaths = [c.annotatedPath, c.maskPath].filter((p): p is string => !!p);
+      c.refs = extraImagePaths.length;
       try {
         const res = await vision.analyze({
           cacheKey: `live:${c.camera}:${c.machineIds.join(",")}`,
           imagePath: join(process.cwd(), c.feed),
-          prompt: baselinePrompt(c.machineIds),
+          prompt: cameraClassifyPrompt({
+            machineIds: c.machineIds,
+            fragments,
+            hasAnnotatedShot: !!c.annotatedPath,
+            hasMask: !!c.maskPath,
+          }),
+          extraImagePaths,
         });
         const rows = parseAssessments(res.text).filter((r) => c.machineIds.includes(r.machineId));
         c.classified = rows.length;
@@ -106,7 +136,15 @@ export async function POST() {
     ok: true,
     room,
     live,
-    capture,
+    // Drop the resolved absolute asset paths — the client only needs the ref count.
+    capture: capture.map((c) => ({
+      camera: c.camera,
+      machineIds: c.machineIds,
+      feed: c.feed,
+      classified: c.classified,
+      refs: c.refs,
+      error: c.error,
+    })),
     ranAt: new Date().toISOString(),
     note: haveKey
       ? undefined

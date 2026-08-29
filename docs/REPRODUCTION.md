@@ -54,8 +54,12 @@ npm start        # serve the production build
 > and this is the default. `data/site-config.json` ships **5 seeded cameras** (`C-01…C-05`,
 > stub images = the committed eval frames), so **with a key** a manual click runs ~5
 > Anthropic vision calls (one per camera feed) and fuses the live reads below corrections.
-> The auto toggle is off by default and stops itself after **20 cycles** (~100 calls worst
-> case). Results are cached under `data/cache/live/` (git-ignored), so re-runs are free.
+> The prompt is `cameraClassifyPrompt` (roster `promptFragment` hints + a camera's annotated
+> shot / mask as extra reference images when calibrated — none of the seeds carry those, so
+> today it matches the baseline wording). The auto toggle is off by default and stops itself
+> after **20 cycles** (~100 calls worst case). Results are cached under `data/cache/live/`
+> (git-ignored), so re-runs are free. This route is **not** part of the scored eval — its
+> accuracy effect is unmeasured.
 
 ## Checks
 
@@ -63,7 +67,7 @@ npm start        # serve the production build
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint (flat config)
 npm run format:check # prettier
-npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations, calibration-config guard (expect: 64/64 pass)
+npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations, calibration-config guard, requestHash + camera-classify prompt (expect: 70/70 pass)
 npm run check:data   # dataset privacy gate (also runs as the pre-commit hook)
 ```
 

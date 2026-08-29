@@ -853,7 +853,9 @@ must also apply corrections so the portal reflects the corrected state.
 - **`Camera.mask?`** is now in the schema (`src/eval/site-config.ts`), the upload route
   (`camera-mask` kind → `data/site-config/<id>/mask.<ext>`), and the `/api/cameras`
   POST/PATCH body (a string sets it, `null`/`""` clears, an absent key keeps it). It is
-  stored and shown; compositing it onto the feed before analysis is still D-0016 work.
+  stored and shown; as of the 2026-08-29 amendment below it is also passed to `/api/refresh`
+  as a reference image + prompt instruction. Compositing it onto the feed (a `sharp`-style
+  pixel op) is still not done and intentionally deferred.
 - **`data/site-config.json` ships 5 seeded cameras** (`C-01…C-05`), each `stubImage` a
   committed eval frame with that frame's machine-id list. Rationale: there is no physical
   camera, but the whole point of `StaticImageFrameSource` is that a photo *is* the feed —
@@ -879,6 +881,29 @@ produced). Seeding the camera list broke `npm run eval -- --mode=agent --replay`
 `null` for anything that isn't the calibration shape, restoring the recorded-cache replay
 byte-for-byte. A proper separation (a distinct path/file for calibration) is **deferred** —
 whoever finally authors a real calibration file must not reuse `config.paths.siteConfig`.
+
+**Amendment (2026-08-29) — calibration inputs are now consumed by the runtime prompt.**
+`POST /api/refresh` no longer sends the eval's frozen `baselinePrompt`. A new portal-only
+builder `cameraClassifyPrompt` (`src/agent/camera-classify.ts`) folds in three calibration
+inputs when a camera has them:
+
+- **per-machine `promptFragment`** (roster, `data/machines.json`) → a "Per-machine notes"
+  block, one line per machine that has a fragment;
+- **`camera.annotatedShot`** → sent as the first extra reference image (`VisionRequest`
+  gains `extraImagePaths?: string[]`), described in the prompt as a spatial key for
+  *locating* ids only, never for reading state;
+- **`camera.mask`** → sent as the next extra image, with an instruction that solid-black
+  regions are not the operator's machines and must be ignored.
+
+The mask is applied **as a reference image + prompt instruction**, not composited onto the
+feed — that was the D-0016 "compositing before analysis" task, deliberately skipped here to
+avoid a native image dependency (`sharp`). `requestHash` folds `extraImagePaths` in **only
+when the array is non-empty**, so every committed `data/cache/{baseline,agent}` entry keeps
+its filename and `npm run eval -- --replay` reproduces byte-for-byte (verified: agent 57.8%,
+baseline 62.2%, unchanged). None of the 5 seeded cameras carry a fragment / annotated shot /
+mask yet, so today this path degrades to the baseline wording — **its accuracy effect is
+unmeasured**; the frozen 9-frame eval scores the CLI agent, not this route, and measuring it
+would need a new `--live` run.
 
 ---
 

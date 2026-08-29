@@ -21,7 +21,22 @@ export function requestHash(req: VisionRequest): string {
   h.update(req.prompt);
   h.update("\0");
   h.update(req.crop ? req.crop.join(",") : "full");
+  // Only extend the hash when there ARE extra reference images, so requests that don't use
+  // them (every eval request) keep the exact filename their cache was written under.
+  if (req.extraImagePaths?.length) {
+    h.update("\0refs\0");
+    h.update(req.extraImagePaths.join(","));
+  }
   return h.digest("hex").slice(0, 32);
+}
+
+/** Anthropic image media type from a file extension; defaults to JPEG. */
+function imageMediaType(path: string): "image/jpeg" | "image/png" | "image/webp" | "image/gif" {
+  const ext = path.toLowerCase().slice(path.lastIndexOf("."));
+  if (ext === ".png") return "image/png";
+  if (ext === ".webp") return "image/webp";
+  if (ext === ".gif") return "image/gif";
+  return "image/jpeg";
 }
 
 /**
@@ -102,6 +117,19 @@ export class AnthropicVisionClient implements VisionClient {
     // req.crop is honoured by the caller (it passes a pre-cropped path) — not here yet.
     const data = readFileSync(req.imagePath).toString("base64");
 
+    // Extra reference images (annotated spatial key, analysis mask) — skip any missing file
+    // so a partially-calibrated camera still classifies.
+    const refBlocks = (req.extraImagePaths ?? [])
+      .filter((p) => existsSync(p))
+      .map((p) => ({
+        type: "image" as const,
+        source: {
+          type: "base64" as const,
+          media_type: imageMediaType(p),
+          data: readFileSync(p).toString("base64"),
+        },
+      }));
+
     const res = await this.client.messages.create({
       model: this.model,
       max_tokens: 1500,
@@ -113,6 +141,7 @@ export class AnthropicVisionClient implements VisionClient {
           role: "user",
           content: [
             { type: "image", source: { type: "base64", media_type: "image/jpeg", data } },
+            ...refBlocks,
             { type: "text", text: req.prompt },
           ],
         },

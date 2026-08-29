@@ -25,6 +25,14 @@ export interface VisionRequest {
   /** Optional crop applied before sending, in source-frame pixels. */
   crop?: BBox;
   prompt: string;
+  /**
+   * Extra reference images sent after the main frame and before the prompt text — a
+   * camera's annotated "spatial key" still and its analysis mask (D-0015). The prompt must
+   * describe them in the same order they appear here. Portal runtime only (`/api/refresh`);
+   * the eval never sets this. Folded into `requestHash` ONLY when non-empty, so every
+   * existing `data/cache/{baseline,agent}` entry keeps its filename and `--replay` is intact.
+   */
+  extraImagePaths?: string[];
 }
 
 export interface VisionResponse {

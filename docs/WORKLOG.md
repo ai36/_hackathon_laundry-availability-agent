@@ -12,6 +12,43 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — `/api/refresh`: camera-aware classify prompt (fragments + annotated shot + mask)
+
+- Owner ask: the seeded cameras only have stub screenshots — no annotated shots, no masks,
+  no per-machine notes — so recognition is running on the bare baseline prompt. Wire the
+  calibration inputs that D-0015 already models into the runtime path (items 1–3).
+- **New portal-only builder** `src/agent/camera-classify.ts` (`cameraClassifyPrompt`),
+  deliberately separate from the eval's frozen `baselinePrompt` / `classifyPrompt`. It adds,
+  per camera, when present:
+  1. roster `promptFragment` hints → a "Per-machine notes" block;
+  2. `camera.annotatedShot` → first extra reference image, "locate ids only, don't read
+     state";
+  3. `camera.mask` → next extra image, "black regions aren't your machines — ignore them".
+     Applied as an image + instruction, **not** composited — no `sharp` dependency added.
+- **Plumbing:** `VisionRequest` gains `extraImagePaths?: string[]`; `AnthropicVisionClient`
+  sends them as extra `image` blocks (missing files skipped); `requestHash` folds them in
+  **only when the array is non-empty**, so committed `data/cache/{baseline,agent}` hashes
+  are untouched. `/api/refresh` builds the roster fragment map once, resolves each camera's
+  annotated/mask paths, and no longer leaks absolute paths in its JSON (`refs` count only).
+- **No seeded camera carries any of the three inputs yet**, so today this degrades to the
+  baseline wording. Accuracy effect is **unmeasured** — the frozen 9-frame eval scores the
+  CLI agent, not this route; a real number would need a new `--live` run.
+- Verification: `typecheck` / `lint` / `format:check` — pass; `npm test` — **70/70**
+  (`vision.test.ts` pins `requestHash` stability, `camera-classify.test.ts` the prompt
+  shape); `check:data` — pass; `npm run build` — pass. `npm run eval -- --mode=agent
+  --replay` → **57.8%** and `--mode=baseline --replay` → **62.2%**, both byte-for-byte
+  unchanged. Stray `docs/artifacts/eval-*-2026-08-29.json` removed; `git status data/` clean.
+- Docs: D-0015 amendment (calibration inputs now consumed; mask-as-reference not composited;
+  replay invariant); `docs/REPRODUCTION.md` (`/api/refresh` note + test count 64 → 70).
+- **Compliance:** `hackathon-compliance` → **PASS WITH RISKS**
+  (`docs/trajectories/compliance/2026-08-29-camera-aware-refresh-prompt.md`). Risks handled:
+  (1) the feature is latent — no seeded camera has the inputs, so it can't be demoed to a
+  judge yet. Handled by **explicitly scoping** the calibration assets + a measured `--live`
+  pass as future work in the CHANGELOG story and D-0015, rather than implying a win. (2)
+  process — this trajectory file + this verdict line. (3) mask-as-reference is weaker than
+  compositing — accepted, documented deferral (no `sharp`). No eligibility blockers; the
+  fair-baseline comparison and `--replay` parity are untouched (pinned by `vision.test.ts`).
+
 ### 2026-08-29 — Reservations ON by default; per-tenant limit raised to 2 and enforced in the UI
 
 - Owner decision (kept + committed): `laundry3.config.ts` `reservation.enabled: false → true`,

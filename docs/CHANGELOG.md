@@ -103,6 +103,25 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-29 — `/api/refresh` camera-aware prompt (fragments + annotated + mask); eval unchanged
+
+- New portal-only `cameraClassifyPrompt` (`src/agent/camera-classify.ts`) replaces
+  `baselinePrompt` in `POST /api/refresh`. Folds in roster `promptFragment` hints and, when a
+  camera has them, its `annotatedShot` + `mask` as extra reference images (`VisionRequest.
+  extraImagePaths`). Mask is passed as image + instruction, not composited (no `sharp`).
+- The eval's `baselinePrompt` / `classifyPrompt` / `runAgent` / `runBaseline` are untouched.
+  `requestHash` only changes when `extraImagePaths` is non-empty → committed caches stable.
+- **No metric moved.** `npm run eval -- --mode=agent --replay` → 57.8% / harmful 0.0% /
+  coverage 100% / 14 calls / $0.0506; `--mode=baseline --replay` → 62.2% / 2.2% / 95.6% / 9
+  calls / $0.0351 — both byte-for-byte identical to the committed artifacts. No seeded camera
+  carries a fragment/annotated/mask, so `/api/refresh` accuracy is **unmeasured** by design.
+- `typecheck` / `lint` / `format:check` pass; `npm test` 70/70; `check:data` pass;
+  `npm run build` pass.
+- **Scope:** this commit is the plumbing only. Authoring the calibration assets it consumes
+  (annotated shots + masks per camera, per-machine `promptFragment`s) and a measured
+  `--live` pass over `/api/refresh` to quantify the effect are **future work** — tracked, not
+  claimed here. As submitted the path degrades to the baseline wording on every real call.
+
 ### 2026-08-29 — reservations on by default; per-tenant limit 2, enforced client + server
 
 - `laundry3.config.ts`: `reservation.enabled` `false → true`, `maxActivePerUser` `1 → 2`
