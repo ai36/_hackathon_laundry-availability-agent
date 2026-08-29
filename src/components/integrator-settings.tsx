@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { observer } from "mobx-react-lite";
 import { ArrowLeft } from "lucide-react";
 
 import { CamerasEditor } from "@/components/cameras-editor";
 import { MachinesEditor } from "@/components/machines-editor";
-import { Button } from "@/components/ui/button";
+import { LinkButton } from "@/components/ui/link-button";
 import { PageShell } from "@/components/ui/page-shell";
 import { Section } from "@/components/ui/section";
 import { useStore } from "@/stores";
@@ -25,18 +24,16 @@ export const IntegratorSettings = observer(function IntegratorSettings() {
     <PageShell
       title="System settings"
       nav={
-        <Link href="/integrator">
-          <Button variant="outline">
-            <ArrowLeft size={14} /> integrator
-          </Button>
-        </Link>
+        <LinkButton href="/integrator" variant="outline">
+          <ArrowLeft size={14} aria-hidden="true" /> integrator
+        </LinkButton>
       }
     >
       <MachinesEditor />
       <CamerasEditor />
 
       <Section title="Site overview">
-        <div className="flex flex-col gap-3 text-[13px]">
+        <div className="flex flex-col gap-3 text-sm">
           <div>
             <div className="text-on-surface-variant font-semibold">
               Roster ({machines.machines.length})

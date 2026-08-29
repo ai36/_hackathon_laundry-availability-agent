@@ -43,7 +43,7 @@ only. Connected to inform the portal work (`/`, `/integrator`, the CRUD console)
 | --- | --- |
 | `vercel-react-best-practices` | writing / reviewing / refactoring React + Next.js — data fetching, Server vs Client components, bundle + render performance |
 | `vercel-composition-patterns` | component API design — compound components, render props, context, boolean-prop proliferation; React 19 API changes |
-| `web-design-guidelines` | reviewing UI code for the Web Interface Guidelines — accessibility, responsiveness, overflow, focus/keyboard, contrast |
+| `web-design-guidelines` | reviewing UI code for the Web Interface Guidelines — accessibility, responsiveness, overflow, focus/keyboard, contrast. **Run 2026-08-28** over `src/components/**` + `globals.css` → the visual-rhythm + WCAG 2.2 pass (D-0001 3rd amendment; CHANGELOG) |
 | `deploy-to-vercel` | actually deploying (the tenant `/` page) to Vercel — see D-0015/D-0016 for what can and can't go there |
 
 **Anthropic:** the `claude-api` skill (building LLM-powered apps with the Anthropic SDK) is

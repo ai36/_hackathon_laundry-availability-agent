@@ -84,26 +84,35 @@ export const RefreshControl = observer(function RefreshControl() {
   return (
     <div className="flex flex-col items-end gap-1">
       <fieldset className="border-outline-variant flex flex-wrap items-center gap-3 rounded-lg border px-3 pt-1 pb-2">
-        <legend className="text-on-surface-variant px-1 text-[11px] font-semibold tracking-[0.08em] uppercase">
+        <legend className="text-2xs text-on-surface-variant px-1 font-semibold tracking-[0.08em] uppercase">
           recognition
         </legend>
         <Button variant="outline" onClick={run} disabled={busy}>
-          <RefreshCw size={13} className={busy ? "animate-spin" : ""} />
+          <RefreshCw
+            size={14}
+            aria-hidden="true"
+            className={busy ? "motion-safe:animate-spin" : ""}
+          />
           {busy ? "refreshing…" : "refresh"}
         </Button>
-        <label className="text-on-surface-variant flex items-center gap-1.5 text-[13px]">
-          <Switch checked={auto} onCheckedChange={setAuto} />
+        <label className="text-on-surface-variant flex items-center gap-2 text-sm">
+          <Switch checked={auto} onCheckedChange={setAuto} label="Auto-refresh recognition" />
           auto · every {period}s
         </label>
       </fieldset>
-      {err && <span className="text-error text-[13px] break-words">{err}</span>}
-      {last && !err && (
-        <span className="text-outline text-[13px] break-words">
-          {captured} camera{captured === 1 ? "" : "s"} captured
-          {last.live ? `, ${classified} machine reads (live)` : ""}
-          {last.note ? ` — ${last.note}` : ""}
-        </span>
-      )}
+      <span aria-live="polite" className="text-outline text-sm break-words">
+        {err ? (
+          <span role="alert" className="text-error">
+            {err}
+          </span>
+        ) : last ? (
+          <>
+            {captured} camera{captured === 1 ? "" : "s"} captured
+            {last.live ? `, ${classified} machine reads (live)` : ""}
+            {last.note ? ` — ${last.note}` : ""}
+          </>
+        ) : null}
+      </span>
     </div>
   );
 });

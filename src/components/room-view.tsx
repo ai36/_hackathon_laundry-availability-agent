@@ -23,18 +23,18 @@ export const RoomView = observer(function RoomView() {
       title="Live status"
       footer="Snapshot of current machine availability. Confirm on arrival."
     >
-      <div className="border-outline-variant bg-surface-container-high mb-8 rounded-lg border p-4 md:p-5">
-        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+      <div className="border-outline-variant bg-surface-container-high rounded-lg border p-4">
+        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm tabular-nums">
           {DOTS.map((d) => (
             <span key={d.key} className="flex items-center gap-2">
-              <span className={`h-2.5 w-2.5 rounded-full ${d.dot}`} aria-hidden />
+              <span className={`h-2.5 w-2.5 rounded-full ${d.dot}`} aria-hidden="true" />
               <span className="font-semibold">{c[d.key]}</span>
               <span className="text-on-surface-variant">{d.label}</span>
             </span>
           ))}
         </div>
         {machines.freeIds.length > 0 && (
-          <p className="border-outline-variant bg-surface text-primary mt-4 rounded border p-3 font-mono text-[13px] break-words">
+          <p className="border-outline-variant bg-surface text-primary mt-4 rounded border p-3 font-mono text-sm break-words">
             Available now: {machines.freeIds.join(", ")}
           </p>
         )}

@@ -2,7 +2,7 @@
 
 import type { ButtonHTMLAttributes } from "react";
 
-type Variant = "default" | "outline" | "ghost" | "danger" | "accent";
+export type Variant = "default" | "outline" | "ghost" | "danger" | "accent";
 
 /**
  * Lumina Wash buttons. Primary (`default`/`accent`) = mint fill + near-black text for max
@@ -16,16 +16,18 @@ const VARIANT: Record<Variant, string> = {
   danger: "border border-error/50 text-error hover:bg-error/10",
 };
 
+/**
+ * Shared control classes. `min-h-9` (36px) keeps every button clear of the WCAG 2.5.8
+ * target-size minimum with headroom; icon-only callers add `w-9 px-0` to stay square.
+ */
+export function buttonClasses(variant: Variant = "outline", className = ""): string {
+  return `inline-flex min-h-9 items-center justify-center gap-2 rounded px-3 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-40 ${VARIANT[variant]} ${className}`;
+}
+
 export function Button({
   variant = "outline",
   className = "",
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
-  return (
-    <button
-      type="button"
-      {...props}
-      className={`inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-[13px] font-semibold transition-colors disabled:pointer-events-none disabled:opacity-40 ${VARIANT[variant]} ${className}`}
-    />
-  );
+  return <button type="button" {...props} className={buttonClasses(variant, className)} />;
 }

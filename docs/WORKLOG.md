@@ -12,6 +12,52 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Portal: visual-rhythm + WCAG pass (ran `web-design-guidelines`)
+
+- Owner asked whether frontend skills are in use and flagged uneven spacing in like
+  elements + loose WCAG (target size). Ran the connected **`web-design-guidelines`** skill
+  (fetches Vercel's Web Interface Guidelines) over `src/components/**` + `globals.css`;
+  fixed every finding. Target-size bar chosen with the owner: **AA + headroom (~36px)**.
+- **Rhythm — one scale, applied uniformly:**
+  - panels/cards/sections: `p-4`; editor rows + inline panels: `p-3` (was a mix of `p-4` /
+    `p-4 md:p-5` / `p-2.5`)
+  - `PageShell` wraps body children in a single `space-y-6`; per-element `mb-6` / `mb-8` /
+    `mt-10` on grids and status bars removed
+  - stacks: `gap-3`; tight groups: `gap-2`; grids: `gap-4`
+  - icons: `14` inline-with-text, `16`/`18` standalone — was `11`–`18` ad hoc
+  - text: dropped every `text-[11/12/13px]` — `text-sm` (body-md 14), `text-xs` (label-lg
+    12), and a new `--text-2xs` token (label-md 11) from DESIGN.md
+- **WCAG 2.2:**
+  - `Button` → `min-h-9` (36px); shared `buttonClasses()` extracted; icon-only delete
+    buttons `w-9 px-0` (36×36)
+  - `Switch` → 24px track inside a 36px hit area; **`label` now a required prop** → sets
+    `aria-label` (the Radix root is a `<button role="switch">`; a wrapping `<label>` never
+    named it)
+  - new **`LinkButton`** (styled `<Link>`) replaces `<Link><Button>` in `integrator-view` /
+    `integrator-settings` — that was `<a><button>`, nested interactive (4.1.2)
+  - `aria-hidden="true"` on every decorative lucide icon
+  - `Section` disclosure → `aria-expanded` + `aria-controls`
+  - `AppShell` → skip-link to `#main`, `aria-label="Primary"` on both `<nav>`,
+    `env(safe-area-inset-bottom)` on the mobile bar; `<main id="main" tabIndex={-1}>`
+  - `globals.css` → `@media (prefers-reduced-motion: reduce)` (kills the refresh spinner +
+    transitions), `touch-action: manipulation`; `layout.tsx` → `themeColor "#131313"`
+  - inputs for codes get `autocomplete="off"` + `spellCheck={false}`; placeholders end `…`;
+    async errors wrapped in `role="alert"` (+ `aria-live="polite"` on the refresh status)
+  - `tabular-nums` on the status-bar counts
+- No business-logic / API / data-model change. One render change: the collapsible
+  `Section` now always mounts its body behind `hidden` (was conditionally rendered) so
+  `aria-controls` has a live target — collapsed `MachineRow` / `CameraRow` subtrees mount.
+- Verified: `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` —
+  **51/51**; `check:data` — **pass**. a11y spot-check via Chrome DevTools console (snippet
+  + output in the CHANGELOG entry): skip-link "Skip to content", both `<nav>` labelled
+  "Primary", `prefers-reduced-motion` rule present, `#main` exists.
+  `docs/assets/portal-{top,machines,settings}.jpg` regenerated.
+- **Compliance** (`hackathon-compliance`): **PASS** — no eligibility blockers. Two process
+  RISKS, both fixed before push: (1) "no logic change" reworded here / in DECISIONS /
+  CHANGELOG to name the `Section` render change; (2) a11y check snippet + output pasted
+  into the CHANGELOG entry as reproducible evidence. Review saved to
+  `docs/trajectories/compliance/2026-08-28-portal-visual-rhythm-wcag.md`.
+
 ### 2026-08-28 — Portal: group the refresh + auto controls in a "recognition" fieldset
 
 - Owner tweak: the "refresh recognition" button and the "auto" switch now sit in one

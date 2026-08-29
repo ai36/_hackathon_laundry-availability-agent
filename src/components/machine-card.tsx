@@ -88,15 +88,15 @@ function MarkWrong({ m }: { m: MachineView }) {
   if (!open) {
     return (
       <Button variant="outline" onClick={() => setOpen(true)} className="mt-2 self-start">
-        <X size={13} /> mark wrong
+        <X size={14} aria-hidden="true" /> mark wrong
       </Button>
     );
   }
 
   return (
-    <div className="border-outline-variant bg-surface-container mt-3 flex flex-col gap-2 rounded border p-2.5">
+    <div className="border-outline-variant bg-surface-container mt-3 flex flex-col gap-3 rounded border p-3">
       <Label>Correct state for {m.machineId}:</Label>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-2">
         {STATES.filter((s) => s !== m.state).map((s) => (
           <Button key={s} variant="default" disabled={busy} onClick={() => submit(s)}>
             {STATE_STYLE[s].label}
@@ -106,21 +106,28 @@ function MarkWrong({ m }: { m: MachineView }) {
       <TextInput
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="note (e.g. bare E = error)"
+        placeholder="note, e.g. bare E = error…"
+        spellCheck={false}
+        autoComplete="off"
         className="w-full"
       />
-      <label className="text-on-surface-variant flex items-center gap-1.5 text-[13px]">
-        <input type="checkbox" checked={durable} onChange={(e) => setDurable(e.target.checked)} />
+      <label className="text-on-surface-variant flex min-h-9 items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={durable}
+          onChange={(e) => setDurable(e.target.checked)}
+          className="accent-primary-container h-4 w-4"
+        />
         applies to this machine in every view (durable)
       </label>
-      {err && <span className="text-error text-[13px] break-words">{err}</span>}
-      <button
-        type="button"
-        onClick={() => setOpen(false)}
-        className="text-outline self-start text-[13px] underline"
-      >
+      {err && (
+        <span role="alert" className="text-error text-sm break-words">
+          {err}
+        </span>
+      )}
+      <Button variant="ghost" onClick={() => setOpen(false)} className="self-start px-0">
         cancel
-      </button>
+      </Button>
     </div>
   );
 }
@@ -136,32 +143,34 @@ export const MachineCard = observer(function MachineCard({
   const s = STATE_STYLE[m.state];
   return (
     <div
-      className={`bg-surface-container-high hover:bg-surface-container-highest flex min-w-0 flex-col gap-1.5 rounded-lg border p-4 transition-colors ${s.card}`}
+      className={`bg-surface-container-high hover:bg-surface-container-highest flex min-w-0 flex-col gap-3 rounded-lg border p-4 transition-colors ${s.card}`}
     >
       <div className="flex items-center justify-between gap-2">
         <span className="truncate text-lg font-bold">{m.machineId}</span>
-        <span className={`h-3 w-3 shrink-0 rounded-full ${s.dot} ${s.glow}`} aria-hidden />
+        <span className={`h-3 w-3 shrink-0 rounded-full ${s.dot} ${s.glow}`} aria-hidden="true" />
       </div>
-      <span className={`text-xl font-semibold ${s.text}`}>{s.label}</span>
-      {m.corrected && (
-        <span className="bg-primary-container/15 text-primary-container w-fit rounded px-1.5 py-0.5 text-[11px] font-bold tracking-wide uppercase">
-          {m.correction?.scope === "machine" ? "integrator · durable" : "integrator"}
-        </span>
-      )}
-      {(m.state === "free" || m.state === "unknown") && !m.corrected && (
-        <span className="text-on-surface-variant text-[13px] opacity-80">confirm on arrival</span>
-      )}
+      <div className="flex flex-col gap-1">
+        <span className={`text-xl font-semibold ${s.text}`}>{s.label}</span>
+        {m.corrected && (
+          <span className="bg-primary-container/15 text-2xs text-primary-container w-fit rounded px-1.5 py-0.5 font-bold tracking-wide uppercase">
+            {m.correction?.scope === "machine" ? "integrator · durable" : "integrator"}
+          </span>
+        )}
+        {(m.state === "free" || m.state === "unknown") && !m.corrected && (
+          <span className="text-on-surface-variant text-sm opacity-80">confirm on arrival</span>
+        )}
+      </div>
       {integrator && (
-        <>
-          <span className="text-outline mt-1 text-[12px] break-words">
+        <div className="flex flex-col gap-1">
+          <span className="text-outline text-xs break-words">
             {m.corrected ? "set by integrator" : `agent · conf ${m.confidence.toFixed(2)}`} ·{" "}
             {m.seenIn} view{m.seenIn === 1 ? "" : "s"} · {m.source}
           </span>
           {m.correction?.note && (
-            <span className="text-outline text-[12px] break-words">“{m.correction.note}”</span>
+            <span className="text-outline text-xs break-words">“{m.correction.note}”</span>
           )}
           <MarkWrong m={m} />
-        </>
+        </div>
       )}
     </div>
   );

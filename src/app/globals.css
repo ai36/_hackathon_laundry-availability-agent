@@ -35,6 +35,10 @@
   --font-sans:
     var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
+  /* label-md from DESIGN.md (11/14) — the one size Tailwind's scale doesn't cover. */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 0.875rem;
+
   --radius-sm: 0.125rem;
   --radius-DEFAULT: 0.25rem;
   --radius-md: 0.375rem;
@@ -61,6 +65,19 @@ body {
   overflow-x: clip;
 }
 
+/* No double-tap-zoom delay on taps; intentional (transparent) tap highlight. */
+a,
+button,
+[role="button"],
+[role="switch"],
+input,
+select,
+label,
+summary {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* High-contrast focus everywhere (design spec: 2px primary ring). */
 *:focus-visible {
   outline: 2px solid var(--color-primary-container);
@@ -69,6 +86,18 @@ body {
 
 main {
   overflow-wrap: anywhere;
+}
+
+/* Respect reduced-motion: kill transitions, transforms-in-motion, and infinite spins. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Status colours — one source for dots and card borders. */

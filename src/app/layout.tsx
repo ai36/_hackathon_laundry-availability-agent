@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -12,6 +12,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "laundry3",
   description: "Shared laundry-room machine availability",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#131313",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -48,7 +48,7 @@ function ImageField({
   const [busy, setBusy] = useState(false);
 
   return (
-    <div className="flex flex-col gap-0.5 text-xs">
+    <div className="flex flex-col gap-1 text-xs">
       <Label>{label}</Label>
       <span className={`break-all ${current ? "text-outline font-mono" : "text-outline"}`}>
         {current ?? "none"}
@@ -79,9 +79,14 @@ function ImageField({
         onClick={() => ref.current?.click()}
         className="self-start"
       >
-        <Upload size={11} /> {busy ? "uploading…" : current ? "replace" : "upload"}
+        <Upload size={14} aria-hidden="true" />{" "}
+        {busy ? "uploading…" : current ? "replace" : "upload"}
       </Button>
-      {err && <span className="text-error break-words">{err}</span>}
+      {err && (
+        <span role="alert" className="text-error break-words">
+          {err}
+        </span>
+      )}
     </div>
   );
 }
@@ -109,17 +114,19 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
     run(() => call("PATCH", { targetId: cam.id, id: id.trim(), machineIdsText: text, ...extra }));
 
   return (
-    <div className="border-outline-variant bg-surface-container flex flex-col gap-2 rounded border p-2.5">
+    <div className="border-outline-variant bg-surface-container flex flex-col gap-3 rounded border p-3">
       <div className="flex flex-wrap items-end gap-2">
-        <label className="flex min-w-0 flex-col gap-0.5">
+        <label className="flex min-w-0 flex-col gap-1">
           <Label>camera id</Label>
           <TextInput
             value={id}
             onChange={(e) => setId(e.target.value)}
+            autoComplete="off"
+            spellCheck={false}
             className="w-28 font-mono"
           />
         </label>
-        <div className="ml-auto flex gap-1.5">
+        <div className="ml-auto flex gap-2">
           <Button variant="default" disabled={busy || !dirty} onClick={() => patch({})}>
             save
           </Button>
@@ -131,17 +138,20 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
                 void run(() => call("DELETE", { id: cam.id }));
             }}
             aria-label={`delete ${cam.id}`}
+            className="w-9 px-0"
           >
-            <Trash2 size={12} />
+            <Trash2 size={14} aria-hidden="true" />
           </Button>
         </div>
       </div>
-      <label className="flex flex-col gap-0.5">
+      <label className="flex flex-col gap-1">
         <Label>machine ids this camera sees (free text)</Label>
         <TextInput
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="W-01, W-02, W-03"
+          placeholder="W-01, W-02, W-03…"
+          autoComplete="off"
+          spellCheck={false}
           className="w-full font-mono"
         />
       </label>
@@ -161,7 +171,11 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
           onPath={(p) => patch({ annotatedShot: p })}
         />
       </div>
-      {err && <span className="text-error text-xs break-words">{err}</span>}
+      {err && (
+        <span role="alert" className="text-error text-xs break-words">
+          {err}
+        </span>
+      )}
     </div>
   );
 }
@@ -194,7 +208,7 @@ export function CamerasEditor() {
 
   return (
     <Section title={`Cameras (${list.length})`} collapsible>
-      <p className="text-on-surface-variant mb-3 text-xs">
+      <p className="text-on-surface-variant mb-4 text-xs">
         Each camera: an id, the machine ids it observes (free text), and — optionally — a{" "}
         <em>stub image</em> for its feed and an <em>annotated shot</em>. Writes{" "}
         <span className="font-mono">data/site-config.json</span> +{" "}
@@ -204,34 +218,42 @@ export function CamerasEditor() {
       {!loaded ? (
         <p className="text-on-surface-variant text-xs">loading…</p>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           {list.length === 0 && <p className="text-outline text-xs">no cameras yet</p>}
           {list.map((cam) => (
             <CameraRow key={cam.id} cam={cam} onList={setList} />
           ))}
-          <div className="border-outline-variant flex flex-wrap items-end gap-2 rounded border border-dashed p-2.5">
-            <label className="flex flex-col gap-0.5">
+          <div className="border-outline-variant flex flex-wrap items-end gap-2 rounded border border-dashed p-3">
+            <label className="flex flex-col gap-1">
               <Label>new camera id</Label>
               <TextInput
                 value={newId}
                 onChange={(e) => setNewId(e.target.value)}
-                placeholder="cam-1"
+                placeholder="cam-1…"
+                autoComplete="off"
+                spellCheck={false}
                 className="w-28 font-mono"
               />
             </label>
-            <label className="flex min-w-[10rem] flex-1 flex-col gap-0.5">
+            <label className="flex min-w-[10rem] flex-1 flex-col gap-1">
               <Label>machine ids</Label>
               <TextInput
                 value={newText}
                 onChange={(e) => setNewText(e.target.value)}
-                placeholder="W-01, W-02"
+                placeholder="W-01, W-02…"
+                autoComplete="off"
+                spellCheck={false}
                 className="font-mono"
               />
             </label>
             <Button variant="accent" disabled={!newId.trim()} onClick={add}>
-              <Plus size={12} /> add camera
+              <Plus size={14} aria-hidden="true" /> add camera
             </Button>
-            {addErr && <span className="text-error w-full text-xs break-words">{addErr}</span>}
+            {addErr && (
+              <span role="alert" className="text-error w-full text-xs break-words">
+                {addErr}
+              </span>
+            )}
           </div>
         </div>
       )}

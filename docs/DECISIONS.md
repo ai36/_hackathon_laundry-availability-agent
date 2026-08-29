@@ -65,6 +65,22 @@ The portal now implements it:
   check at a 486 px CSS viewport (all three pages, both editors expanded) — no page
   horizontal scroll, every control visible. Screenshots in `docs/assets/` regenerated.
 
+**Amendment (2026-08-28) — visual rhythm + WCAG 2.2 hardening.** Ran the connected
+`web-design-guidelines` skill (Vercel Web Interface Guidelines) and acted on every finding.
+Spacing is now one scale applied uniformly (`p-4` panels / `p-3` rows, a single `space-y-6`
+body rhythm in `PageShell`, `gap-2/3/4`, icon sizes `14`/`16`, text reduced to
+`text-xs` / `text-sm` + a `--text-2xs` token). Accessibility: every interactive control is
+≥36 px (`Button` `min-h-9`, `Switch` a 24 px track inside a 36 px hit area); `Switch`
+requires a `label` prop that becomes its `aria-label`; a new `LinkButton` (styled `<Link>`)
+replaces `<Link><Button>` so navigation is a single `<a>`, not `<a><button>`; decorative
+icons carry `aria-hidden`; the collapsible `Section` wires `aria-expanded` / `aria-controls`;
+`AppShell` adds a skip-link, `aria-label` on both `<nav>`, and `env(safe-area-inset-bottom)`;
+`globals.css` honours `prefers-reduced-motion` and sets `touch-action: manipulation`;
+`layout.tsx` sets `themeColor`. No business-logic / API / data-model change; one render
+change — the collapsible `Section` now always mounts its body (behind `hidden`) instead of
+conditionally rendering it, because `aria-controls` needs a live target. Verification as
+above, 51/51.
+
 ---
 
 ## D-0002 — MobX store architecture

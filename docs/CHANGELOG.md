@@ -103,6 +103,42 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-28 — portal: visual-rhythm + WCAG 2.2 pass (`web-design-guidelines` skill)
+
+- Ran the connected `web-design-guidelines` skill (Vercel Web Interface Guidelines) over
+  `src/components/**` + `globals.css`; fixed every finding. Target size: AA + headroom
+  (36px), agreed with owner.
+- Rhythm: one spacing scale applied uniformly (`p-4` panels / `p-3` rows, `space-y-6` body,
+  `gap-2/3/4`, icons `14`/`16`, text collapsed to `text-xs`/`text-sm` + new `--text-2xs`).
+- a11y: `Button` `min-h-9` + shared `buttonClasses()`; `Switch` 36px hit area + required
+  `label`→`aria-label`; new `LinkButton` kills `<a><button>` nesting; `aria-hidden` on
+  decorative icons; `Section` `aria-expanded`/`aria-controls`; `AppShell` skip-link +
+  `aria-label` navs + safe-area; `prefers-reduced-motion` block; `theme-color`; `role="alert"`
+  on errors; `autocomplete="off"`/`spellCheck={false}` on code inputs; `tabular-nums` counts.
+- No business-logic / API / data-model change; one render change — the collapsible
+  `Section` now always mounts its body behind `hidden` (needed for `aria-controls`), so
+  collapsed `MachineRow` / `CameraRow` subtrees mount.
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **51/51**;
+  `check:data` — **pass**. Route table unchanged. Screenshots regenerated.
+- a11y spot-check (Chrome DevTools console, `/tenant`):
+
+  ```js
+  ({
+    skipLink: document.querySelector('a[href="#main"]')?.textContent.trim(),
+    mainHasId: !!document.getElementById("main"),
+    navLabels: [...document.querySelectorAll("nav")].map((n) => n.getAttribute("aria-label")),
+    reducedMotion: [...document.styleSheets].some((ss) => {
+      try {
+        return [...ss.cssRules].some((r) => r.conditionText?.includes("prefers-reduced-motion"));
+      } catch {
+        return false;
+      }
+    }),
+  });
+  // → { skipLink: "Skip to content", mainHasId: true,
+  //     navLabels: ["Primary", "Primary"], reducedMotion: true }
+  ```
+
 ### 2026-08-28 — portal: "Lumina Wash" design system (`docs/design-reference/`)
 
 - Owner-supplied reference (`docs/design-reference/lumina_wash/DESIGN.md` + screens)

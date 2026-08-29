@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { observer } from "mobx-react-lite";
 import { SlidersHorizontal } from "lucide-react";
 
 import { MachineGrid } from "@/components/machine-grid";
 import { RefreshControl } from "@/components/refresh-control";
-import { Button } from "@/components/ui/button";
+import { LinkButton } from "@/components/ui/link-button";
 import { PageShell } from "@/components/ui/page-shell";
 import { useStore } from "@/stores";
 
@@ -29,11 +28,9 @@ export const IntegratorView = observer(function IntegratorView() {
         </>
       }
       nav={
-        <Link href="/integrator/settings">
-          <Button variant="outline">
-            <SlidersHorizontal size={14} /> settings
-          </Button>
-        </Link>
+        <LinkButton href="/integrator/settings" variant="outline">
+          <SlidersHorizontal size={14} aria-hidden="true" /> settings
+        </LinkButton>
       }
       footer={
         <>
@@ -44,18 +41,21 @@ export const IntegratorView = observer(function IntegratorView() {
         </>
       }
     >
-      <div className="border-outline-variant bg-surface-container-high mb-6 rounded-lg border p-4 md:p-5">
+      <div className="border-outline-variant bg-surface-container-high rounded-lg border p-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm tabular-nums">
             {DOTS.map((d) => (
               <span key={d.key} className="flex items-center gap-2">
-                <span className={`h-2.5 w-2.5 rounded-full ${d.dot}`} aria-hidden />
+                <span className={`h-2.5 w-2.5 rounded-full ${d.dot}`} aria-hidden="true" />
                 <span className="font-semibold">{c[d.key]}</span>
                 <span className="text-on-surface-variant">{d.label}</span>
               </span>
             ))}
             <span className="flex items-center gap-2">
-              <span className="bg-primary-container/60 h-2.5 w-2.5 rounded-full" aria-hidden />
+              <span
+                className="bg-primary-container/60 h-2.5 w-2.5 rounded-full"
+                aria-hidden="true"
+              />
               <span className="font-semibold">{machines.correctedCount}</span>
               <span className="text-on-surface-variant">
                 correction{machines.correctedCount === 1 ? "" : "s"}
@@ -64,7 +64,7 @@ export const IntegratorView = observer(function IntegratorView() {
           </div>
           <RefreshControl />
         </div>
-        <p className="border-primary-container/30 bg-primary-container/10 text-primary mt-4 rounded border px-3 py-2 text-[13px]">
+        <p className="border-primary-container/30 bg-primary-container/10 text-primary mt-4 rounded border px-3 py-2 text-sm">
           “Mark wrong” on any card overrides the agent. A <em>durable</em> correction carries to
           every view and every future capture of that machine (D-0014). Cameras &amp; machines are
           in <span className="font-mono">settings</span>.

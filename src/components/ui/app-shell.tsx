@@ -3,17 +3,23 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Radio, ShieldHalf, SlidersHorizontal, WashingMachine } from "lucide-react";
+import {
+  Radio,
+  ShieldHalf,
+  SlidersHorizontal,
+  WashingMachine,
+  type LucideIcon,
+} from "lucide-react";
 
 /**
  * Global navigation frame (Lumina Wash): a fixed left rail on desktop, a fixed bottom bar
  * on phones. Three destinations, one per URL route — no query-param "mode" toggle.
  */
-const NAV = [
+const NAV: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: "/tenant", label: "Live status", Icon: Radio },
   { href: "/integrator", label: "Integrator", Icon: ShieldHalf },
   { href: "/integrator/settings", label: "Settings", Icon: SlidersHorizontal },
-] as const;
+];
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "/integrator") return pathname === "/integrator";
@@ -25,10 +31,20 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <>
+      <a
+        href="#main"
+        className="bg-primary-container sr-only rounded px-3 py-2 text-sm font-semibold text-[#00251a] focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[60]"
+      >
+        Skip to content
+      </a>
+
       {/* Desktop rail */}
-      <nav className="border-outline-variant bg-surface-container fixed top-0 left-0 z-40 hidden h-full w-60 flex-col border-r md:flex">
+      <nav
+        aria-label="Primary"
+        className="border-outline-variant bg-surface-container fixed top-0 left-0 z-40 hidden h-full w-60 flex-col border-r md:flex"
+      >
         <div className="flex items-center gap-2 px-5 py-6">
-          <WashingMachine size={22} className="text-primary-container" aria-hidden />
+          <WashingMachine size={22} aria-hidden="true" className="text-primary-container" />
           <span className="text-lg font-semibold tracking-tight">Laundry room</span>
         </div>
         <ul className="mt-2 flex flex-col gap-1 px-3">
@@ -39,13 +55,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-3 rounded-r-xl px-4 py-2.5 text-sm font-medium transition-colors ${
+                  className={`flex min-h-11 items-center gap-3 rounded-r-xl px-4 text-sm font-medium transition-colors ${
                     active
                       ? "bg-primary-container text-[#00251a]"
                       : "text-on-surface-variant hover:bg-surface-container-highest hover:text-on-surface"
                   }`}
                 >
-                  <Icon size={18} aria-hidden />
+                  <Icon size={18} aria-hidden="true" />
                   {label}
                 </Link>
               </li>
@@ -55,10 +71,15 @@ export function AppShell({ children }: { children: ReactNode }) {
       </nav>
 
       {/* Content */}
-      <div className="flex min-h-full flex-1 flex-col pb-16 md:ml-60 md:pb-0">{children}</div>
+      <div className="flex min-h-full flex-1 flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:ml-60 md:pb-0">
+        {children}
+      </div>
 
       {/* Mobile bottom bar */}
-      <nav className="border-outline-variant bg-surface-container-highest fixed bottom-0 left-0 z-50 flex w-full justify-around rounded-t-xl border-t md:hidden">
+      <nav
+        aria-label="Primary"
+        className="border-outline-variant bg-surface-container-highest fixed bottom-0 left-0 z-50 flex w-full justify-around rounded-t-xl border-t pb-[env(safe-area-inset-bottom)] md:hidden"
+      >
         {NAV.map(({ href, label, Icon }) => {
           const active = isActive(pathname, href);
           return (
@@ -66,11 +87,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               key={href}
               href={href}
               aria-current={active ? "page" : undefined}
-              className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium transition-colors ${
+              className={`text-2xs flex min-h-14 flex-1 flex-col items-center justify-center gap-1 font-medium transition-colors ${
                 active ? "text-primary-container" : "text-on-surface-variant"
               }`}
             >
-              <Icon size={20} aria-hidden />
+              <Icon size={20} aria-hidden="true" />
               {label}
             </Link>
           );

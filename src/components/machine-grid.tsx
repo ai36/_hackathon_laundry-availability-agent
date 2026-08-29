@@ -12,8 +12,8 @@ export function MachineGrid({
   integrator?: boolean;
 }) {
   return (
-    <section className="mb-8">
-      <h2 className="text-on-surface-variant mb-3 text-[12px] font-semibold tracking-[0.15em] uppercase">
+    <section>
+      <h2 className="text-on-surface-variant mb-3 text-xs font-semibold tracking-[0.15em] uppercase">
         {title}
       </h2>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

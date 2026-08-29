@@ -53,17 +53,19 @@ function MachineRow({
   }
 
   return (
-    <div className="border-outline-variant bg-surface-container flex flex-col gap-2 rounded border p-2.5">
+    <div className="border-outline-variant bg-surface-container flex flex-col gap-3 rounded border p-3">
       <div className="flex flex-wrap items-end gap-2">
-        <label className="flex min-w-0 flex-col gap-0.5">
+        <label className="flex min-w-0 flex-col gap-1">
           <Label>id</Label>
           <TextInput
             value={id}
             onChange={(e) => setId(e.target.value)}
+            autoComplete="off"
+            spellCheck={false}
             className="w-24 font-mono"
           />
         </label>
-        <label className="flex min-w-0 flex-col gap-0.5">
+        <label className="flex min-w-0 flex-col gap-1">
           <Label>type</Label>
           <Select
             value={type}
@@ -77,7 +79,7 @@ function MachineRow({
             ))}
           </Select>
         </label>
-        <div className="ml-auto flex gap-1.5">
+        <div className="ml-auto flex gap-2">
           <Button
             variant="default"
             disabled={busy || !dirty}
@@ -102,12 +104,13 @@ function MachineRow({
                 void run(() => call("DELETE", { machineId: m.machineId }));
             }}
             aria-label={`delete ${m.machineId}`}
+            className="w-9 px-0"
           >
-            <Trash2 size={12} />
+            <Trash2 size={14} aria-hidden="true" />
           </Button>
         </div>
       </div>
-      <label className="flex flex-col gap-0.5">
+      <label className="flex flex-col gap-1">
         <Label>
           prompt fragment{" "}
           <span className="text-outline">&mdash; how to read this machine&rsquo;s indicator</span>
@@ -115,11 +118,15 @@ function MachineRow({
         <TextInput
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="e.g. left digits = minutes left; solid E = out of order"
+          placeholder="e.g. left digits = minutes left; solid E = out of order…"
           className="w-full"
         />
       </label>
-      {err && <span className="text-error text-xs break-words">{err}</span>}
+      {err && (
+        <span role="alert" className="text-error text-xs break-words">
+          {err}
+        </span>
+      )}
     </div>
   );
 }
@@ -163,7 +170,7 @@ export function MachinesEditor() {
 
   return (
     <Section title={`Machines (${list.length})`} collapsible>
-      <p className="text-on-surface-variant mb-3 text-xs">
+      <p className="text-on-surface-variant mb-4 text-xs">
         id · type · an optional <span className="font-mono">promptFragment</span> the agent gets
         when it reads this machine (D-0015). Writes{" "}
         <span className="font-mono">data/machines.json</span>.
@@ -171,21 +178,23 @@ export function MachinesEditor() {
       {!loaded ? (
         <p className="text-on-surface-variant text-xs">loading…</p>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           {list.map((m) => (
             <MachineRow key={m.machineId} m={m} onList={setList} onRoster={refreshRoom} />
           ))}
-          <div className="border-outline-variant flex flex-wrap items-end gap-2 rounded border border-dashed p-2.5">
-            <label className="flex flex-col gap-0.5">
+          <div className="border-outline-variant flex flex-wrap items-end gap-2 rounded border border-dashed p-3">
+            <label className="flex flex-col gap-1">
               <Label>new id</Label>
               <TextInput
                 value={newId}
                 onChange={(e) => setNewId(e.target.value)}
-                placeholder="W-17"
+                placeholder="W-17…"
+                autoComplete="off"
+                spellCheck={false}
                 className="w-24 font-mono"
               />
             </label>
-            <label className="flex flex-col gap-0.5">
+            <label className="flex flex-col gap-1">
               <Label>type</Label>
               <Select
                 value={newType}
@@ -200,9 +209,13 @@ export function MachinesEditor() {
               </Select>
             </label>
             <Button variant="accent" disabled={!newId.trim()} onClick={add} className="ml-auto">
-              <Plus size={12} /> add
+              <Plus size={14} aria-hidden="true" /> add
             </Button>
-            {addErr && <span className="text-error w-full text-xs break-words">{addErr}</span>}
+            {addErr && (
+              <span role="alert" className="text-error w-full text-xs break-words">
+                {addErr}
+              </span>
+            )}
           </div>
         </div>
       )}
