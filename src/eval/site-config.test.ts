@@ -57,9 +57,14 @@ test("upsertCamera adds, edits, renames; removeCamera drops", () => {
     id: "cam-1",
     machineIds: ["W-01"],
     stubImage: "data/site-config/cam-1/stub.jpg",
+    mask: "data/site-config/cam-1/mask.png",
   });
   assert.equal(c.cameras[0].machineIds.length, 1);
   assert.equal(c.cameras[0].stubImage, "data/site-config/cam-1/stub.jpg");
+  assert.equal(c.cameras[0].mask, "data/site-config/cam-1/mask.png");
+  // a later edit that omits mask clears it (matches the PATCH route resolving undefined)
+  c = upsertCamera(c, { id: "cam-1", machineIds: ["W-01"] });
+  assert.equal(c.cameras[0].mask, undefined);
   c = upsertCamera(c, { id: "cam-2", targetId: "cam-1", machineIds: ["W-01"] });
   assert.deepEqual(
     c.cameras.map((x) => x.id),

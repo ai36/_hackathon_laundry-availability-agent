@@ -1,10 +1,13 @@
 /**
  * Camera CRUD (D-0015 integrator console).
  *
- *   GET    /api/cameras                                            -> { ok, cameras }
- *   POST   /api/cameras  { id, machineIdsText, stubImage?, annotatedShot? }
- *   PATCH  /api/cameras  { id, targetId?, machineIdsText?, stubImage?, annotatedShot? }
+ *   GET    /api/cameras                                                     -> { ok, cameras }
+ *   POST   /api/cameras  { id, machineIdsText, stubImage?, annotatedShot?, mask? }
+ *   PATCH  /api/cameras  { id, targetId?, machineIdsText?, stubImage?, annotatedShot?, mask? }
  *   DELETE /api/cameras  { id }
+ *
+ * For an image field on PATCH: a string sets it, `null` / `""` clears it, `undefined` (key
+ * absent) leaves it unchanged.
  *
  * Writes data/site-config.json (a fixed path). Node runtime; works under `npm run dev` /
  * any self-hosted Node/Docker host, not a read-only serverless FS.
@@ -33,8 +36,9 @@ type Body = {
   targetId?: string;
   machineIdsText?: string;
   machineIds?: string[];
-  stubImage?: string;
-  annotatedShot?: string;
+  stubImage?: string | null;
+  annotatedShot?: string | null;
+  mask?: string | null;
 };
 
 async function body(req: Request): Promise<Body> {
@@ -66,8 +70,9 @@ export async function POST(req: Request) {
       upsertCamera(cfg, {
         id: b.id!,
         machineIds: ids(b),
-        stubImage: b.stubImage,
-        annotatedShot: b.annotatedShot,
+        stubImage: b.stubImage || undefined,
+        annotatedShot: b.annotatedShot || undefined,
+        mask: b.mask || undefined,
       }),
     );
     return NextResponse.json({ ok: true, cameras: next.cameras });
@@ -96,6 +101,7 @@ export async function PATCH(req: Request) {
         stubImage: b.stubImage === undefined ? cur.stubImage : b.stubImage || undefined,
         annotatedShot:
           b.annotatedShot === undefined ? cur.annotatedShot : b.annotatedShot || undefined,
+        mask: b.mask === undefined ? cur.mask : b.mask || undefined,
       }),
     );
     return NextResponse.json({ ok: true, cameras: next.cameras });

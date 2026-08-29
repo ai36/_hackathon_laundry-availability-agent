@@ -35,8 +35,9 @@ export const RefreshControl = observer(function RefreshControl() {
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const cycles = useRef(0);
 
-  // Hard cap on unattended auto-refresh — bounds cost when a key + camera feeds are present.
-  const MAX_AUTO = 60;
+  // Hard cap on unattended auto-refresh — bounds cost when a key + camera feeds are present
+  // (each cycle classifies every seeded camera; 20 × 5 ≈ 100 calls worst case).
+  const MAX_AUTO = 20;
 
   async function run() {
     setBusy(true);

@@ -18,6 +18,12 @@ export interface Camera {
   stubImage?: string;
   /** A still with machine ids drawn on it — the spatial key for the agent (D-0015). */
   annotatedShot?: string;
+  /**
+   * An analysis mask (D-0015): a transparent image where opaque black `rgb(0,0,0)` regions
+   * cover parts of the frame the agent should ignore. Stored here; runtime application is
+   * pending (D-0016).
+   */
+  mask?: string;
 }
 
 export interface SiteConfig {
@@ -74,6 +80,7 @@ export function upsertCamera(cfg: SiteConfig, cam: Camera & { targetId?: string 
     machineIds: cam.machineIds,
     stubImage: cam.stubImage,
     annotatedShot: cam.annotatedShot,
+    mask: cam.mask,
   };
   if (idx === -1) cameras.push(next);
   else cameras[idx] = { ...cameras[idx], ...next };

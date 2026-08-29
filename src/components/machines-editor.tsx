@@ -4,13 +4,11 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
 import { Button, ICON_BUTTON } from "@/components/ui/button";
-import { Label, Select, TextInput } from "@/components/ui/field";
+import { Label, TextInput } from "@/components/ui/field";
 import { Section } from "@/components/ui/section";
 import type { MachineType } from "@/eval/types";
 import type { RosterMachine } from "@/eval/roster";
 import { useStore } from "@/stores";
-
-const TYPES: MachineType[] = ["washer", "dryer"];
 
 async function call(method: string, body: unknown): Promise<RosterMachine[]> {
   const res = await fetch("/api/machines", {
@@ -33,11 +31,10 @@ function MachineRow({
   onRoster: () => void;
 }) {
   const [id, setId] = useState(m.machineId);
-  const [type, setType] = useState<MachineType>(m.type);
   const [prompt, setPrompt] = useState(m.promptFragment ?? "");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const dirty = id !== m.machineId || type !== m.type || prompt !== (m.promptFragment ?? "");
+  const dirty = id !== m.machineId || prompt !== (m.promptFragment ?? "");
 
   async function run(fn: () => Promise<RosterMachine[]>) {
     setBusy(true);
@@ -54,32 +51,16 @@ function MachineRow({
 
   return (
     <div className="border-outline-variant bg-surface-container flex flex-col gap-3 rounded border p-3">
-      <div className="flex flex-wrap gap-3">
-        <label className="flex min-w-0 flex-col gap-1">
-          <Label>id</Label>
-          <TextInput
-            value={id}
-            onChange={(e) => setId(e.target.value)}
-            autoComplete="off"
-            spellCheck={false}
-            className="w-24 font-mono"
-          />
-        </label>
-        <label className="flex min-w-0 flex-col gap-1">
-          <Label>type</Label>
-          <Select
-            value={type}
-            onChange={(e) => setType(e.target.value as MachineType)}
-            className="w-28"
-          >
-            {TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </Select>
-        </label>
-      </div>
+      <label className="flex min-w-0 flex-col gap-1">
+        <Label>id</Label>
+        <TextInput
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+          autoComplete="off"
+          spellCheck={false}
+          className="w-24 font-mono"
+        />
+      </label>
       <label className="flex flex-col gap-1">
         <Label>
           prompt fragment{" "}
@@ -101,7 +82,7 @@ function MachineRow({
               call("PATCH", {
                 targetId: m.machineId,
                 machineId: id.trim(),
-                type,
+                type: m.type,
                 promptFragment: prompt,
               }),
             )
@@ -159,7 +140,7 @@ function RosterSection({
   }
 
   return (
-    <Section title={`${title} (${rows.length})`} collapsible>
+    <Section title={`${title} (${rows.length})`}>
       <div className="flex flex-col gap-3">
         {rows.map((m) => (
           <MachineRow key={m.machineId} m={m} onList={onList} onRoster={onRoster} />
@@ -217,7 +198,7 @@ export function MachinesEditor() {
 
   if (!loaded) {
     return (
-      <Section title="Machines" collapsible>
+      <Section title="Machines" defaultOpen>
         <p className="text-on-surface-variant text-xs">loading…</p>
       </Section>
     );

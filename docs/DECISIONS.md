@@ -771,6 +771,28 @@ optional reference-state screenshots and an optional prompt fragment — all non
 levers. The site-config schema and the portal must be built to this shape; `buildRoomStatus`
 must also apply corrections so the portal reflects the corrected state.
 
+**Amendment (2026-08-28) — cameras seeded, mask wired, image previews, `type` dropped.**
+
+- **`Camera.mask?`** is now in the schema (`src/eval/site-config.ts`), the upload route
+  (`camera-mask` kind → `data/site-config/<id>/mask.<ext>`), and the `/api/cameras`
+  POST/PATCH body (a string sets it, `null`/`""` clears, an absent key keeps it). It is
+  stored and shown; compositing it onto the feed before analysis is still D-0016 work.
+- **`data/site-config.json` ships 5 seeded cameras** (`C-01…C-05`), each `stubImage` a
+  committed eval frame with that frame's machine-id list. Rationale: there is no physical
+  camera, but the whole point of `StaticImageFrameSource` is that a photo *is* the feed —
+  so the judge sees `Cameras (5)` and can run `refresh` against real images out of the
+  box. Key-free that is a plain re-fusion (0 calls); with a key it is 5 vision calls per
+  manual click (auto-refresh capped at `MAX_AUTO` = 20 cycles). The file is
+  `.prettierignore`d — `writeSiteConfig`'s `JSON.stringify` is its canonical format.
+- **`GET /api/asset?path=`** (new) streams an image for the console's preview thumbnails,
+  restricted by a `..`-reject + a `data/public/frames/` | `data/site-config/` prefix
+  allow-list + a magic-byte sniff. Read-only; integrator-only local service. `ImageField`
+  shows a 64px thumbnail + `replace` + `remove`; `remove` clears the config reference and
+  never unlinks a committed frame.
+- **The per-row `type` selector is gone** from the machine editor. The roster UI is split
+  into type-fixed `Washers` / `Dryers` sections, so the field was redundant; PATCH still
+  carries the machine's existing `type`. Re-classifying = delete + re-add.
+
 ---
 
 ## D-0016 — Deployment: Docker service, `FrameSource` abstraction, static-image mock

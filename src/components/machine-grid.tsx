@@ -1,13 +1,13 @@
 "use client";
 
 import { useId, useState } from "react";
-import { ChevronRight } from "lucide-react";
 
 import { MachineCard } from "@/components/machine-card";
+import { DisclosureButton } from "@/components/ui/collapsible";
 import type { MachineView } from "@/portal/room-status";
 
 const GRID = "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
-const HEADING = "text-xs font-semibold tracking-[0.15em] text-on-surface-variant uppercase";
+const HEADING = "mb-3 text-xs font-semibold tracking-[0.15em] text-on-surface-variant uppercase";
 
 /**
  * Fluid-to-fixed grid (Lumina Wash): 1 col on phones → 2 → 3 → 4 on wide. The heading
@@ -31,22 +31,11 @@ export function MachineGrid({
   return (
     <section>
       {collapsible ? (
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-          aria-controls={bodyId}
-          className={`mb-3 flex min-h-10 items-center gap-2 ${HEADING}`}
-        >
-          <ChevronRight
-            size={14}
-            aria-hidden="true"
-            className={`shrink-0 transition-transform ${open ? "rotate-90" : ""}`}
-          />
+        <DisclosureButton open={open} onToggle={() => setOpen((o) => !o)} controls={bodyId}>
           {heading}
-        </button>
+        </DisclosureButton>
       ) : (
-        <h2 className={`mb-3 ${HEADING}`}>{heading}</h2>
+        <h2 className={HEADING}>{heading}</h2>
       )}
       <div id={bodyId} className={collapsible && !open ? "hidden" : GRID}>
         {list.map((m) => (

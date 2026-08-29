@@ -3,6 +3,7 @@
 import { observer } from "mobx-react-lite";
 
 import { MachineGrid } from "@/components/machine-grid";
+import { CountRow } from "@/components/ui/count-row";
 import { PageShell } from "@/components/ui/page-shell";
 import { useStore } from "@/stores";
 import type { MachineView } from "@/portal/room-status";
@@ -12,7 +13,6 @@ const freeCount = (list: MachineView[]) => list.filter((m) => m.state === "free"
 /** Tenant portal: current per-machine availability, nothing else. */
 export const RoomView = observer(function RoomView() {
   const { machines } = useStore();
-  const c = machines.counts;
 
   return (
     <PageShell
@@ -20,7 +20,7 @@ export const RoomView = observer(function RoomView() {
       footer="Snapshot of current machine availability. Confirm on arrival."
     >
       <div className="border-outline-variant bg-surface-container-high rounded-lg border p-4">
-        {/* What a tenant actually wants first: how many of each kind are free right now. */}
+        {/* What a tenant wants first: how many of each kind are free right now. */}
         <div className="flex flex-wrap gap-x-10 gap-y-4">
           {(
             [
@@ -54,20 +54,9 @@ export const RoomView = observer(function RoomView() {
           ))}
         </div>
 
-        {/* Secondary — the rest of the breakdown. */}
-        <p className="text-on-surface-variant mt-4 flex flex-wrap gap-x-3 gap-y-1 text-sm tabular-nums">
-          <span>{c.occupied} in use</span>
-          <span aria-hidden="true">·</span>
-          <span>{c.out_of_order} out of order</span>
-          <span aria-hidden="true">·</span>
-          <span>{c.unknown} unknown</span>
-        </p>
-
-        {machines.freeIds.length > 0 && (
-          <p className="border-outline-variant bg-surface text-primary mt-4 rounded border p-3 font-mono text-sm break-words">
-            Available now: {machines.freeIds.join(", ")}
-          </p>
-        )}
+        <div className="mt-4">
+          <CountRow counts={machines.counts} corrections={machines.correctedCount} />
+        </div>
       </div>
 
       <MachineGrid title="Washers" list={machines.washers} collapsible />

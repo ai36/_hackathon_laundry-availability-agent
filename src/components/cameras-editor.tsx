@@ -30,29 +30,30 @@ async function upload(file: File, kind: string, ownerId: string): Promise<string
   return data.path;
 }
 
+/** `/api/asset` URL for previewing a repo-relative image path. */
+const assetUrl = (path: string) => `/api/asset?path=${encodeURIComponent(path)}`;
+
 function ImageField({
   label,
   kind,
   ownerId,
   current,
-  onPath,
+  onChange,
 }: {
   label: string;
   kind: string;
   ownerId: string;
   current?: string;
-  onPath: (p: string) => void;
+  /** A path sets the field; `null` clears it. */
+  onChange: (path: string | null) => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   return (
-    <div className="flex flex-col gap-1 text-xs">
+    <div className="flex flex-col gap-1.5 text-xs">
       <Label>{label}</Label>
-      <span className={`break-all ${current ? "text-outline font-mono" : "text-outline"}`}>
-        {current ?? "none"}
-      </span>
       <input
         ref={ref}
         type="file"
@@ -64,7 +65,7 @@ function ImageField({
           setBusy(true);
           setErr(null);
           try {
-            onPath(await upload(f, kind, ownerId));
+            onChange(await upload(f, kind, ownerId));
           } catch (x) {
             setErr(x instanceof Error ? x.message : "upload failed");
           } finally {
@@ -73,15 +74,46 @@ function ImageField({
           }
         }}
       />
-      <Button
-        variant="outline"
-        disabled={busy}
-        onClick={() => ref.current?.click()}
-        className="self-start"
-      >
-        <Upload size={16} aria-hidden="true" />{" "}
-        {busy ? "uploading…" : current ? "replace" : "upload"}
-      </Button>
+      {current ? (
+        <div className="flex items-start gap-2.5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={assetUrl(current)}
+            alt=""
+            width={64}
+            height={64}
+            className="border-outline-variant bg-surface h-16 w-16 shrink-0 rounded border object-cover"
+          />
+          <div className="flex min-w-0 flex-col gap-1.5">
+            <span className="text-outline font-mono break-all">{current}</span>
+            <div className="flex flex-wrap gap-1.5">
+              <Button variant="outline" disabled={busy} onClick={() => ref.current?.click()}>
+                <Upload size={16} aria-hidden="true" /> {busy ? "uploading…" : "replace"}
+              </Button>
+              <Button
+                variant="danger"
+                disabled={busy}
+                onClick={() => onChange(null)}
+                aria-label={`remove ${label}`}
+              >
+                <Trash2 size={16} aria-hidden="true" /> remove
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          <span className="text-outline">none</span>
+          <Button
+            variant="outline"
+            disabled={busy}
+            onClick={() => ref.current?.click()}
+            className="self-start"
+          >
+            <Upload size={16} aria-hidden="true" /> {busy ? "uploading…" : "upload"}
+          </Button>
+        </>
+      )}
       {err && (
         <span role="alert" className="text-error break-words">
           {err}
@@ -110,7 +142,7 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
     }
   }
 
-  const patch = (extra: Partial<Camera>) =>
+  const patch = (extra: Record<string, unknown>) =>
     run(() => call("PATCH", { targetId: cam.id, id: id.trim(), machineIdsText: text, ...extra }));
 
   return (
@@ -137,20 +169,27 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
           className="w-full font-mono"
         />
       </label>
-      <div className="grid grid-cols-1 gap-3 min-[520px]:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <ImageField
           label="stub image (test feed — D-0016 StaticImageFrameSource)"
           kind="camera-stub"
           ownerId={cam.id}
           current={cam.stubImage}
-          onPath={(p) => patch({ stubImage: p })}
+          onChange={(p) => patch({ stubImage: p })}
         />
         <ImageField
           label="annotated shot (ids drawn on it — spatial key, D-0015)"
           kind="camera-annotated"
           ownerId={cam.id}
           current={cam.annotatedShot}
-          onPath={(p) => patch({ annotatedShot: p })}
+          onChange={(p) => patch({ annotatedShot: p })}
+        />
+        <ImageField
+          label="mask (black regions = ignore in analysis, D-0015)"
+          kind="camera-mask"
+          ownerId={cam.id}
+          current={cam.mask}
+          onChange={(p) => patch({ mask: p })}
         />
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -205,15 +244,17 @@ export function CamerasEditor() {
   }
 
   return (
-    <Section title={`Cameras (${list.length})`} collapsible>
+    <Section title={`Cameras (${list.length})`}>
       <p className="text-on-surface-variant mb-4 text-xs">
         Each camera: an id (convention <span className="font-mono">C-01</span>,{" "}
         <span className="font-mono">C-02</span>… to match <span className="font-mono">W-</span>/
         <span className="font-mono">D-</span> machines), the machine ids it observes (free text),
-        and — optionally — a <em>stub image</em> for its feed and an <em>annotated shot</em>. Writes{" "}
+        and — optionally — a <em>stub image</em> for its feed, an <em>annotated shot</em>, and a{" "}
+        <em>mask</em> (black regions the agent should ignore). Writes{" "}
         <span className="font-mono">data/site-config.json</span> +{" "}
-        <span className="font-mono">data/site-config/&lt;id&gt;/</span>. Not yet read by the eval
-        runtime (D-0015/D-0016).
+        <span className="font-mono">data/site-config/&lt;id&gt;/</span>. The stub image is fed to{" "}
+        <span className="font-mono">refresh</span>; the annotated shot and mask are stored but not
+        yet applied at runtime (D-0015/D-0016).
       </p>
       {!loaded ? (
         <p className="text-on-surface-variant text-xs">loading…</p>

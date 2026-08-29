@@ -10,3 +10,5 @@ public/
 .nvmrc
 docs/artifacts/
 docs/design-reference/
+# machine-written by writeSiteConfig() — its JSON.stringify format, not Prettier's
+data/site-config.json

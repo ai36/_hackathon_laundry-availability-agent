@@ -103,6 +103,27 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-28 — portal: seeded cameras, mask/preview/delete, unified lists, tenant labels
+
+- New shared `DisclosureButton` (`ui/collapsible.tsx`) + `CountRow` (`ui/count-row.tsx`).
+  `Section` and `MachineGrid` both render `DisclosureButton` → Settings sections now look
+  identical to the Live status / Integrator machine grids; `Section` lost its card chrome.
+  Live status + Integrator both render `CountRow` (coloured dots).
+- Live status card: two big free-count figures + `CountRow`; `Available now:` list removed.
+- `data/site-config.json` seeded with 5 cameras (`C-01…C-05`), each `stubImage` a committed
+  eval frame; `Cameras (5)`. `MAX_AUTO` 60→20. `data/site-config.json` added to
+  `.prettierignore` (machine-written by `writeSiteConfig`).
+- `Camera.mask?` added (`site-config.ts`, `/api/cameras`, `/api/upload` `camera-mask` kind);
+  stored, not yet applied at runtime. `site-config.test.ts` +mask assertions.
+- New `GET /api/asset?path=` (traversal-checked, allow-listed, magic-byte-sniffed) powers
+  camera image thumbnails. `ImageField` → thumbnail + `replace` + `remove` (clears the
+  reference only). Stub/annotated/mask in a 3-col grid.
+- `type` field removed from the machine editor rows (rows are type-fixed by section).
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **51/51**;
+  `check:data` — **pass**. `/api/asset` curl: serves a committed frame (200 image/jpeg),
+  rejects `../` and out-of-root (400). Route table adds `ƒ /api/asset`. Screenshots
+  regenerated.
+
 ### 2026-08-28 — portal: collapsible lists everywhere, tenant summary, editor rows, icons
 
 - `MachineGrid` gains a `collapsible` prop + always shows the item count in the heading

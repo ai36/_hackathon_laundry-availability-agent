@@ -11,8 +11,10 @@
  * report + `data/corrections/` — no model call, no cost.
  *
  * COST: the live branch calls the Anthropic API once per camera-with-a-feed. It only fires
- * with a key AND at least one camera stub image present (none are committed). The client
- * "auto" toggle is off by default and caps itself at MAX_AUTO cycles (see refresh-control).
+ * when `ANTHROPIC_API_KEY` is set; the key-free default (the judge's path) makes zero calls.
+ * `data/site-config.json` seeds 5 cameras whose stub images are the committed eval frames,
+ * so a keyed manual "refresh" is ~5 calls. The client "auto" toggle is off by default and
+ * caps itself at MAX_AUTO cycles (see refresh-control).
  *
  * The client "auto" toggle calls this on an interval (period = runtime.stateRefreshSeconds).
  * Node runtime; integrator-only local / on-prem service (no auth — see D-0016).

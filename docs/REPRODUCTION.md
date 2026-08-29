@@ -46,11 +46,13 @@ npm start        # serve the production build
 > owns that state on a writable volume. To restore the submitted state:
 > `git checkout -- data/ && git clean -fd data/site-config/`.
 >
-> **`POST /api/refresh`** (the "refresh recognition" button + auto toggle) is **key-optional**:
-> with no `ANTHROPIC_API_KEY` it only re-fuses the committed report + corrections (free). With
-> a key **and** at least one camera stub image (none are committed), it also runs one
-> Anthropic call per camera feed per cycle and fuses the live reads (below corrections). The
-> auto toggle is off by default and stops itself after 60 cycles.
+> **`POST /api/refresh`** (the "refresh" button + auto toggle) is **key-optional**:
+> with no `ANTHROPIC_API_KEY` it only re-fuses the committed report + corrections — **free**,
+> and this is the default. `data/site-config.json` ships **5 seeded cameras** (`C-01…C-05`,
+> stub images = the committed eval frames), so **with a key** a manual click runs ~5
+> Anthropic vision calls (one per camera feed) and fuses the live reads below corrections.
+> The auto toggle is off by default and stops itself after **20 cycles** (~100 calls worst
+> case). Results are cached under `data/cache/live/` (git-ignored), so re-runs are free.
 
 ## Checks
 

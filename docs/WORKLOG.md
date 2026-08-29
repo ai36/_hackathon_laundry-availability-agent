@@ -12,6 +12,58 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Portal: seeded cameras + mask/preview/delete, unified lists, tenant labels
+
+- Owner, several messages: restore the coloured count labels on Live status (drop the drab
+  grey line) and remove the `Available now:` id list, keeping the big free-count figures;
+  make the Settings collapsible sections look identical to the machine grids on the other
+  pages; Cameras shows 0 but should ship seeded mock cameras (no physical hardware — a
+  photo stands in as the feed, and that photo is what the agent analyses); the per-row
+  `type` field in the Washers/Dryers editors is now redundant; add a camera **mask** field
+  (transparent image, black = ignore in analysis); and give the camera image fields a
+  **preview thumbnail** + a **delete** control.
+- **Shared collapsible heading** (`src/components/ui/collapsible.tsx`): new
+  `DisclosureButton` — the one uppercase-label + rotating-chevron toggle. `Section` (all of
+  Settings) and `MachineGrid` (Live status / Integrator) both render it now, so the three
+  pages' lists match exactly. `Section` lost its card chrome (`surface-container-high`
+  border/`p-4`) and its `collapsible` prop (always a disclosure now).
+- **Shared count line** (`src/components/ui/count-row.tsx`): `CountRow` — coloured
+  dot + count + label per state, plus an optional corrections tally. Live status and the
+  Integrator view both use it. Live status card is now: two big figures
+  (`Washers free N / 16`, `Dryers free N / 16`) → `CountRow` (`13 free · 10 in use ·
+  3 out of order · 6 unknown · 3 corrections`). `Available now:` removed.
+- **Seeded cameras** (`data/site-config.json`): 5 cameras `C-01…C-05`, each `stubImage` a
+  committed eval frame (`data/public/frames/img_*.jpg`) with the machine ids that frame
+  covers. `Cameras (5)` instead of `(0)`; `/api/refresh` iterates them (key-free = 0 calls,
+  the judge's path; keyed = 5 calls per manual click). `MAX_AUTO` 60→20 in
+  `refresh-control.tsx`; the route's COST docstring updated. File is now
+  `.prettierignore`d — its canonical shape is `writeSiteConfig`'s `JSON.stringify`, not
+  Prettier's.
+- **Camera mask** (`Camera.mask?` in `src/eval/site-config.ts`; `camera-mask` kind in
+  `/api/upload`; `mask` field in `/api/cameras` POST/PATCH with the string-sets /
+  null-clears / undefined-keeps rule). Stored + shown; runtime application is still D-0016.
+  `site-config.test.ts` gains a mask round-trip + clear assertion (still 51 tests).
+- **Image preview + delete** (`cameras-editor.tsx`): new `GET /api/asset?path=` streams an
+  image after a `..`-reject + `data/public/frames/` | `data/site-config/` allow-list + a
+  magic-byte sniff. `ImageField` shows a 64px thumbnail, the path, and `replace` + `remove`
+  (`remove` clears the reference only — it never unlinks the committed frame). Stub /
+  annotated / mask now a 3-col grid.
+- **`type` removed** from the machine editor rows — the row lives in a type-fixed Washers
+  or Dryers section, so the picker was meaningless. PATCH still sends the machine's
+  existing `type`. Re-classify = delete + re-add in the other section.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` —
+  **51/51**; `check:data` — **pass**. Chrome: camera thumbnails render via `/api/asset`,
+  `remove` clears a field, machine rows have no `type`, all four Settings sections match
+  the Live/Integrator disclosure style. `/api/asset` rejects `../` and out-of-root paths
+  (curl 400). `docs/assets/portal-{top,machines,settings}.jpg` regenerated.
+- **Compliance** (`hackathon-compliance`): **PASS WITH RISKS** — no eligibility blockers
+  (`/api/asset` read-only + gated; eval pipeline reads only `site.machines`, never the
+  seeded cameras; `npm test` 51/51). Handled before push: (1) `docs/REPRODUCTION.md` cost
+  note updated (5 seeded cameras, ~5 calls/keyed manual refresh, auto caps at 20); (2)
+  `/api/asset` `data/site-config/` reads tightened to config-referenced paths only
+  (unreferenced path now 400); (3) review saved to
+  `docs/trajectories/compliance/2026-08-28-portal-cameras-mask-asset.md`.
+
 ### 2026-08-28 — Portal: collapsible lists everywhere, tenant summary, editor rows, icons
 
 - Owner, across several messages: save/delete wrapped onto an orphaned right-aligned second
