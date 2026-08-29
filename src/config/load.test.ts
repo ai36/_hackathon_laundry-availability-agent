@@ -79,3 +79,14 @@ test("accepts a valid vision effort and rejects an unknown one", () => {
   assert.equal(loadConfig({ agent: { visionEffort: "medium" } }).agent.visionEffort, "medium");
   assert.throws(() => loadConfig({ agent: { visionEffort: "max" as "high" } }), ConfigError);
 });
+
+test("deepMerge ignores prototype-polluting keys from parsed JSON overrides", () => {
+  const poison = JSON.parse('{"__proto__": {"polluted": true}, "site": {"name": "ok"}}') as Record<
+    string,
+    unknown
+  >;
+  const c = loadConfig(poison);
+  assert.equal(c.site.name, "ok");
+  assert.equal(({} as Record<string, unknown>).polluted, undefined);
+  assert.equal((Object.prototype as Record<string, unknown>).polluted, undefined);
+});

@@ -12,6 +12,44 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Settings: make the Configuration section editable
+
+- Owner: let the integrator change deployment settings in the UI — editable fields, `save`
+  / `cancel`, and an amber highlight on a changed (unsaved) field.
+- **Overrides layer** (`src/config/overrides.ts`, new): `resolvePortalConfig()` =
+  `DEFAULT_CONFIG ← laundry3.config.ts ← data/config-overrides.json`, merged and validated
+  per call. `writeOverrides(patch)` validates the merged result first (throws on invalid),
+  then writes the file. `data/config-overrides.json` is **git-ignored** —
+  a portal-runtime layer, **not read by the offline eval** (`src/agent/*` / `src/eval/*`
+  keep the static `config` singleton = defaults + `laundry3.config.ts`). `deepMerge`
+  exported from `load.ts`.
+- **`PATCH /api/config`** (route now GET + PATCH): body is a nested config object; the
+  portal sends every non-`paths` leaf coerced to its default's type; 400 + the `ConfigError`
+  message on an invalid merge (e.g. `staleAfterSeconds < stateRefreshSeconds`). `GET` also
+  returns `defaults` + `locked` (`["paths."]`).
+- **`ConfigView` rewritten** as a form: text / number / `Switch` (booleans) / `Select`
+  (`agent.visionEffort`) input per field; `paths.*` rendered read-only. A dirty field gets
+  an amber border + row tint; `save` PATCHes, `cancel` reverts to the loaded values; an
+  "N unsaved changes" hint shows while dirty. After save, the amber clears and the `•`
+  (differs-from-default) marker updates.
+- `src/app/integrator/page.tsx` now reads `resolvePortalConfig().runtime.stateRefreshSeconds`
+  so a saved edit takes effect without a restart for that one consumer.
+- New tests (`src/config/overrides.test.ts` + a `deepMerge` proto-pollution case in
+  `load.test.ts`): round-trip, invalid-merge-doesn't-write, `paths.*` server-side strip,
+  `overriddenPaths`. `writeOverrides` / `readOverrides` take an optional path arg for tests.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` —
+  **57/57** (+6); `check:data` — **pass**. Curl: `PATCH` persists
+  (`cycles.defaultWashMinutes` 35→42, `verification.confidenceThreshold` 0.7→0.8), `GET`
+  reflects it, an invalid merge is `400`, `data/config-overrides.json` is written and
+  git-ignored. Chrome: editing a field tints it amber + enables `save`; save clears the
+  tint and adds the `•` marker. `docs/assets/portal-settings.jpg` regenerated.
+- **Compliance** (`hackathon-compliance`): **PASS WITH RISKS** — no eligibility blockers
+  (G2 boundary holds: the eval reads the static `config` singleton, never the overrides
+  file). Three risks fixed before push: (1) `writeOverrides` now strips `paths.*`
+  server-side; (2) `deepMerge` skips `__proto__`/`constructor`/`prototype`; (3) docstrings
+  corrected to describe the full-config PATCH. New tests cover 1 & 2. Review:
+  `docs/trajectories/compliance/2026-08-29-settings-config-editable.md`.
+
 ### 2026-08-29 — Settings: read-only "Configuration" section
 
 - Owner: surface the deployment config (`src/config/defaults.ts` / `laundry3.config.ts`)

@@ -6,12 +6,14 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 }
 
 /** Deep-merge `override` onto `base`, returning a new object. Arrays are replaced, not merged. */
-function deepMerge<T>(base: T, override: unknown): T {
+export function deepMerge<T>(base: T, override: unknown): T {
   if (!isPlainObject(base) || !isPlainObject(override)) {
     return override === undefined ? base : (override as T);
   }
   const out: Record<string, unknown> = { ...base };
   for (const [key, value] of Object.entries(override)) {
+    // Never let a parsed-JSON override walk the prototype chain.
+    if (key === "__proto__" || key === "constructor" || key === "prototype") continue;
     out[key] = deepMerge((base as Record<string, unknown>)[key], value);
   }
   return out as T;

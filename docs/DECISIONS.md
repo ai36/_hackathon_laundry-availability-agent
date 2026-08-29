@@ -381,12 +381,21 @@ sanity-check split by type. P2 features default off (`reservation.enabled: false
 `agent.changeDetection.enabled: false`) — the other values in those groups are the intended
 production settings.
 
-**Amendment (2026-08-29) — surfaced read-only in the portal.** `GET /api/config` returns the
-resolved config plus an `overridden` list (dotted paths that differ from
-`DEFAULT_CONFIG`), and `ConfigView` renders it as a "Configuration" section on
-`/integrator/settings` — grouped, monospace, with a dot on overridden values. It is
-**read-only**: the same knobs drive the offline eval (`src/agent/*`, `src/eval/*`), so they
-stay edited in one place (`laundry3.config.ts`, validated on load). No write path.
+**Amendment (2026-08-29) — surfaced in the portal; editable via an overrides layer.**
+`ConfigView` renders a "Configuration" section on `/integrator/settings` — every knob
+grouped, an input per field (`paths.*` read-only), a `•` on values that differ from
+`DEFAULT_CONFIG`, an amber highlight on unsaved edits, and `save` / `cancel`.
+
+- `GET /api/config` → resolved config + `defaults` + `overridden` + `locked` prefixes.
+- `PATCH /api/config` validates the merge (`writeOverrides`, throws on an invalid result)
+  and stores the non-`paths` fields verbatim in **`data/config-overrides.json`**
+  (git-ignored). `resolvePortalConfig()` = `defaults ← laundry3.config.ts ←
+  config-overrides.json`, merged and validated per request.
+- **The overrides file is portal-runtime only.** `src/agent/*` and `src/eval/*` import the
+  static `config` singleton (`resolved.ts` = `defaults ← laundry3.config.ts`) and never
+  read the overrides file — the submitted eval config stays hand-edited in
+  `laundry3.config.ts`. Only portal consumers opt in: `GET /api/config` and
+  `src/app/integrator/page.tsx` (`refreshSeconds`). `to restore: rm data/config-overrides.json`.
 
 ---
 

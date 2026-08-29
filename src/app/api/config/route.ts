@@ -1,43 +1,65 @@
 /**
- * GET /api/config  ->  { ok, config, overridden }
+ * Deployment config for the integrator console.
  *
- * Read-only view of the resolved deployment config — `src/config/defaults.ts` with
- * `laundry3.config.ts` merged on top and validated on load. Surfaced in the Settings page.
+ *   GET   /api/config              -> { ok, config, defaults, overridden, locked }
+ *   PATCH /api/config  <patch>     -> { ok, config, overridden }   (400 on invalid merge)
  *
- * Not writable from the portal on purpose: these knobs also drive the offline eval
- * (`src/agent/*`, `src/eval/*`), so they stay in one hand-edited place. `overridden` lists
- * the dotted paths whose value differs from the built-in default.
+ * `config` is `src/config/defaults.ts` + `laundry3.config.ts` + `data/config-overrides.json`
+ * (the last written by PATCH), merged and validated on every request. `patch` is a nested
+ * `DeepPartial<Laundry3Config>` — the portal sends the full non-`paths` config; the route
+ * strips `paths.*`, validates the merge, and stores the rest verbatim as the overrides file.
  *
- * TRUST BOUNDARY: no authentication; integrator-only local / on-prem service (D-0016).
- * Read-only — GET only, no params, no filesystem access, no write path. It returns nothing
- * not already in committed source (`src/config/defaults.ts` + `laundry3.config.ts`); no
- * secrets are in `Laundry3Config`. Do not expose this route on a shared or public host
- * without a gate.
+ * SCOPE: this only affects the **portal runtime**. The offline eval (`src/agent/*`,
+ * `src/eval/*`) imports the static `config` singleton and never reads the overrides file —
+ * the submitted eval config stays hand-edited in `laundry3.config.ts`.
+ *
+ * TRUST BOUNDARY: no authentication; integrator-only local / on-prem service (D-0016). The
+ * overrides file is git-ignored. `Laundry3Config` has no credential fields. Do not expose
+ * this route on a shared or public host without a gate.
  */
 import { NextResponse } from "next/server";
 
-import { config, DEFAULT_CONFIG, type Laundry3Config } from "@/config";
+import {
+  DEFAULT_CONFIG,
+  LOCKED_PREFIXES,
+  overriddenPaths,
+  resolvePortalConfig,
+  writeOverrides,
+  type DeepPartial,
+  type Laundry3Config,
+} from "@/config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function diffPaths(a: unknown, b: unknown, prefix = ""): string[] {
-  if (a && b && typeof a === "object" && !Array.isArray(a)) {
-    return Object.keys(a as Record<string, unknown>).flatMap((k) =>
-      diffPaths(
-        (a as Record<string, unknown>)[k],
-        (b as Record<string, unknown>)[k],
-        prefix ? `${prefix}.${k}` : k,
-      ),
-    );
-  }
-  return a === b ? [] : [prefix];
-}
-
 export function GET() {
+  const config = resolvePortalConfig();
   return NextResponse.json({
     ok: true,
-    config: config as Laundry3Config,
-    overridden: diffPaths(config, DEFAULT_CONFIG),
+    config,
+    defaults: DEFAULT_CONFIG,
+    overridden: overriddenPaths(config),
+    locked: LOCKED_PREFIXES,
   });
+}
+
+export async function PATCH(req: Request) {
+  let patch: DeepPartial<Laundry3Config>;
+  try {
+    patch = (await req.json()) as DeepPartial<Laundry3Config>;
+  } catch {
+    return NextResponse.json({ error: "body must be JSON" }, { status: 400 });
+  }
+  if (!patch || typeof patch !== "object" || Array.isArray(patch)) {
+    return NextResponse.json({ error: "body must be an object" }, { status: 400 });
+  }
+  try {
+    const config = writeOverrides(patch);
+    return NextResponse.json({ ok: true, config, overridden: overriddenPaths(config) });
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "invalid config" },
+      { status: 400 },
+    );
+  }
 }

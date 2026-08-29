@@ -103,6 +103,21 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-29 — settings: editable "Configuration" section
+
+- New `src/config/overrides.ts` (`resolvePortalConfig` / `writeOverrides` /
+  `overriddenPaths`); `deepMerge` exported from `load.ts`. `PATCH /api/config` validates
+  and persists to git-ignored `data/config-overrides.json` — a portal-runtime layer the
+  offline eval does not read. `ConfigView` rewritten as a form (text / number / switch /
+  select; `paths.*` read-only; amber dirty highlight; `save` / `cancel`).
+  `integrator/page.tsx` reads `resolvePortalConfig()`. `paths.*` stripped server-side in
+  `writeOverrides`; `deepMerge` skips `__proto__`/`constructor`/`prototype`. D-0008
+  amendment.
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **57/57** (+6:
+  `overrides.test.ts`, `deepMerge` proto guard); `check:data` — **pass**. Curl: PATCH
+  persists, GET reflects it, invalid merge → 400, `data/config-overrides.json` written +
+  git-ignored. Screenshot regenerated.
+
 ### 2026-08-29 — settings: read-only "Configuration" section
 
 - New `GET /api/config` (resolved config + `overridden` dotted-path list) and `ConfigView`
