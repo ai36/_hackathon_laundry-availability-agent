@@ -60,12 +60,37 @@ for free. All runs `--replay`-reproducible offline. Full write-up: **`docs/CHANG
 ### The portal
 
 `npm run dev` → a Next.js page that fuses the agent's per-machine assessments across every
-camera angle and shows the tenant a room view (`src/portal/room-status.ts` +
-`src/stores/machines-store.ts`, MobX). It reads the committed eval report — **no API call** —
-so `npm run build` prerenders it. Reservations and a live feed are P2, not wired.
+camera angle, **overlays the integrator corrections**, and shows a room view
+(`src/portal/room-status.ts` + `src/stores/machines-store.ts`, MobX). It reads the committed
+baseline report and applies `data/corrections/` — i.e. it shows the **Final "classify +
+corrections" config** (80.0%, `docs/artifacts/eval-baseline-corrected-2026-08-28.json`), not
+the Iteration-1 verify pass. **No API call**, so `/` still prerenders. Reservations and a
+live feed are P2, not wired.
 
-![laundry3 portal — summary + washers](docs/assets/portal-top.jpg)
-![laundry3 portal — machine grid, D-06 out of order](docs/assets/portal-machines.jpg)
+![laundry3 portal — tenant view: state only, "confirm on arrival"](docs/assets/portal-top.jpg)
+![laundry3 portal — integrator view: agent confidence, source frame, "mark wrong" on every card, W-04 corrected out-of-order](docs/assets/portal-machines.jpg)
+
+**Integrator walkthrough (no API key, no hardware).** The judge can walk the whole
+correction loop on the frozen dataset:
+
+```bash
+npm run dev            # http://localhost:3000
+```
+
+1. Open `http://localhost:3000/?role=integrator` — every card now shows the agent's
+   confidence, the frame it came from, and a **“✕ mark wrong”** control.
+2. Find a machine the agent got wrong (e.g. a `free` washer shown as `In use`). Click
+   **mark wrong**, pick the correct state, optionally tick **“applies to this machine in
+   every view (durable)”**, add a note, submit.
+3. `POST /api/corrections` writes `data/corrections/<frame>.json` and returns the re-fused
+   room; the card flips immediately and gets an **integrator** badge. A *durable* correction
+   also carries to every other view of that machine.
+4. Re-score with the same correction store:
+   `npm run eval -- --mode=baseline --split=evaluation --replay --corrections`.
+
+The tenant view (`/`) shows only the resulting state — no confidence, no controls. Full
+deployment shape (Docker, `FrameSource`, static-image mock, the correction→prompt feedback
+loop): `docs/DECISIONS.md` D-0014 / D-0015 / D-0016.
 
 ### Main failure mode & hot take
 

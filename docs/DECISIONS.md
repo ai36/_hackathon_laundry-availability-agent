@@ -593,8 +593,11 @@ the override only).
 ## D-0015 — Integrator calibration model: cameras, masks, per-machine reference states + prompt
 
 - **Date:** 2026-08-28
-- **Status:** Proposed — spec only; portal + `site-config.json` schema not built. Recorded
-  now so the build and the config format agree and to avoid rework.
+- **Status:** Partial. **Built:** portal roles (`?role=integrator`), the per-machine
+  "mark wrong" → `POST /api/corrections` write loop, `buildRoomStatus` overlaying corrections
+  (D-0016 P0 — judge-walkable, key-free). **Not built:** camera/machine CRUD, mask upload,
+  reference-state screenshots, per-machine prompt fragment, `site-config.json` schema, the
+  correction→prompt feedback synthesis (D-0014 amendment). Spec below stands for those.
 
 **Context.** D-0009 / D-0010 name a `data/site-config.json` produced during onboarding
 (per-machine ROIs, reference crops, few-shot exemplars, thresholds). D-0014 adds a correction
@@ -668,8 +671,10 @@ must also apply corrections so the portal reflects the corrected state.
 ## D-0016 — Deployment: Docker service, `FrameSource` abstraction, static-image mock
 
 - **Date:** 2026-08-28
-- **Status:** Proposed — spec + phasing. P0 (judge-walkable integrator path) is the
-  minimal-submission target; the container and real camera sources are later phases.
+- **Status:** **P0 delivered** — the correction loop is clickable key-free on the frozen
+  9-frame dataset (portal `?role=integrator` → "mark wrong" → `POST /api/corrections` →
+  re-fused room; `buildRoomStatus` overlays the store). P1 (container + runtime loop +
+  `StaticImageFrameSource`) and P2 (real camera sources) are still spec + phasing below.
 
 **Context.** Vercel is out for the integrator side: its filesystem is read-only, and the
 runtime is a polling loop that does not fit a serverless invocation (D-0015 discussion, and

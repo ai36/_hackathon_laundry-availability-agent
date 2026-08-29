@@ -5,11 +5,15 @@ import type { MachineView, RoomStatus } from "@/portal/room-status";
 
 import type { RootStore } from "./root-store";
 
+export type PortalRole = "tenant" | "integrator";
+
 /** Portal-side machine state, hydrated from a committed eval report (see room-status.ts). */
 export class MachinesStore {
   machines: MachineView[] = [];
   model = "";
   reportPath = "";
+  correctedCount = 0;
+  role: PortalRole = "tenant";
 
   constructor(public root: RootStore) {
     makeAutoObservable(this, { root: false }, { autoBind: true });
@@ -19,6 +23,17 @@ export class MachinesStore {
     this.machines = room.machines;
     this.model = room.provenance.model;
     this.reportPath = room.provenance.report;
+    this.correctedCount = room.provenance.corrections;
+  }
+
+  setRole(role: PortalRole) {
+    this.role = role;
+  }
+
+  /** Replace the machine list after a correction round-trip through /api/corrections. */
+  applyRoom(room: RoomStatus) {
+    this.machines = room.machines;
+    this.correctedCount = room.provenance.corrections;
   }
 
   get washers() {

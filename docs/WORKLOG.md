@@ -12,6 +12,40 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Portal: integrator role + clickable correction loop (D-0015/D-0016 P0)
+
+- **D-0016 P0 acceptance criterion met:** a judge with no API key and no hardware can walk
+  the whole correction loop on the frozen 9-frame dataset.
+- **`buildRoomStatus` now overlays corrections** (D-0014): default report switched to
+  `eval-baseline-2026-08-28.json` (raw baseline, so the correction overlay is visible), a
+  `machine`-scope correction wins outright, an `observation`-scope one wins for its source
+  frame. `MachineView` gains `corrected` + `correction {scope, note}`; `RoomStatus.provenance`
+  gains `corrections` count. +1 test (38 total).
+- **`src/eval/corrections.ts`:** extracted `writeCorrection()` (read-modify-write, shared by
+  the CLI and the API) and `correctionFor()` (frame-aware lookup). `scripts/correct.ts` now
+  calls the shared writer.
+- **`src/app/api/corrections/route.ts`** (Node runtime, `force-dynamic`): `POST` writes
+  `data/corrections/<frame>.json` and returns the freshly re-fused `RoomStatus`; `GET`
+  summarises the store. Works under `npm run dev` and any Node/Docker host; the static `/`
+  route is unaffected (build still shows `○ /`, `ƒ /api/corrections`).
+- **Portal roles** (`src/components/room-status.tsx`, `MachinesStore.role`):
+  `?role=integrator` reveals per-card agent confidence + source frame + a **"✕ mark wrong"**
+  control (state picker + note + a "durable" toggle → `scope: machine`). On submit the store
+  swaps in the API's re-fused room; the card flips and gets an **integrator** badge. Tenant
+  view (`/`) shows only the resulting state + "confirm on arrival" — no confidence, no
+  controls.
+- Verified end-to-end in Chrome: integrator view shows the 3 committed corrections (W-04,
+  D-02, D-06 out-of-order, durable badge); marking W-09 `free` flipped the card and bumped
+  the header counts live; the test correction was deleted afterwards. Screenshots refreshed
+  (`docs/assets/portal-top.jpg` = tenant, `portal-machines.jpg` = integrator).
+- Docs: README "Integrator walkthrough" section; D-0015 status → Partial (loop built, CRUD /
+  masks / refs / prompt-synthesis still spec); D-0016 P0 marked done.
+- **Not built** (deferred, still spec): camera/machine CRUD UI, mask upload, reference-state
+  screenshots, per-machine prompt fragment editor, `site-config.json` schema, the
+  correction→prompt feedback synthesis.
+- Verification: `npm run typecheck` / `lint` / `build` / `format:check` — **pass**;
+  `npm test` — **38/38**; `npm run check:data` — **pass**.
+
 ### 2026-08-28 — Cache refreshed on haiku + config knobs (capture interval, vision effort)
 
 - **User decision:** keep `claude-haiku-4-5` (cost); refresh the cache so it matches the

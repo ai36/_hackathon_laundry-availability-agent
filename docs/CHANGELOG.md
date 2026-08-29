@@ -103,6 +103,21 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-28 — portal: integrator role + clickable correction loop
+
+- `buildRoomStatus` overlays D-0014 corrections (default report → `eval-baseline-2026-08-28.json`
+  so the overlay is visible); `MachineView.corrected` / `.correction`; +1 test (38 total).
+- `writeCorrection()` extracted from the CLI into `src/eval/corrections.ts`, shared with a
+  new `POST /api/corrections` route (Node runtime; `GET` summarises). Build unchanged:
+  `○ /`, `ƒ /api/corrections`.
+- `?role=integrator` → per-card confidence + source + "✕ mark wrong" (state picker + note +
+  durable toggle → `scope: machine`); submit swaps in the API's re-fused room, card flips
+  with an integrator badge. Tenant `/` = state only.
+- Verified in Chrome end-to-end (3 committed corrections shown; a test mark-wrong flipped a
+  card and updated counts live; test correction removed). Screenshots refreshed.
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **38/38**;
+  `check:data` — **pass**. Meets D-0016 P0 (judge walks the loop key-free).
+
 ### 2026-08-28 — cache refreshed on `claude-haiku-4-5` + committed frames
 
 - Deleted the archived `claude-sonnet-5` cache (still in git at `e8de845`) and re-ran

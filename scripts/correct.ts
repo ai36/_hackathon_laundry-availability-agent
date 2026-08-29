@@ -11,10 +11,10 @@
  * Writes/updates data/corrections/<frameId>.json. Re-running for the same (frame, machine)
  * replaces the earlier entry.
  */
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-import { loadCorrections, type Correction } from "@/eval/corrections";
+import { loadCorrections, writeCorrection, type Correction } from "@/eval/corrections";
 
 const DIR = "data/corrections";
 const STATES = ["free", "occupied", "out_of_order", "unknown"] as const;
@@ -75,33 +75,29 @@ function cmdAdd(): void {
     fail(`state must be one of: ${STATES.join(" | ")}`);
   }
   const scope = (flags.get("scope") ?? "observation") as Correction["scope"];
-  if (scope !== "observation" && scope !== "machine") {
-    fail(`--scope must be "observation" or "machine"`);
-  }
   if (!existsSync(join("data/labels", `${frameId}.json`))) {
     console.warn(`! no label file for ${frameId} — recording the correction anyway`);
   }
 
-  mkdirSync(DIR, { recursive: true });
-  const path = join(DIR, `${frameId}.json`);
-  const file: { frameId: string; corrections: Correction[] } = existsSync(path)
-    ? JSON.parse(readFileSync(path, "utf8"))
-    : { frameId, corrections: [] };
+  const noteFlag = flags.get("note");
+  const byFlag = flags.get("by");
+  try {
+    writeCorrection(
+      {
+        frameId,
+        machineId,
+        correctState: state as Correction["correctState"],
+        scope,
+        note: noteFlag && noteFlag !== "true" ? noteFlag : undefined,
+        by: byFlag && byFlag !== "true" ? byFlag : undefined,
+      },
+      DIR,
+    );
+  } catch (err) {
+    fail(err instanceof Error ? err.message : "write failed");
+  }
 
-  const entry: Correction = {
-    machineId,
-    correctState: state as Correction["correctState"],
-    scope,
-    note: flags.get("note") && flags.get("note") !== "true" ? flags.get("note") : undefined,
-    by: flags.get("by") && flags.get("by") !== "true" ? (flags.get("by") as string) : "integrator",
-    at: new Date().toISOString(),
-  };
-  file.corrections = file.corrections.filter((c) => c.machineId !== machineId);
-  file.corrections.push(entry);
-  file.corrections.sort((a, b) => a.machineId.localeCompare(b.machineId));
-  writeFileSync(path, JSON.stringify(file, null, 2) + "\n");
-
-  console.log(`${path}: ${machineId} -> ${state} (${scope})`);
+  console.log(`${join(DIR, `${frameId}.json`)}: ${machineId} -> ${state} (${scope})`);
   const total = readdirSync(DIR).filter((f) => f.endsWith(".json")).length;
   console.log(`${total} correction file(s) in ${DIR}/`);
 }

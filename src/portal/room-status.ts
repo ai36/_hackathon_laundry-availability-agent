@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { config } from "@/config";
+import { correctionFor, loadCorrections } from "@/eval/corrections";
 import type { MachineState, MachineType } from "@/eval/types";
 
 /** One machine as the portal shows it, fused across every camera angle that sees it. */
@@ -14,12 +15,16 @@ export interface MachineView {
   /** frameId the shown state came from, and how many frames saw this machine. */
   source: string;
   seenIn: number;
+  /** true when an integrator correction (D-0014) set this state, not the model. */
+  corrected?: boolean;
+  /** the correction's scope + note, when `corrected`. */
+  correction?: { scope: "observation" | "machine"; note?: string };
 }
 
 export interface RoomStatus {
   machines: MachineView[];
   /** Model + run the statuses came from. */
-  provenance: { model: string; mode: string; report: string };
+  provenance: { model: string; mode: string; report: string; corrections: number };
   counts: Record<MachineState, number>;
 }
 
@@ -38,15 +43,19 @@ const ACTIONABLE: MachineState[] = ["free", "occupied", "out_of_order"];
 /**
  * Build the room view from a committed eval report — no API calls. For each machine in the
  * roster, pick the most confident *actionable* observation across all frames; fall back to
- * the most confident `unknown` if that's all there is.
+ * the most confident `unknown` if that's all there is. Then overlay integrator corrections
+ * (D-0014): a `machine`-scope correction wins outright; an `observation`-scope one wins when
+ * it targets the frame the shown state came from.
  */
 export function buildRoomStatus(
-  reportPath = join("docs", "artifacts", "eval-agent-2026-08-28.json"),
+  reportPath = join("docs", "artifacts", "eval-baseline-2026-08-28.json"),
   rosterPath = join(config.paths.dataset, "machines.json"),
+  correctionsDir = join(config.paths.dataset, "corrections"),
 ): RoomStatus {
   const report = JSON.parse(readFileSync(reportPath, "utf8")) as Report;
   const roster = JSON.parse(readFileSync(rosterPath, "utf8")) as Roster;
   const typeOf = new Map(roster.machines.map((m) => [m.machineId, m.type]));
+  const corrections = loadCorrections(correctionsDir);
 
   const obs = new Map<string, { frameId: string; state: MachineState; confidence: number }[]>();
   for (const [frameId, pred] of Object.entries(report.predictions)) {
@@ -64,14 +73,24 @@ export function buildRoomStatus(
         .filter((o) => ACTIONABLE.includes(o.state))
         .sort((a, b) => b.confidence - a.confidence)[0] ??
       [...list].sort((a, b) => b.confidence - a.confidence)[0];
-    machines.push({
+
+    const view: MachineView = {
       machineId,
       type: typeOf.get(machineId) ?? (machineId.startsWith("W-") ? "washer" : "dryer"),
       state: pick.state,
       confidence: pick.confidence,
       source: pick.frameId,
       seenIn: list.length,
-    });
+    };
+
+    const c = correctionFor(corrections, pick.frameId, machineId);
+    if (c) {
+      view.state = c.correctState;
+      view.confidence = 1;
+      view.corrected = true;
+      view.correction = { scope: c.scope, note: c.note };
+    }
+    machines.push(view);
   }
   machines.sort((a, b) => a.machineId.localeCompare(b.machineId));
 
@@ -90,6 +109,7 @@ export function buildRoomStatus(
       model: report.model ?? "unknown",
       mode: report.mode ?? "agent",
       report: reportPath.replace(/\\/g, "/"),
+      corrections: machines.filter((m) => m.corrected).length,
     },
   };
 }

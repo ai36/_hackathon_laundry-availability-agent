@@ -4,7 +4,7 @@ import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { applyCorrections, loadCorrections } from "./corrections";
+import { applyCorrections, loadCorrections, writeCorrection } from "./corrections";
 import type { FramePrediction } from "./types";
 
 function fixture(files: Record<string, unknown>): string {
@@ -113,4 +113,38 @@ test("rejects an invalid correctState", () => {
 test("missing directory yields no corrections", () => {
   const c = loadCorrections(join(tmpdir(), "laundry3-corr-does-not-exist"));
   assert.equal(c.count, 0);
+});
+
+test("writeCorrection rejects path-traversal ids", () => {
+  const dir = fixture({});
+  try {
+    assert.throws(
+      () =>
+        writeCorrection({ frameId: "../../package", machineId: "W-01", correctState: "free" }, dir),
+      /frameId must match/,
+    );
+    assert.throws(
+      () => writeCorrection({ frameId: "img_1", machineId: "a/b", correctState: "free" }, dir),
+      /machineId must match/,
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("writeCorrection appends then replaces for the same machine", () => {
+  const dir = fixture({});
+  try {
+    writeCorrection({ frameId: "img_1", machineId: "W-01", correctState: "free" }, dir);
+    writeCorrection(
+      { frameId: "img_1", machineId: "W-01", correctState: "out_of_order", scope: "machine" },
+      dir,
+    );
+    writeCorrection({ frameId: "img_1", machineId: "D-01", correctState: "occupied" }, dir);
+    const c = loadCorrections(dir);
+    assert.equal(c.count, 2); // W-01 replaced, not duplicated
+    assert.equal(c.byMachine.get("W-01")?.correctState, "out_of_order");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

@@ -17,7 +17,7 @@
  * the integrator was looking at when they made it; `loadCorrections` promotes it to all
  * frames on read.
  */
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import type { FramePrediction, MachineState } from "./types";
@@ -149,4 +149,78 @@ export function applyCorrections(
   });
 
   return { prediction: { ...prediction, machines }, applied };
+}
+
+/**
+ * The correction that applies to `machineId` in the context of `frameId`, if any —
+ * an `observation`-scope entry for that exact frame wins, else a `machine`-scope entry.
+ */
+export function correctionFor(
+  corrections: ReturnType<typeof loadCorrections>,
+  frameId: string,
+  machineId: string,
+): Correction | undefined {
+  const obs = (corrections.byFrame.get(frameId) ?? []).find((c) => c.machineId === machineId);
+  return obs ?? corrections.byMachine.get(machineId);
+}
+
+export interface CorrectionInput {
+  frameId: string;
+  machineId: string;
+  correctState: MachineState;
+  scope?: CorrectionScope;
+  note?: string;
+  by?: string;
+}
+
+/** Frame / machine ids that are safe to use as a path segment. */
+const ID_RE = /^[A-Za-z0-9_-]+$/;
+
+/**
+ * Append or replace one correction in `data/corrections/<frameId>.json` (read-modify-write).
+ * Shared by the `npm run correct` CLI and the portal's `/api/corrections` route. Throws on
+ * an invalid state / scope / id. `frameId` and `machineId` are restricted to
+ * `[A-Za-z0-9_-]+` so a request body can never write outside `dir` (path traversal).
+ * Returns the written entry.
+ */
+export function writeCorrection(input: CorrectionInput, dir = DEFAULT_DIR): Correction {
+  if (!ID_RE.test(input.frameId ?? "")) {
+    throw new Error(
+      `writeCorrection: frameId must match ${ID_RE} (got "${String(input.frameId)}")`,
+    );
+  }
+  if (!ID_RE.test(input.machineId ?? "")) {
+    throw new Error(
+      `writeCorrection: machineId must match ${ID_RE} (got "${String(input.machineId)}")`,
+    );
+  }
+  if (!isState(input.correctState)) {
+    throw new Error(
+      `writeCorrection: correctState "${String(input.correctState)}" is not a MachineState`,
+    );
+  }
+  const scope = input.scope ?? "observation";
+  if (scope !== "observation" && scope !== "machine") {
+    throw new Error(`writeCorrection: scope "${scope}" must be "observation" or "machine"`);
+  }
+
+  const entry: Correction = {
+    machineId: input.machineId,
+    correctState: input.correctState,
+    scope,
+    note: input.note?.trim() ? input.note.trim() : undefined,
+    by: input.by?.trim() ? input.by.trim() : "integrator",
+    at: new Date().toISOString(),
+  };
+
+  mkdirSync(dir, { recursive: true });
+  const path = join(dir, `${input.frameId}.json`);
+  const file: FrameCorrections = existsSync(path)
+    ? (JSON.parse(readFileSync(path, "utf8")) as FrameCorrections)
+    : { frameId: input.frameId, corrections: [] };
+  file.corrections = file.corrections.filter((c) => c.machineId !== input.machineId);
+  file.corrections.push(entry);
+  file.corrections.sort((a, b) => a.machineId.localeCompare(b.machineId));
+  writeFileSync(path, JSON.stringify(file, null, 2) + "\n");
+  return entry;
 }
