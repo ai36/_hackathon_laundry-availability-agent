@@ -953,14 +953,34 @@ cache is unaffected (path-keyed, not byte-keyed), so that dead-end still reprodu
 map (not a transparent "analysis mask"), the live route was sending a wrong-content image
 with a dead-end prompt. `POST /api/refresh` now runs **one `baselinePrompt` whole-frame call
 per camera** again — matching the shipped "baseline + corrections" config it fuses into.
-`cameraClassifyPrompt` stays, but only the eval's `--mode=calibrated` uses it now; the
-the region map is editable in the Cameras editor and feeds `--mode=roi`; `annotatedShot` fed
+`cameraClassifyPrompt` stays, but only the eval's `--mode=calibrated` uses it now. The
+region map is editable in the Cameras editor and feeds `--mode=roi`; `annotatedShot` fed
 only the `--mode=calibrated` dead-end, so it was **removed from the portal** (2026-08-29 —
 the `ImageField`, the `camera-annotated` upload kind, and the `/api/cameras` body key are
 gone; an existing value is preserved untouched). Its committed `img_*.annotated.jpg` files
-stay in the repo for that reproduction. (The `buildRoomStatus` default report was also repointed from the moved
-`eval-baseline-2026-08-28.json` to `eval-baseline-2026-08-29.json` — the portal 500'd
-without it.)
+stay in the repo for that reproduction. (The `buildRoomStatus` default report was also
+repointed from the moved `eval-baseline-2026-08-28.json` to `eval-baseline-2026-08-29.json`
+— the portal 500'd without it.)
+
+**Amendment (2026-08-29) — machine-model reading quirks are calibration, not the base prompt.**
+Rules for reading a specific machine's indicator —
+
+- the price format (e.g. a bare `2.25` with no colon is the wash/dry price, not a countdown);
+- a countdown reads as `M:SS` / `MM:SS` with a colon that **blinks once per second**, so a
+  single camera snapshot may catch it dark — a running machine can then look like a price;
+- on a stacked pair sharing one panel, the LEFT readout (up-arrow ↑) is the upper unit and
+  the RIGHT (down-arrow ↓) is the lower;
+- 7-segment digits are worn — a dead or dim segment is not an error code, and a running
+  machine is not `out_of_order` just because a segment is out —
+
+are **integration-time calibration**, not part of the recognition prompt. They belong in the
+per-machine `promptFragment` (roster, `data/machines.json`) that the integrator authors for a
+site. `baselinePrompt` and `classifyPrompt` deliberately carry none of them — that keeps the
+fair baseline model-agnostic. `src/agent/roi.ts` currently holds two such rules inline (the
+price rule and the stacked-panel layout) — a disclosed simplification of a non-shipping
+iteration whose `--live` run is frozen; a real deployment moves them to `promptFragment`. The
+blinking-colon cue is a **temporal** signal a single frame cannot see reliably; the real fix
+for it is P1 change-detection over 2+ frames (D-0016), not built.
 
 ---
 

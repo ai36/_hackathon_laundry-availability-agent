@@ -12,6 +12,18 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Doc: machine-model reading quirks are calibration, not the base prompt (D-0015)
+
+- Owner call: don't bake machine-specific display-reading rules (price `2.25` format,
+  countdown `M:SS` with a colon blinking once/sec, stacked-panel LEFT=upper/RIGHT=lower,
+  worn-segment tolerance) into the recognition prompt — they are per-site `promptFragment`
+  calibration, added at integration time. Verified `baselinePrompt` / `classifyPrompt` carry
+  none of them (the fair baseline stays model-agnostic). Added a D-0015 amendment recording
+  the principle, noting `src/agent/roi.ts` holds two such rules inline as a disclosed
+  simplification of a non-shipping iteration, and that the blinking colon is a temporal cue a
+  single frame can't see — the real fix is P1 change-detection. Doc-only; no code / data /
+  number change.
+
 ### 2026-08-29 — Remove the annotated-shot upload from the portal (kept as files for the dead-end)
 
 - `annotatedShot` fed only `--mode=calibrated` (the documented −13.7 pp dead-end); the live
