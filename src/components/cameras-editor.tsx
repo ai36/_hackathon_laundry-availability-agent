@@ -50,7 +50,7 @@ function ImageField({
   return (
     <div className="flex flex-col gap-0.5 text-xs">
       <Label>{label}</Label>
-      <span className={`break-all ${current ? "font-mono text-zinc-400" : "text-zinc-400"}`}>
+      <span className={`break-all ${current ? "text-outline font-mono" : "text-outline"}`}>
         {current ?? "none"}
       </span>
       <input
@@ -81,7 +81,7 @@ function ImageField({
       >
         <Upload size={11} /> {busy ? "uploading…" : current ? "replace" : "upload"}
       </Button>
-      {err && <span className="break-words text-red-500">{err}</span>}
+      {err && <span className="text-error break-words">{err}</span>}
     </div>
   );
 }
@@ -109,7 +109,7 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
     run(() => call("PATCH", { targetId: cam.id, id: id.trim(), machineIdsText: text, ...extra }));
 
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-zinc-200/70 p-2.5 dark:border-zinc-800">
+    <div className="border-outline-variant bg-surface-container flex flex-col gap-2 rounded border p-2.5">
       <div className="flex flex-wrap items-end gap-2">
         <label className="flex min-w-0 flex-col gap-0.5">
           <Label>camera id</Label>
@@ -161,7 +161,7 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
           onPath={(p) => patch({ annotatedShot: p })}
         />
       </div>
-      {err && <span className="text-xs break-words text-red-500">{err}</span>}
+      {err && <span className="text-error text-xs break-words">{err}</span>}
     </div>
   );
 }
@@ -194,7 +194,7 @@ export function CamerasEditor() {
 
   return (
     <Section title={`Cameras (${list.length})`} collapsible>
-      <p className="mb-3 text-xs text-zinc-500">
+      <p className="text-on-surface-variant mb-3 text-xs">
         Each camera: an id, the machine ids it observes (free text), and — optionally — a{" "}
         <em>stub image</em> for its feed and an <em>annotated shot</em>. Writes{" "}
         <span className="font-mono">data/site-config.json</span> +{" "}
@@ -202,14 +202,14 @@ export function CamerasEditor() {
         runtime (D-0015/D-0016).
       </p>
       {!loaded ? (
-        <p className="text-xs text-zinc-500">loading…</p>
+        <p className="text-on-surface-variant text-xs">loading…</p>
       ) : (
         <div className="flex flex-col gap-2">
-          {list.length === 0 && <p className="text-xs text-zinc-400">no cameras yet</p>}
+          {list.length === 0 && <p className="text-outline text-xs">no cameras yet</p>}
           {list.map((cam) => (
             <CameraRow key={cam.id} cam={cam} onList={setList} />
           ))}
-          <div className="flex flex-wrap items-end gap-2 rounded-md border border-dashed border-zinc-300 p-2.5 dark:border-zinc-700">
+          <div className="border-outline-variant flex flex-wrap items-end gap-2 rounded border border-dashed p-2.5">
             <label className="flex flex-col gap-0.5">
               <Label>new camera id</Label>
               <TextInput
@@ -231,7 +231,7 @@ export function CamerasEditor() {
             <Button variant="accent" disabled={!newId.trim()} onClick={add}>
               <Plus size={12} /> add camera
             </Button>
-            {addErr && <span className="w-full text-xs break-words text-red-500">{addErr}</span>}
+            {addErr && <span className="text-error w-full text-xs break-words">{addErr}</span>}
           </div>
         </div>
       )}

@@ -53,7 +53,7 @@ function MachineRow({
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-zinc-200/70 p-2.5 dark:border-zinc-800">
+    <div className="border-outline-variant bg-surface-container flex flex-col gap-2 rounded border p-2.5">
       <div className="flex flex-wrap items-end gap-2">
         <label className="flex min-w-0 flex-col gap-0.5">
           <Label>id</Label>
@@ -110,7 +110,7 @@ function MachineRow({
       <label className="flex flex-col gap-0.5">
         <Label>
           prompt fragment{" "}
-          <span className="text-zinc-400">&mdash; how to read this machine&rsquo;s indicator</span>
+          <span className="text-outline">&mdash; how to read this machine&rsquo;s indicator</span>
         </Label>
         <TextInput
           value={prompt}
@@ -119,7 +119,7 @@ function MachineRow({
           className="w-full"
         />
       </label>
-      {err && <span className="text-xs break-words text-red-500">{err}</span>}
+      {err && <span className="text-error text-xs break-words">{err}</span>}
     </div>
   );
 }
@@ -163,19 +163,19 @@ export function MachinesEditor() {
 
   return (
     <Section title={`Machines (${list.length})`} collapsible>
-      <p className="mb-3 text-xs text-zinc-500">
+      <p className="text-on-surface-variant mb-3 text-xs">
         id · type · an optional <span className="font-mono">promptFragment</span> the agent gets
         when it reads this machine (D-0015). Writes{" "}
         <span className="font-mono">data/machines.json</span>.
       </p>
       {!loaded ? (
-        <p className="text-xs text-zinc-500">loading…</p>
+        <p className="text-on-surface-variant text-xs">loading…</p>
       ) : (
         <div className="flex flex-col gap-2">
           {list.map((m) => (
             <MachineRow key={m.machineId} m={m} onList={setList} onRoster={refreshRoom} />
           ))}
-          <div className="flex flex-wrap items-end gap-2 rounded-md border border-dashed border-zinc-300 p-2.5 dark:border-zinc-700">
+          <div className="border-outline-variant flex flex-wrap items-end gap-2 rounded border border-dashed p-2.5">
             <label className="flex flex-col gap-0.5">
               <Label>new id</Label>
               <TextInput
@@ -202,7 +202,7 @@ export function MachinesEditor() {
             <Button variant="accent" disabled={!newId.trim()} onClick={add} className="ml-auto">
               <Plus size={12} /> add
             </Button>
-            {addErr && <span className="w-full text-xs break-words text-red-500">{addErr}</span>}
+            {addErr && <span className="text-error w-full text-xs break-words">{addErr}</span>}
           </div>
         </div>
       )}

@@ -12,6 +12,58 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Portal: "Lumina Wash" design system from `docs/design-reference/`
+
+- Owner placed a reference design in `docs/design-reference/` (token sheet
+  `lumina_wash/DESIGN.md` + annotated tenant / integrator / settings / component-state
+  screens) and asked to build the app's design from it.
+- **Tokens** (`src/app/globals.css`): full Lumina Wash set as Tailwind v4 `@theme` vars —
+  `surface` / `surface-container{,-low,-high,-highest}` tonal layering, `on-surface` /
+  `on-surface-variant` / `outline` text, `primary-container #00f5a0` (mint) as the only
+  saturated accent, `secondary-container #feb700` + `error #ffb4ab` for state. Status
+  colours consolidated into `.dot-*` / `.card-*` / `.glow-*` helpers. Single dark theme
+  (dropped the `prefers-color-scheme` swap and all `dark:` variants).
+- **Font:** `Inter` via `next/font/google` (was Geist), `--font-inter`.
+- **Font size:** removed `html { font-size: 150% }` — the reference defines its own px type
+  scale (body 14–16, headlines 26–32) and is now the sizing source of truth. This
+  supersedes the earlier "2×" request.
+- **Nav shell:** new `src/components/ui/app-shell.tsx` (in `layout.tsx`) — fixed left rail
+  on `md+`, fixed bottom bar on phones; 3 items → the 3 URL routes (`/tenant`,
+  `/integrator`, `/integrator/settings`), active state from `usePathname`. No mode toggle.
+- **UI kit restyle:** `Button` (mint fill + `#00251a` text for primary; outline / ghost;
+  red only for delete), `field` (dark fill, 1px `outline-variant`, mint focus border),
+  `switch` (slim, mint-on), `Section` / `PageShell`. `MachineCard` → surface-container-high
+  card, status-tinted border, glowing status dot, `text-lg` id + `text-xl` status.
+  `MachineGrid` → 1 / 2 / 3 / 4-col. `room-view` / `integrator-view` grew a proper status
+  bar with dot indicators. Editors: zinc → tokens.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` —
+  **51/51**; `check:data` — **pass**. `docs/assets/portal-{top,machines,settings}.jpg`
+  regenerated on the new design; README image captions unchanged; README + D-0015 "root
+  font 150%" wording updated to point at the D-0001 2nd amendment.
+- Responsive check (Chrome DevTools console, window resized to 375 px → clamps to a 486 px
+  CSS viewport; run on `/tenant`, `/integrator`, `/integrator/settings` with both settings
+  editors expanded):
+
+  ```js
+  const de = document.documentElement, vw = de.clientWidth, bad = [];
+  document.querySelectorAll("*").forEach((el) => {
+    if (el.getBoundingClientRect().right <= vw + 1) return;
+    let p = el.parentElement, scroll = false;
+    while (p) { const o = getComputedStyle(p).overflowX;
+      if (["auto","scroll","hidden","clip"].includes(o)) { scroll = true; break; } p = p.parentElement; }
+    if (!scroll) bad.push(el);
+  });
+  ({ overflow: de.scrollWidth > vw, offenders: bad.length });
+  // → { overflow: false, offenders: 0 } on all three pages
+  ```
+
+- **Compliance** (`hackathon-compliance`): **PASS WITH RISKS** — no eligibility blockers
+  (no eval / frames / secrets / `--live` touched; `docs/design-reference/*.html` CDN script
+  tags are inert owner mockups). Two RISKS, both fixed before push: (1) README + D-0015
+  "root font 150%" wording updated to point at the D-0001 2nd amendment; (2) the responsive
+  check snippet + result pasted above as reproducible evidence. Review saved to
+  `docs/trajectories/compliance/2026-08-28-lumina-wash-design.md`.
+
 ### 2026-08-28 — Portal: design system, auto-refresh, radix-ui + lucide-react
 
 - Owner corrections: settings still not adaptive at 375 px; design must be consistent across

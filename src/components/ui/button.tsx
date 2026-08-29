@@ -4,14 +4,16 @@ import type { ButtonHTMLAttributes } from "react";
 
 type Variant = "default" | "outline" | "ghost" | "danger" | "accent";
 
+/**
+ * Lumina Wash buttons. Primary (`default`/`accent`) = mint fill + near-black text for max
+ * contrast; `outline`/`ghost` = no fill; `danger` = red, reserved for delete / report-error.
+ */
 const VARIANT: Record<Variant, string> = {
-  default:
-    "bg-zinc-900 text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white",
-  accent: "bg-emerald-600 text-white hover:bg-emerald-500",
-  outline:
-    "border border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800",
-  ghost: "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800",
-  danger: "border border-red-500/50 text-red-500 hover:bg-red-500/10",
+  default: "bg-primary-container text-[#00251a] hover:bg-primary",
+  accent: "bg-primary-container text-[#00251a] hover:bg-primary",
+  outline: "border border-outline-variant text-on-surface hover:bg-surface-container-highest",
+  ghost: "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
+  danger: "border border-error/50 text-error hover:bg-error/10",
 };
 
 export function Button({
@@ -23,7 +25,7 @@ export function Button({
     <button
       type="button"
       {...props}
-      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors disabled:pointer-events-none disabled:opacity-40 ${VARIANT[variant]} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-[13px] font-semibold transition-colors disabled:pointer-events-none disabled:opacity-40 ${VARIANT[variant]} ${className}`}
     />
   );
 }

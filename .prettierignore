@@ -9,3 +9,4 @@ public/
 *.md
 .nvmrc
 docs/artifacts/
+docs/design-reference/

@@ -88,14 +88,14 @@ export const RefreshControl = observer(function RefreshControl() {
           <RefreshCw size={13} className={busy ? "animate-spin" : ""} />
           {busy ? "refreshing…" : "refresh recognition"}
         </Button>
-        <label className="flex items-center gap-1.5 text-xs text-zinc-500">
+        <label className="text-on-surface-variant flex items-center gap-1.5 text-[13px]">
           <Switch checked={auto} onCheckedChange={setAuto} />
           auto · every {period}s
         </label>
       </div>
-      {err && <span className="text-xs break-words text-red-500">{err}</span>}
+      {err && <span className="text-error text-[13px] break-words">{err}</span>}
       {last && !err && (
-        <span className="text-xs break-words text-zinc-400">
+        <span className="text-outline text-[13px] break-words">
           {captured} camera{captured === 1 ? "" : "s"} captured
           {last.live ? `, ${classified} machine reads (live)` : ""}
           {last.note ? ` — ${last.note}` : ""}

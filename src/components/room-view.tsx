@@ -1,13 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import { observer } from "mobx-react-lite";
-import { SlidersHorizontal } from "lucide-react";
 
 import { MachineGrid } from "@/components/machine-grid";
-import { Button } from "@/components/ui/button";
 import { PageShell } from "@/components/ui/page-shell";
 import { useStore } from "@/stores";
+
+const DOTS = [
+  { key: "free", label: "free", dot: "dot-free" },
+  { key: "occupied", label: "in use", dot: "dot-occupied" },
+  { key: "out_of_order", label: "out of order", dot: "dot-out_of_order" },
+  { key: "unknown", label: "unknown", dot: "dot-unknown" },
+] as const;
 
 /** Tenant portal: current per-machine availability, nothing else. */
 export const RoomView = observer(function RoomView() {
@@ -16,29 +20,26 @@ export const RoomView = observer(function RoomView() {
 
   return (
     <PageShell
-      title="Laundry room"
-      nav={
-        <Link href="/integrator">
-          <Button variant="ghost">
-            <SlidersHorizontal size={14} /> integrator
-          </Button>
-        </Link>
-      }
-      subtitle={
-        <>
-          <p>
-            {c.free} free · {c.occupied} in use · {c.out_of_order} out of order · {c.unknown}{" "}
-            unknown
-          </p>
-          {machines.freeIds.length > 0 && (
-            <p className="mt-2 break-words text-zinc-700 dark:text-zinc-300">
-              Available now: <span className="font-mono">{machines.freeIds.join(", ")}</span>
-            </p>
-          )}
-        </>
-      }
+      title="Live status"
       footer="Snapshot of current machine availability. Confirm on arrival."
     >
+      <div className="border-outline-variant bg-surface-container-high mb-8 rounded-lg border p-4 md:p-5">
+        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+          {DOTS.map((d) => (
+            <span key={d.key} className="flex items-center gap-2">
+              <span className={`h-2.5 w-2.5 rounded-full ${d.dot}`} aria-hidden />
+              <span className="font-semibold">{c[d.key]}</span>
+              <span className="text-on-surface-variant">{d.label}</span>
+            </span>
+          ))}
+        </div>
+        {machines.freeIds.length > 0 && (
+          <p className="border-outline-variant bg-surface text-primary mt-4 rounded border p-3 font-mono text-[13px] break-words">
+            Available now: {machines.freeIds.join(", ")}
+          </p>
+        )}
+      </div>
+
       <MachineGrid title="Washers" list={machines.washers} />
       <MachineGrid title="Dryers" list={machines.dryers} />
     </PageShell>

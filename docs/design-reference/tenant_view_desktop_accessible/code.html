@@ -1,0 +1,312 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Laundry room - Equipment</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#cdffde",
+                        "secondary-fixed": "#ffdea8",
+                        "inverse-primary": "#006c44",
+                        "secondary-fixed-dim": "#ffba20",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-low": "#1c1b1b",
+                        "tertiary-fixed-dim": "#ffb3ae",
+                        "on-primary-fixed": "#002111",
+                        "on-primary-fixed-variant": "#005232",
+                        "outline": "#849588",
+                        "on-error": "#690005",
+                        "on-secondary-fixed": "#271900",
+                        "on-secondary": "#412d00",
+                        "on-secondary-fixed-variant": "#5e4200",
+                        "outline-variant": "#3b4a40",
+                        "on-primary": "#003921",
+                        "on-tertiary-container": "#b91623",
+                        "surface-dim": "#131313",
+                        "surface": "#131313",
+                        "tertiary-container": "#ffcbc7",
+                        "primary-fixed": "#50ffaf",
+                        "on-surface": "#e5e2e1",
+                        "on-tertiary-fixed": "#410004",
+                        "surface-container": "#201f1f",
+                        "on-tertiary-fixed-variant": "#930014",
+                        "primary-fixed-dim": "#00e293",
+                        "secondary": "#ffdb9d",
+                        "on-background": "#e5e2e1",
+                        "surface-container-high": "#2a2a2a",
+                        "on-surface-variant": "#b9cbbd",
+                        "surface-container-highest": "#353534",
+                        "inverse-surface": "#e5e2e1",
+                        "tertiary-fixed": "#ffdad7",
+                        "tertiary": "#fff0ef",
+                        "secondary-container": "#feb700",
+                        "error-container": "#93000a",
+                        "surface-tint": "#00e293",
+                        "surface-bright": "#393939",
+                        "error": "#ffb4ab",
+                        "on-tertiary": "#68000b",
+                        "background": "#131313",
+                        "on-secondary-container": "#6b4b00",
+                        "surface-variant": "#353534",
+                        "primary-container": "#00f5a0",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-primary-container": "#006b43",
+                        "on-error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "sm": "12px",
+                        "xl": "32px",
+                        "margin-desktop": "40px",
+                        "xs": "8px",
+                        "base": "4px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "title-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["26px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "label-md": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "label-lg": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #131313;
+            color: #e5e2e1;
+        }
+        
+        /* High Contrast Focus States */
+        *:focus-visible {
+            outline: 2px solid #00f5a0;
+            outline-offset: 2px;
+        }
+
+        .machine-card-free { border-color: rgba(0, 245, 160, 0.5); }
+        .machine-card-in-use { border-color: rgba(254, 183, 0, 0.5); }
+        .machine-card-error { border-color: rgba(255, 180, 171, 0.5); }
+        .machine-card-unknown { border-color: rgba(185, 203, 189, 0.5); }
+        
+        .status-dot-free { background-color: #00f5a0; }
+        .status-dot-in-use { background-color: #feb700; }
+        .status-dot-error { background-color: #ffb4ab; }
+        .status-dot-unknown { background-color: #b9cbbd; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-lg min-h-screen flex flex-col md:flex-row">
+<!-- NavigationDrawer (Desktop) -->
+<nav aria-label="Main Navigation" class="bg-surface-container dark:bg-surface-container border-r border-outline-variant flat no shadows hidden md:flex flex-col fixed left-0 top-0 h-full w-80 z-40">
+<div class="px-lg py-xl">
+<h1 class="text-primary font-bold text-title-lg font-title-lg">Laundry Management</h1>
+</div>
+<ul class="flex flex-col gap-sm px-sm">
+<li class="">
+<a aria-current="page" class="flex items-center gap-md px-lg py-md text-on-surface-variant hover:bg-surface-variant rounded-r-full transition-colors hover:translate-x-1 transition-transform" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="radio" aria-hidden="true" class="lucide lucide-radio"><path d="M16.247 7.761a6 6 0 0 1 0 8.478"></path><path d="M19.075 4.933a10 10 0 0 1 0 14.134"></path><path d="M4.925 19.067a10 10 0 0 1 0-14.134"></path><path d="M7.753 16.239a6 6 0 0 1 0-8.478"></path><circle cx="12" cy="12" r="2"></circle></svg>
+<span class="font-body-lg text-body-lg">Live Status</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-lg py-md text-on-surface-variant hover:bg-surface-variant rounded-r-full transition-colors hover:translate-x-1 transition-transform" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shield-half" aria-hidden="true" class="lucide lucide-shield-half"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="M12 22V2"></path></svg>
+<span class="font-body-lg text-body-lg">Integrator View</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-md px-lg py-md text-on-surface-variant hover:bg-surface-variant rounded-r-full transition-colors hover:translate-x-1 transition-transform" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sliders-horizontal" aria-hidden="true" class="lucide lucide-sliders-horizontal"><path d="M10 5H3"></path><path d="M12 19H3"></path><path d="M14 3v4"></path><path d="M16 17v4"></path><path d="M21 12h-9"></path><path d="M21 19h-5"></path><path d="M21 5h-7"></path><path d="M8 10v4"></path><path d="M8 12H3"></path></svg>
+<span class="font-body-lg text-body-lg">System Settings</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 md:ml-80 flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-background dark:bg-background border-b border-outline-variant flat no shadows flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-lg max-w-container-max mx-auto docked full-width top-0 z-30 sticky">
+<div class="flex items-center gap-md">
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="washing-machine" aria-hidden="true" class="lucide lucide-washing-machine text-primary dark:text-primary-fixed-dim"><path d="M3 6h3"></path><path d="M17 6h.01"></path><rect width="18" height="20" x="3" y="2" rx="2"></rect><circle cx="12" cy="13" r="5"></circle><path d="M12 18a2.5 2.5 0 0 0 0-5 2.5 2.5 0 0 1 0-5"></path></svg>
+<h2 class="text-headline-lg-mobile font-headline-lg-mobile md:text-headline-lg md:font-headline-lg font-bold text-on-background">Laundry room</h2>
+</div>
+<nav aria-label="Page Tabs" class="hidden md:flex items-center gap-lg" role="tablist">
+<a aria-selected="true" class="text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary hover:text-primary transition-colors duration-200 hover:bg-surface-variant/50 active:scale-95 px-2 py-1 rounded transition-all" href="#" role="tab">Equipment</a>
+<a aria-selected="false" class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors duration-200 hover:bg-surface-variant/50 active:scale-95 px-2 py-1 rounded transition-all" href="#" role="tab">Control</a>
+<a aria-selected="false" class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors duration-200 hover:bg-surface-variant/50 active:scale-95 px-2 py-1 rounded transition-all" href="#" role="tab">Settings</a>
+</nav>
+<button aria-label="Open Settings" class="md:hidden text-on-surface-variant hover:text-primary transition-colors duration-200">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="settings" aria-hidden="true" class="lucide lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+</button>
+</header>
+<!-- Canvas -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-xl pb-32 md:pb-xl">
+<!-- Global Status Bar -->
+<section aria-label="System Status" class="mb-xl bg-surface-container-high rounded-xl p-lg border border-outline-variant">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-md mb-md">
+<div aria-label="Machine availability summary" class="flex flex-wrap gap-lg text-body-lg font-body-lg text-on-surface-variant">
+<div class="flex items-center gap-xs"><span aria-hidden="true" class="w-2 h-2 rounded-full status-dot-free"></span> 13 free</div>
+<div class="flex items-center gap-xs"><span aria-hidden="true" class="w-2 h-2 rounded-full status-dot-in-use"></span> 10 in use</div>
+<div class="flex items-center gap-xs"><span aria-hidden="true" class="w-2 h-2 rounded-full status-dot-error"></span> 3 out of order</div>
+<div class="flex items-center gap-xs"><span aria-hidden="true" class="w-2 h-2 rounded-full status-dot-unknown"></span> 6 unknown</div>
+</div>
+<div class="flex items-center gap-sm">
+<span class="text-body-md font-body-md text-on-surface-variant" id="integrator-mode-label">integrator mode</span>
+<button aria-checked="false" aria-labelledby="integrator-mode-label" class="w-10 h-6 bg-surface-variant rounded-full p-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" role="switch">
+<div class="w-4 h-4 bg-on-surface-variant rounded-full"></div>
+</button>
+</div>
+</div>
+<div class="text-body-md font-body-md text-on-surface-variant font-mono bg-surface p-sm rounded-lg border border-outline-variant/50">
+<span class="text-on-surface">Available now:</span> W-01, W-02, W-03, W-05, W-06, W-07, W-08, W-10, W-11, W-13, W-14, W-15, W-16
+                </div>
+</section>
+<!-- Filters -->
+<div aria-label="Filter machines" class="flex gap-sm mb-lg overflow-x-auto pb-2 scrollbar-hide" role="group">
+<button aria-pressed="true" class="bg-primary-container text-on-primary-container px-md py-xs rounded-full text-label-lg font-label-lg whitespace-nowrap">All Equipment</button>
+<button aria-pressed="false" class="bg-surface-variant text-on-surface-variant hover:bg-surface-container-highest px-md py-xs rounded-full text-label-lg font-label-lg whitespace-nowrap transition-colors">Washers Only</button>
+<button aria-pressed="false" class="bg-surface-variant text-on-surface-variant hover:bg-surface-container-highest px-md py-xs rounded-full text-label-lg font-label-lg whitespace-nowrap transition-colors">Dryers Only</button>
+<button aria-pressed="false" class="bg-surface-variant text-on-surface-variant hover:bg-surface-container-highest px-md py-xs rounded-full text-label-lg font-label-lg whitespace-nowrap transition-colors">Available Only</button>
+</div>
+<!-- Washers Section -->
+<section aria-labelledby="washers-heading" class="mb-xl">
+<h3 class="text-label-lg font-label-lg text-on-surface-variant uppercase tracking-widest mb-md" id="washers-heading">Washers</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md">
+<!-- Free Machine -->
+<button aria-label="Washer 01, Free, confirm on arrival" class="text-left w-full bg-surface-container-high rounded-xl p-md border machine-card-free relative overflow-hidden group hover:bg-surface-container-highest transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-title-lg font-title-lg font-bold text-on-surface truncate">W-01</span>
+<span aria-hidden="true" class="w-3 h-3 rounded-full status-dot-free shadow-[0_0_8px_rgba(0,245,160,0.5)]"></span>
+</div>
+<div class="text-headline-sm font-headline-sm text-on-surface mb-1 truncate">Free</div>
+<div class="text-label-md font-label-md text-on-surface-variant opacity-80">confirm on arrival</div>
+</button>
+<button aria-label="Washer 02, Free, confirm on arrival" class="text-left w-full bg-surface-container-high rounded-xl p-md border machine-card-free relative overflow-hidden group hover:bg-surface-container-highest transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-title-lg font-title-lg font-bold text-on-surface truncate">W-02</span>
+<span aria-hidden="true" class="w-3 h-3 rounded-full status-dot-free shadow-[0_0_8px_rgba(0,245,160,0.5)]"></span>
+</div>
+<div class="text-headline-sm font-headline-sm text-on-surface mb-1 truncate">Free</div>
+<div class="text-label-md font-label-md text-on-surface-variant opacity-80">confirm on arrival</div>
+</button>
+<!-- Out of Order Machine -->
+<div aria-label="Washer 04, Out of order, flags: integrator, durable" class="bg-surface-container-high rounded-xl p-md border machine-card-error relative overflow-hidden group hover:bg-surface-container-highest active:scale-[0.98] transition-all cursor-pointer" role="region" tabindex="0">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-title-lg font-title-lg font-bold text-on-surface truncate">W-04</span>
+<span aria-hidden="true" class="w-3 h-3 rounded-full status-dot-error shadow-[0_0_8px_rgba(255,180,171,0.5)]"></span>
+</div>
+<div class="text-headline-sm font-headline-sm text-on-surface mb-1 truncate">Out of order</div>
+<div class="flex gap-xs mt-2">
+<span class="bg-surface-container-low text-primary px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">integrator</span>
+<span class="bg-surface-container-low text-primary px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">durable</span>
+</div>
+</div>
+<!-- In Use Machine -->
+<div aria-label="Washer 09, In use, 75% complete" class="bg-surface-container-high rounded-xl p-md border machine-card-in-use relative overflow-hidden group opacity-90 hover:bg-surface-container-highest active:scale-[0.98] transition-all cursor-pointer" role="region" tabindex="0">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-title-lg font-title-lg font-bold text-on-surface truncate">W-09</span>
+<span aria-hidden="true" class="w-3 h-3 rounded-full status-dot-in-use"></span>
+</div>
+<div class="text-headline-sm font-headline-sm text-on-surface mb-1 truncate">In use</div>
+<div aria-label="Progress: 75%" aria-valuemax="100" aria-valuemin="0" aria-valuenow="75" class="w-full bg-surface-container-low h-1 mt-3 rounded-full overflow-hidden" role="progressbar">
+<div class="bg-secondary-container h-full w-3/4"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Dryers Section -->
+<section aria-labelledby="dryers-heading">
+<h3 class="text-label-lg font-label-lg text-on-surface-variant uppercase tracking-widest mb-md" id="dryers-heading">Dryers</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md">
+<!-- In Use Machine -->
+<div aria-label="Dryer 01, In use, 25% complete" class="bg-surface-container-high rounded-xl p-md border machine-card-in-use relative overflow-hidden group opacity-90 hover:bg-surface-container-highest active:scale-[0.98] transition-all cursor-pointer" role="region" tabindex="0">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-title-lg font-title-lg font-bold text-on-surface truncate">D-01</span>
+<span aria-hidden="true" class="w-3 h-3 rounded-full status-dot-in-use"></span>
+</div>
+<div class="text-headline-sm font-headline-sm text-on-surface mb-1 truncate">In use</div>
+<div aria-label="Progress: 25%" aria-valuemax="100" aria-valuemin="0" aria-valuenow="25" class="w-full bg-surface-container-low h-1 mt-3 rounded-full overflow-hidden" role="progressbar">
+<div class="bg-secondary-container h-full w-1/4"></div>
+</div>
+</div>
+<!-- Out of Order Machine -->
+<div aria-label="Dryer 02, Out of order, flags: integrator, durable" class="bg-surface-container-high rounded-xl p-md border machine-card-error relative overflow-hidden group hover:bg-surface-container-highest active:scale-[0.98] transition-all cursor-pointer" role="region" tabindex="0">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-title-lg font-title-lg font-bold text-on-surface truncate">D-02</span>
+<span aria-hidden="true" class="w-3 h-3 rounded-full status-dot-error shadow-[0_0_8px_rgba(255,180,171,0.5)]"></span>
+</div>
+<div class="text-headline-sm font-headline-sm text-on-surface mb-1 truncate">Out of order</div>
+<div class="flex gap-xs mt-2">
+<span class="bg-surface-container-low text-primary px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">integrator</span>
+<span class="bg-surface-container-low text-primary px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">durable</span>
+</div>
+</div>
+<!-- Unknown Machine -->
+<div aria-label="Dryer 11, Unknown status, confirm on arrival" class="bg-surface-container-high rounded-xl p-md border machine-card-unknown relative overflow-hidden group opacity-80 hover:bg-surface-container-highest active:scale-[0.98] transition-all cursor-pointer" role="region" tabindex="0">
+<div class="flex justify-between items-start mb-sm">
+<span class="text-title-lg font-title-lg font-bold text-on-surface truncate">D-11</span>
+<span aria-hidden="true" class="w-3 h-3 rounded-full status-dot-unknown"></span>
+</div>
+<div class="text-headline-sm font-headline-sm text-on-surface mb-1 truncate">Unknown</div>
+<div class="text-label-md font-label-md text-on-surface-variant">confirm on arrival</div>
+</div>
+</div>
+</section>
+<footer class="mt-xl pt-lg border-t border-outline-variant text-body-md font-body-md text-on-surface-variant">
+                Snapshot of current machine availability. Confirm on arrival.
+            </footer>
+</main>
+</div>
+<!-- BottomNavBar (Mobile) -->
+<nav aria-label="Mobile Navigation" class="bg-surface-container-highest dark:bg-surface-container-highest border-t border-outline-variant shadow-lg fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-sm pb-md pt-base md:hidden docked full-width rounded-t-xl">
+<a aria-current="page" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-lg py-base hover:bg-surface-variant scale-95 transition-all ripple effect" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="list" aria-hidden="true" class="lucide lucide-list"><path d="M3 5h.01"></path><path d="M3 12h.01"></path><path d="M3 19h.01"></path><path d="M8 5h13"></path><path d="M8 12h13"></path><path d="M8 19h13"></path></svg>
+<span class="text-label-lg font-label-lg mt-1">Equipment</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant rounded-full px-lg py-base scale-95 transition-all ripple effect" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="layout-dashboard" aria-hidden="true" class="lucide lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+<span class="text-label-lg font-label-lg mt-1">Control</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant rounded-full px-lg py-base scale-95 transition-all ripple effect" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="settings" aria-hidden="true" class="lucide lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span class="text-label-lg font-label-lg mt-1">Settings</span>
+</a>
+</nav>
+<script>
+        lucide.createIcons();
+    </script>
+
+
+</body></html>

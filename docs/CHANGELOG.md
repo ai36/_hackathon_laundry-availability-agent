@@ -103,6 +103,21 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-28 — portal: "Lumina Wash" design system (`docs/design-reference/`)
+
+- Owner-supplied reference (`docs/design-reference/lumina_wash/DESIGN.md` + screens)
+  implemented: `globals.css` full token set as Tailwind v4 `@theme` vars, single dark
+  theme, `Inter` via `next/font`, `.dot-*`/`.card-*`/`.glow-*` status helpers. Removed
+  `html { font-size: 150% }` (reference defines its own px scale). D-0001 amendment.
+- New `src/components/ui/app-shell.tsx` — left rail (`md+`) / bottom bar (mobile), 3 items
+  → the 3 URL routes. `Button` / `field` / `switch` / `Section` / `PageShell` /
+  `MachineCard` / grids restyled to tokens.
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **51/51**;
+  `check:data` — **pass**. Chrome @ 486 px CSS viewport, all 3 pages + editors expanded:
+  `scrollWidth == clientWidth`, 0 overflow offenders, all controls visible. Route table
+  unchanged (`○ /`, `○ /tenant`, `ƒ /integrator{,/settings}`, `ƒ /api/*`).
+  `docs/assets/portal-{top,machines,settings}.jpg` regenerated.
+
 ### 2026-08-28 — portal: design system + auto-refresh (radix-ui, lucide-react)
 
 - Deps `radix-ui@1.6.7` + `lucide-react@1.35.0` (portal-only). New `src/components/ui/` kit

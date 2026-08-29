@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UI Component States - Laundry Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-container": "#6b4b00",
+                      "inverse-primary": "#006c44",
+                      "background": "#131313",
+                      "on-primary-fixed": "#002111",
+                      "on-tertiary-fixed-variant": "#930014",
+                      "on-primary-fixed-variant": "#005232",
+                      "surface-bright": "#393939",
+                      "on-background": "#e5e2e1",
+                      "tertiary-fixed": "#ffdad7",
+                      "on-surface": "#e5e2e1",
+                      "inverse-surface": "#e5e2e1",
+                      "inverse-on-surface": "#313030",
+                      "on-secondary-fixed": "#271900",
+                      "surface-container-highest": "#353534",
+                      "on-secondary-fixed-variant": "#5e4200",
+                      "primary-fixed-dim": "#00e293",
+                      "error": "#ffb4ab",
+                      "surface-container": "#201f1f",
+                      "tertiary-fixed-dim": "#ffb3ae",
+                      "tertiary-container": "#ffcbc7",
+                      "on-primary": "#003921",
+                      "outline": "#849588",
+                      "primary-container": "#00f5a0",
+                      "on-error-container": "#ffdad6",
+                      "surface-tint": "#00e293",
+                      "on-surface-variant": "#b9cbbd",
+                      "surface-dim": "#131313",
+                      "surface": "#131313",
+                      "surface-container-lowest": "#0e0e0e",
+                      "on-tertiary": "#68000b",
+                      "on-error": "#690005",
+                      "primary": "#cdffde",
+                      "secondary-fixed-dim": "#ffba20",
+                      "surface-container-low": "#1c1b1b",
+                      "on-tertiary-fixed": "#410004",
+                      "on-tertiary-container": "#b91623",
+                      "outline-variant": "#3b4a40",
+                      "on-secondary": "#412d00",
+                      "tertiary": "#fff0ef",
+                      "secondary-container": "#feb700",
+                      "secondary": "#ffdb9d",
+                      "on-primary-container": "#006b43",
+                      "surface-variant": "#353534",
+                      "secondary-fixed": "#ffdea8",
+                      "error-container": "#93000a",
+                      "surface-container-high": "#2a2a2a",
+                      "primary-fixed": "#50ffaf"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "xl": "32px",
+                      "lg": "24px",
+                      "gutter": "16px",
+                      "xs": "8px",
+                      "margin-desktop": "40px",
+                      "base": "4px",
+                      "container-max": "1280px",
+                      "md": "16px",
+                      "margin-mobile": "16px",
+                      "sm": "12px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "headline-sm": [
+                              "Inter"
+                      ],
+                      "label-lg": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Inter"
+                      ],
+                      "title-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": [
+                              "26px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-lg": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "title-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen">
+<!-- Top Navigation Placeholder (Hidden for Canvas Focus) -->
+<!-- Navigation intentionally omitted to prioritize component state visualization -->
+<main class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-xl space-y-xl">
+<header class="mb-xl">
+<h1 class="text-headline-lg font-headline-lg text-on-background mb-xs">UI Component States</h1>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Design System Reference: Lumina Wash Dark Theme</p>
+</header>
+<!-- Buttons Section -->
+<section class="bg-surface-container rounded-xl p-lg border border-outline-variant">
+<h2 class="text-headline-sm font-headline-sm text-primary mb-lg">Buttons</h2>
+<div class="grid grid-cols-1 md:grid-cols-5 gap-md">
+<!-- Primary Button -->
+<div class="space-y-md">
+<h3 class="text-title-lg font-title-lg text-on-surface mb-sm">Primary</h3>
+<!-- Default -->
+<button class="w-full bg-primary-container text-on-primary-container font-label-lg text-label-lg py-sm px-md rounded-full">Default</button>
+<!-- Hover -->
+<button class="w-full bg-primary text-on-primary-container font-label-lg text-label-lg py-sm px-md rounded-full shadow-[0_0_10px_rgba(0,245,160,0.5)]">Hover</button>
+<!-- Active -->
+<button class="w-full bg-primary-container text-on-primary-container font-label-lg text-label-lg py-sm px-md rounded-full scale-95 transition-transform">Active</button>
+<!-- Focus -->
+<button class="w-full bg-primary-container text-on-primary-container font-label-lg text-label-lg py-sm px-md rounded-full ring-2 ring-primary ring-offset-2 ring-offset-background">Focus</button>
+<!-- Disabled -->
+<button class="w-full bg-surface-variant text-on-surface-variant font-label-lg text-label-lg py-sm px-md rounded-full opacity-50 cursor-not-allowed">Disabled</button>
+</div>
+<!-- Secondary Outline -->
+<div class="space-y-md">
+<h3 class="text-title-lg font-title-lg text-on-surface mb-sm">Outline</h3>
+<!-- Default -->
+<button class="w-full border border-outline text-on-surface font-label-lg text-label-lg py-sm px-md rounded-full">Default</button>
+<!-- Hover -->
+<button class="w-full border border-primary text-primary font-label-lg text-label-lg py-sm px-md rounded-full bg-primary/10">Hover</button>
+<!-- Active -->
+<button class="w-full border border-primary text-primary font-label-lg text-label-lg py-sm px-md rounded-full scale-95 transition-transform">Active</button>
+<!-- Focus -->
+<button class="w-full border border-outline text-on-surface font-label-lg text-label-lg py-sm px-md rounded-full ring-2 ring-primary ring-offset-2 ring-offset-background">Focus</button>
+<!-- Disabled -->
+<button class="w-full border border-outline-variant text-on-surface-variant font-label-lg text-label-lg py-sm px-md rounded-full opacity-50 cursor-not-allowed">Disabled</button>
+</div>
+<!-- Danger Button -->
+<div class="space-y-md">
+<h3 class="text-title-lg font-title-lg text-error mb-sm">Danger</h3>
+<!-- Default -->
+<button class="w-full border border-error text-error font-label-lg text-label-lg py-sm px-md rounded-full">Default</button>
+<!-- Hover -->
+<button class="w-full bg-error text-on-error font-label-lg text-label-lg py-sm px-md rounded-full">Hover</button>
+<!-- Active -->
+<button class="w-full bg-error text-on-error font-label-lg text-label-lg py-sm px-md rounded-full scale-95 transition-transform">Active</button>
+<!-- Focus -->
+<button class="w-full border border-error text-error font-label-lg text-label-lg py-sm px-md rounded-full ring-2 ring-error ring-offset-2 ring-offset-background">Focus</button>
+<!-- Disabled -->
+<button class="w-full border border-error/50 text-error/50 font-label-lg text-label-lg py-sm px-md rounded-full opacity-50 cursor-not-allowed">Disabled</button>
+</div>
+</div>
+</section>
+<!-- Machine Cards Section -->
+<section class="bg-surface-container rounded-xl p-lg border border-outline-variant">
+<h2 class="text-headline-sm font-headline-sm text-primary mb-lg">Equipment Cards</h2>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+<!-- Free State -->
+<div class="bg-surface-container-high rounded-lg p-md border border-primary-container shadow-[0_0_8px_rgba(0,245,160,0.1)] relative">
+<div class="flex justify-between items-start mb-lg">
+<span class="text-title-lg font-title-lg text-on-surface">W-01</span>
+<div class="w-3 h-3 rounded-full bg-primary-container animate-pulse"></div>
+</div>
+<div class="flex items-center gap-2 mb-xs">
+<span class="material-symbols-outlined text-primary-container" data-icon="local_laundry_service">local_laundry_service</span>
+<span class="text-body-lg font-body-lg text-primary-container font-semibold">Available</span>
+</div>
+<p class="text-label-md font-label-md text-on-surface-variant opacity-60">Ready for use</p>
+</div>
+<!-- In Use State -->
+<div class="bg-surface-container-high rounded-lg p-md border border-secondary-container relative">
+<div class="flex justify-between items-start mb-lg">
+<span class="text-title-lg font-title-lg text-on-surface">D-04</span>
+<div class="w-3 h-3 rounded-full bg-secondary-container"></div>
+</div>
+<div class="flex items-center gap-2 mb-xs">
+<span class="material-symbols-outlined text-secondary-container" data-icon="local_laundry_service" data-weight="fill" style="font-variation-settings: 'FILL' 1;">local_laundry_service</span>
+<span class="text-body-lg font-body-lg text-secondary-container font-semibold">45m left</span>
+</div>
+<p class="text-label-md font-label-md text-on-surface-variant opacity-60">Cycle in progress</p>
+</div>
+<!-- Out of Order State -->
+<div class="bg-surface-container-high rounded-lg p-md border border-error relative opacity-75">
+<div class="flex justify-between items-start mb-lg">
+<span class="text-title-lg font-title-lg text-on-surface">W-07</span>
+<div class="w-3 h-3 rounded-full bg-error"></div>
+</div>
+<div class="flex items-center gap-2 mb-xs">
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+<span class="text-body-lg font-body-lg text-error font-semibold">Maintenance</span>
+</div>
+<p class="text-label-md font-label-md text-on-surface-variant opacity-60">Reported 2h ago</p>
+</div>
+</div>
+</section>
+<!-- Form Controls Section -->
+<section class="bg-surface-container rounded-xl p-lg border border-outline-variant">
+<h2 class="text-headline-sm font-headline-sm text-primary mb-lg">Form Controls</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+<!-- Inputs -->
+<div class="space-y-md">
+<div>
+<label class="block text-label-lg font-label-lg text-on-surface mb-xs">Default Input</label>
+<input class="w-full bg-surface-container-high border border-outline-variant rounded-md py-sm px-md text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors" placeholder="Placeholder text..." type="text"/>
+</div>
+<div>
+<label class="block text-label-lg font-label-lg text-primary mb-xs">Focused Input</label>
+<input class="w-full bg-surface-container-high border border-primary rounded-md py-sm px-md text-on-surface font-body-md ring-1 ring-primary outline-none" placeholder="Placeholder text..." type="text" value="Active typing..."/>
+</div>
+</div>
+<!-- Toggles -->
+<div class="space-y-md">
+<div class="flex items-center justify-between p-sm bg-surface-container-high rounded-md border border-outline-variant">
+<span class="text-body-lg font-body-lg text-on-surface">Auto-Refresh (Off)</span>
+<div class="w-10 h-6 bg-surface-variant rounded-full relative cursor-pointer border border-outline-variant">
+<div class="absolute left-1 top-1 w-4 h-4 bg-on-surface-variant rounded-full transition-transform"></div>
+</div>
+</div>
+<div class="flex items-center justify-between p-sm bg-surface-container-high rounded-md border border-outline-variant">
+<span class="text-body-lg font-body-lg text-on-surface">Auto-Refresh (On)</span>
+<div class="w-10 h-6 bg-primary-container rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 w-4 h-4 bg-on-primary-container rounded-full transition-transform translate-x-0"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</body></html>

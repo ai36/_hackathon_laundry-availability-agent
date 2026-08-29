@@ -1,0 +1,354 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Laundry Management - Integrator View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#cdffde",
+                        "secondary-fixed": "#ffdea8",
+                        "inverse-primary": "#006c44",
+                        "secondary-fixed-dim": "#ffba20",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-low": "#1c1b1b",
+                        "tertiary-fixed-dim": "#ffb3ae",
+                        "on-primary-fixed": "#002111",
+                        "on-primary-fixed-variant": "#005232",
+                        "outline": "#849588",
+                        "on-error": "#690005",
+                        "on-secondary-fixed": "#271900",
+                        "on-secondary": "#412d00",
+                        "on-secondary-fixed-variant": "#5e4200",
+                        "outline-variant": "#3b4a40",
+                        "on-primary": "#003921",
+                        "on-tertiary-container": "#b91623",
+                        "surface-dim": "#131313",
+                        "surface": "#131313",
+                        "tertiary-container": "#ffcbc7",
+                        "primary-fixed": "#50ffaf",
+                        "on-surface": "#e5e2e1",
+                        "on-tertiary-fixed": "#410004",
+                        "surface-container": "#201f1f",
+                        "on-tertiary-fixed-variant": "#930014",
+                        "primary-fixed-dim": "#00e293",
+                        "secondary": "#ffdb9d",
+                        "on-background": "#e5e2e1",
+                        "surface-container-high": "#2a2a2a",
+                        "on-surface-variant": "#b9cbbd",
+                        "surface-container-highest": "#353534",
+                        "inverse-surface": "#e5e2e1",
+                        "tertiary-fixed": "#ffdad7",
+                        "tertiary": "#fff0ef",
+                        "secondary-container": "#feb700",
+                        "error-container": "#93000a",
+                        "surface-tint": "#00e293",
+                        "surface-bright": "#393939",
+                        "error": "#ffb4ab",
+                        "on-tertiary": "#68000b",
+                        "background": "#131313",
+                        "on-secondary-container": "#6b4b00",
+                        "surface-variant": "#353534",
+                        "primary-container": "#00f5a0",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-primary-container": "#006b43",
+                        "on-error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "sm": "12px",
+                        "xl": "32px",
+                        "margin-desktop": "40px",
+                        "xs": "8px",
+                        "base": "4px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "title-lg": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .focus-ring:focus-visible {
+            outline: 2px solid theme('colors.primary');
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased flex">
+<!-- NavigationDrawer (Web) -->
+<nav class="hidden md:flex flex-col fixed left-0 top-0 h-full z-40 bg-surface-container border-r border-outline-variant docked left-0 h-full w-80">
+<div class="px-lg py-xl border-b border-outline-variant">
+<h2 class="text-primary font-bold text-title-lg font-title-lg">Laundry Management</h2>
+</div>
+<div aria-label="Main Navigation" class="flex-1 overflow-y-auto py-md" role="navigation">
+<ul class="space-y-sm px-xs">
+<li class="">
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-variant rounded-r-full px-lg py-md transition-colors text-body-lg font-body-lg focus-ring active:bg-surface-container-highest" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="radio" aria-hidden="true" class="lucide lucide-radio"><path d="M16.247 7.761a6 6 0 0 1 0 8.478"></path><path d="M19.075 4.933a10 10 0 0 1 0 14.134"></path><path d="M4.925 19.067a10 10 0 0 1 0-14.134"></path><path d="M7.753 16.239a6 6 0 0 1 0-8.478"></path><circle cx="12" cy="12" r="2"></circle></svg>
+<span class="">Live Status</span>
+</a>
+</li>
+<li class="">
+<a aria-current="page" class="flex items-center gap-md bg-secondary-container text-on-secondary-container rounded-r-full font-bold px-lg py-md text-body-lg font-body-lg focus-ring" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shield" aria-hidden="true" class="lucide lucide-shield"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path></svg>
+<span class="">Integrator View</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-md text-on-surface-variant hover:bg-surface-variant rounded-r-full px-lg py-md transition-colors text-body-lg font-body-lg focus-ring active:bg-surface-container-highest" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sliders-horizontal" aria-hidden="true" class="lucide lucide-sliders-horizontal"><path d="M10 5H3"></path><path d="M12 19H3"></path><path d="M14 3v4"></path><path d="M16 17v4"></path><path d="M21 12h-9"></path><path d="M21 19h-5"></path><path d="M21 5h-7"></path><path d="M8 10v4"></path><path d="M8 12H3"></path></svg>
+<span class="">System Settings</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-80 min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-background border-b border-outline-variant docked full-width top-0 sticky z-30">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-lg max-w-container-max mx-auto">
+<div class="flex items-center gap-sm">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="washing-machine" aria-hidden="true" class="lucide lucide-washing-machine text-primary text-2xl"><path d="M3 6h3"></path><path d="M17 6h.01"></path><rect width="18" height="20" x="3" y="2" rx="2"></rect><circle cx="12" cy="13" r="5"></circle><path d="M12 18a2.5 2.5 0 0 0 0-5 2.5 2.5 0 0 1 0-5"></path></svg>
+<h1 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg font-bold text-on-background">Laundry room <span class="text-on-surface-variant font-normal">· integrator</span></h1>
+</div>
+<div class="flex items-center gap-md">
+<button aria-label="Settings" class="text-on-surface-variant hover:text-primary transition-colors duration-200 focus-ring rounded">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="settings" aria-hidden="true" class="lucide lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+</button>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<div class="p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full flex-1">
+<!-- Global Status Bar -->
+<div aria-label="Equipment Status Overview" class="mb-xl flex flex-wrap items-center gap-md text-body-lg font-body-lg text-on-surface-variant" role="region">
+<div class="flex items-center gap-xs"><span aria-hidden="true" class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span> <span class="sr-only">Status: </span>13 free</div>
+<span aria-hidden="true" class="text-outline-variant">•</span>
+<div class="flex items-center gap-xs"><span aria-hidden="true" class="w-2 h-2 rounded-full bg-secondary-container"></span> <span class="sr-only">Status: </span>10 in use</div>
+<span aria-hidden="true" class="text-outline-variant">•</span>
+<div class="flex items-center gap-xs"><span aria-hidden="true" class="w-2 h-2 rounded-full bg-error"></span> <span class="sr-only">Status: </span>3 out of order</div>
+<span aria-hidden="true" class="text-outline-variant">•</span>
+<div class="flex items-center gap-xs"><span aria-hidden="true" class="w-2 h-2 rounded-full bg-outline"></span> <span class="sr-only">Status: </span>6 unknown</div>
+<span aria-hidden="true" class="text-outline-variant">•</span>
+<div class="">3 corrections</div>
+</div>
+<!-- Controls (Auto-refresh) -->
+<div class="flex items-center gap-md mb-lg">
+<button class="flex items-center gap-xs px-sm py-xs border border-outline-variant rounded-md text-on-surface hover:bg-surface-variant transition-colors text-body-md font-body-md focus-ring">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="refresh-cw" aria-hidden="true" class="lucide lucide-refresh-cw w-4 h-4"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>
+                    refresh recognition
+                </button>
+<div class="flex items-center gap-xs text-body-md font-body-md text-on-surface-variant">
+<button aria-checked="true" class="w-10 h-5 bg-primary-container rounded-full flex items-center p-0.5 cursor-pointer focus-ring" role="switch">
+<div class="w-4 h-4 bg-on-primary-container rounded-full transform translate-x-5"></div>
+<span class="sr-only">Toggle auto-refresh</span>
+</button>
+<span class="">auto • every 30s</span>
+</div>
+</div>
+<!-- Context Banner -->
+<div class="bg-surface-container-high border border-outline-variant rounded-lg p-md mb-xl text-primary text-body-md font-body-md" role="note">
+                "Mark wrong" on any card overrides the agent. A <span class="italic">durable</span> correction carries to every view and every future capture of that machine (D-0014). Cameras &amp; machines are in settings.
+            </div>
+<!-- Filter Chips -->
+<div aria-label="Filter equipment" class="flex flex-wrap gap-sm mb-xl" role="group">
+<button aria-pressed="true" class="px-md py-xs rounded-full bg-primary-container text-on-primary-container text-label-lg font-label-lg border border-transparent focus-ring active:scale-95">All</button>
+<button aria-pressed="false" class="px-md py-xs rounded-full bg-surface-container text-on-surface-variant text-label-lg font-label-lg border border-outline-variant hover:bg-surface-variant transition-colors focus-ring active:scale-95">Washers</button>
+<button aria-pressed="false" class="px-md py-xs rounded-full bg-surface-container text-on-surface-variant text-label-lg font-label-lg border border-outline-variant hover:bg-surface-variant transition-colors focus-ring active:scale-95">Dryers</button>
+<button aria-pressed="false" class="px-md py-xs rounded-full bg-surface-container text-on-surface-variant text-label-lg font-label-lg border border-outline-variant hover:bg-surface-variant transition-colors focus-ring active:scale-95">Errors Only</button>
+</div>
+<!-- Grid Layout -->
+<div class="space-y-xl" role="grid">
+<!-- Washers Section -->
+<section aria-labelledby="washers-heading" role="rowgroup">
+<h3 class="text-label-lg font-label-lg text-on-surface-variant tracking-wider uppercase mb-md" id="washers-heading">Washers</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter" role="row">
+<!-- Free Card -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-md flex flex-col gap-sm hover:border-primary-fixed-dim transition-colors relative overflow-hidden group focus-within:ring-2 focus-within:ring-primary active:scale-[0.98] focus:outline-none" role="gridcell" tabindex="0">
+<div class="flex justify-between items-start">
+<h4 class="text-headline-sm font-headline-sm text-on-surface truncate">W-01</h4>
+<span aria-label="Status: Free" class="w-3 h-3 rounded-full bg-primary-fixed-dim" role="img"></span>
+</div>
+<div>
+<div class="text-title-lg font-title-lg text-on-surface font-bold truncate">Free</div>
+<div class="text-body-md font-body-md text-on-surface-variant opacity-60">confirm on arrival</div>
+</div>
+<div class="text-label-md font-label-md text-outline mt-auto pt-sm">
+                                agent · conf 0.90 · 1 view · img_1819
+                            </div>
+<button class="mt-sm flex items-center justify-center gap-xs px-sm py-xs border border-outline-variant rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors text-label-lg font-label-lg w-full focus-ring bg-surface">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x w-4 h-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg> mark wrong
+                            </button>
+</div>
+<!-- Out of Order Card -->
+<div class="bg-surface-container-low border border-error rounded-lg p-md flex flex-col gap-sm relative overflow-hidden shadow-[0_0_10px_rgba(255,180,171,0.1)] focus-within:ring-2 focus-within:ring-error active:scale-[0.98] focus:outline-none" role="gridcell" tabindex="0">
+<div class="flex justify-between items-start">
+<h4 class="text-headline-sm font-headline-sm text-on-surface truncate">W-04</h4>
+<span aria-label="Status: Out of order" class="w-3 h-3 rounded-full bg-error" role="img"></span>
+</div>
+<div>
+<div class="flex items-center gap-xs flex-wrap">
+<span class="text-title-lg font-title-lg text-error font-bold truncate">Out of order</span>
+<span class="text-label-md font-label-md bg-secondary-container text-on-secondary-container px-1.5 py-0.5 rounded font-bold">integrator · durable</span>
+</div>
+<div class="text-body-md font-body-md text-on-surface-variant mt-xs italic border-l-2 border-outline-variant pl-2">
+                                    "taped off, powered down across all frames"
+                                </div>
+</div>
+<div class="text-label-md font-label-md text-outline mt-auto pt-sm">
+                                set by integrator · 1 view · img_1819
+                            </div>
+<button class="mt-sm flex items-center justify-center gap-xs px-sm py-xs border border-outline-variant rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors text-label-lg font-label-lg w-full focus-ring bg-surface">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x w-4 h-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg> mark wrong
+                            </button>
+</div>
+<!-- In Use Card -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-md flex flex-col gap-sm hover:border-secondary-container transition-colors relative overflow-hidden group focus-within:ring-2 focus-within:ring-secondary-container active:scale-[0.98] focus:outline-none" role="gridcell" tabindex="0">
+<div class="flex justify-between items-start">
+<h4 class="text-headline-sm font-headline-sm text-on-surface truncate">W-09</h4>
+<span aria-label="Status: In use" class="w-3 h-3 rounded-full bg-secondary-container" role="img"></span>
+</div>
+<div>
+<div class="text-title-lg font-title-lg text-on-surface font-bold truncate">In use</div>
+</div>
+<div class="text-label-md font-label-md text-outline mt-auto pt-sm">
+                                agent · conf 0.95 · 1 view · img_8629
+                            </div>
+<button class="mt-sm flex items-center justify-center gap-xs px-sm py-xs border border-outline-variant rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors text-label-lg font-label-lg w-full focus-ring bg-surface">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x w-4 h-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg> mark wrong
+                            </button>
+</div>
+<!-- Free Card (Duplicate for grid visualization) -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-md flex flex-col gap-sm hover:border-primary-fixed-dim transition-colors relative overflow-hidden group focus-within:ring-2 focus-within:ring-primary active:scale-[0.98] focus:outline-none" role="gridcell" tabindex="0">
+<div class="flex justify-between items-start">
+<h4 class="text-headline-sm font-headline-sm text-on-surface truncate">W-10</h4>
+<span aria-label="Status: Free" class="w-3 h-3 rounded-full bg-primary-fixed-dim" role="img"></span>
+</div>
+<div>
+<div class="text-title-lg font-title-lg text-on-surface font-bold truncate">Free</div>
+<div class="text-body-md font-body-md text-on-surface-variant opacity-60">confirm on arrival</div>
+</div>
+<div class="text-label-md font-label-md text-outline mt-auto pt-sm">
+                                agent · conf 0.85 · 1 view · img_8629
+                            </div>
+<button class="mt-sm flex items-center justify-center gap-xs px-sm py-xs border border-outline-variant rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors text-label-lg font-label-lg w-full focus-ring bg-surface">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x w-4 h-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg> mark wrong
+                            </button>
+</div>
+</div>
+</section>
+<!-- Dryers Section -->
+<section aria-labelledby="dryers-heading" role="rowgroup">
+<h3 class="text-label-lg font-label-lg text-on-surface-variant tracking-wider uppercase mb-md" id="dryers-heading">Dryers</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter" role="row">
+<!-- In Use Card -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-md flex flex-col gap-sm hover:border-secondary-container transition-colors relative overflow-hidden group focus-within:ring-2 focus-within:ring-secondary-container active:scale-[0.98] focus:outline-none" role="gridcell" tabindex="0">
+<div class="flex justify-between items-start">
+<h4 class="text-headline-sm font-headline-sm text-on-surface truncate">D-01</h4>
+<span aria-label="Status: In use" class="w-3 h-3 rounded-full bg-secondary-container" role="img"></span>
+</div>
+<div>
+<div class="text-title-lg font-title-lg text-on-surface font-bold truncate">In use</div>
+</div>
+<div class="text-label-md font-label-md text-outline mt-auto pt-sm">
+                                agent · conf 0.85 · 3 views · img_1821
+                            </div>
+<button class="mt-sm flex items-center justify-center gap-xs px-sm py-xs border border-outline-variant rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors text-label-lg font-label-lg w-full focus-ring bg-surface">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x w-4 h-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg> mark wrong
+                            </button>
+</div>
+<!-- Out of Order Card -->
+<div class="bg-surface-container-low border border-error rounded-lg p-md flex flex-col gap-sm relative overflow-hidden shadow-[0_0_10px_rgba(255,180,171,0.1)] focus-within:ring-2 focus-within:ring-error active:scale-[0.98] focus:outline-none" role="gridcell" tabindex="0">
+<div class="flex justify-between items-start">
+<h4 class="text-headline-sm font-headline-sm text-on-surface truncate">D-02</h4>
+<span aria-label="Status: Out of order" class="w-3 h-3 rounded-full bg-error" role="img"></span>
+</div>
+<div>
+<div class="flex items-center gap-xs flex-wrap">
+<span class="text-title-lg font-title-lg text-error font-bold truncate">Out of order</span>
+<span class="text-label-md font-label-md bg-secondary-container text-on-secondary-container px-1.5 py-0.5 rounded font-bold">integrator · durable</span>
+</div>
+<div class="text-body-md font-body-md text-on-surface-variant mt-xs italic border-l-2 border-outline-variant pl-2">
+                                    "hard error code on display, not a running cycle"
+                                </div>
+</div>
+<div class="text-label-md font-label-md text-outline mt-auto pt-sm">
+                                set by integrator · 3 views · img_1823
+                            </div>
+<button class="mt-sm flex items-center justify-center gap-xs px-sm py-xs border border-outline-variant rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors text-label-lg font-label-lg w-full focus-ring bg-surface">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x w-4 h-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg> mark wrong
+                            </button>
+</div>
+<!-- Unknown Card -->
+<div class="bg-surface-container-low border border-outline-variant rounded-lg p-md flex flex-col gap-sm opacity-70 hover:opacity-100 transition-opacity relative overflow-hidden group focus-within:ring-2 focus-within:ring-outline active:scale-[0.98] focus:outline-none" role="gridcell" tabindex="0">
+<div class="flex justify-between items-start">
+<h4 class="text-headline-sm font-headline-sm text-on-surface truncate">D-11</h4>
+<span aria-label="Status: Unknown" class="w-3 h-3 rounded-full bg-outline" role="img"></span>
+</div>
+<div>
+<div class="text-title-lg font-title-lg text-on-surface font-bold truncate">Unknown</div>
+<div class="text-body-md font-body-md text-on-surface-variant opacity-60">confirm on arrival</div>
+</div>
+<div class="text-label-md font-label-md text-outline mt-auto pt-sm">
+                                agent · conf 0.00 · 0 views · —
+                            </div>
+<button class="mt-sm flex items-center justify-center gap-xs px-sm py-xs border border-outline-variant rounded text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors text-label-lg font-label-lg w-full focus-ring bg-surface">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x w-4 h-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg> mark wrong
+                            </button>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer Log / Info -->
+<footer class="mt-xl pt-lg border-t border-outline-variant text-label-md font-label-md text-outline" role="contentinfo">
+                Status from claude-haiku-4-5 — offline snapshot from docs/artifacts/eval-baseline-2026-08-28.json, plus 3 integrator corrections. Reservations (P2) and a live camera feed are not wired in this build.
+            </footer>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-sm pb-md pt-base md:hidden bg-surface-container-highest border-t border-outline-variant shadow-lg rounded-t-xl docked full-width bottom-0 rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant rounded-full px-lg py-base text-label-lg font-label-lg w-1/3 focus-ring" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clipboard-list" aria-hidden="true" class="lucide lucide-clipboard-list w-5 h-5 mb-1"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>
+<span class="text-xs">Equipment</span>
+</a>
+<a aria-current="page" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-lg py-base text-label-lg font-label-lg w-1/3 focus-ring" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="layout-dashboard" aria-hidden="true" class="lucide lucide-layout-dashboard w-5 h-5 mb-1"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+<span class="text-xs font-bold">Control</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant rounded-full px-lg py-base text-label-lg font-label-lg w-1/3 focus-ring" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="settings" aria-hidden="true" class="lucide lucide-settings w-5 h-5 mb-1"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span class="text-xs">Settings</span>
+</a>
+</nav>
+<script>
+        lucide.createIcons();
+    </script>
+
+
+</body></html>

@@ -73,7 +73,9 @@ camera angle and **overlay the integrator corrections** (`src/portal/room-status
 `data/machines.json`. All show the **Final "classify + corrections" config** (80.0%,
 `docs/artifacts/eval-baseline-corrected-2026-08-28.json`), not the Iteration-1 verify pass.
 All three routes are built from one small in-repo UI kit (`src/components/ui/`, on `radix-ui`
-+ `lucide-react`); root font 150%, responsive with no mobile horizontal scroll. The
++ `lucide-react`) in the owner-supplied **"Lumina Wash"** design system (single dark theme,
+`Inter`, px type scale — `docs/design-reference/`); responsive with no mobile horizontal
+scroll, and a left-rail / bottom-bar nav shell. The
 **“↻ refresh recognition”** control on `/integrator` has a manual button **and an auto
 toggle** — every cycle `POST /api/refresh` captures each camera's feed and (with a key) runs
 the agent, then re-fuses. Reservations and a live feed are P2, not wired.

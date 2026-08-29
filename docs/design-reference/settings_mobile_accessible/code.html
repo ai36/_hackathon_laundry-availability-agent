@@ -1,0 +1,300 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Laundry Management - Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#cdffde",
+                        "secondary-fixed": "#ffdea8",
+                        "inverse-primary": "#006c44",
+                        "secondary-fixed-dim": "#ffba20",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-low": "#1c1b1b",
+                        "tertiary-fixed-dim": "#ffb3ae",
+                        "on-primary-fixed": "#002111",
+                        "on-primary-fixed-variant": "#005232",
+                        "outline": "#849588",
+                        "on-error": "#690005",
+                        "on-secondary-fixed": "#271900",
+                        "on-secondary": "#412d00",
+                        "on-secondary-fixed-variant": "#5e4200",
+                        "outline-variant": "#3b4a40",
+                        "on-primary": "#003921",
+                        "on-tertiary-container": "#b91623",
+                        "surface-dim": "#131313",
+                        "surface": "#131313",
+                        "tertiary-container": "#ffcbc7",
+                        "primary-fixed": "#50ffaf",
+                        "on-surface": "#e5e2e1",
+                        "on-tertiary-fixed": "#410004",
+                        "surface-container": "#201f1f",
+                        "on-tertiary-fixed-variant": "#930014",
+                        "primary-fixed-dim": "#00e293",
+                        "secondary": "#ffdb9d",
+                        "on-background": "#e5e2e1",
+                        "surface-container-high": "#2a2a2a",
+                        "on-surface-variant": "#b9cbbd",
+                        "surface-container-highest": "#353534",
+                        "inverse-surface": "#e5e2e1",
+                        "tertiary-fixed": "#ffdad7",
+                        "tertiary": "#fff0ef",
+                        "secondary-container": "#feb700",
+                        "error-container": "#93000a",
+                        "surface-tint": "#00e293",
+                        "surface-bright": "#393939",
+                        "error": "#ffb4ab",
+                        "on-tertiary": "#68000b",
+                        "background": "#131313",
+                        "on-secondary-container": "#6b4b00",
+                        "surface-variant": "#353534",
+                        "primary-container": "#00f5a0",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-primary-container": "#006b43",
+                        "on-error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "sm": "12px",
+                        "xl": "32px",
+                        "margin-desktop": "40px",
+                        "xs": "8px",
+                        "base": "4px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "title-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["26px", { "lineHeight": "32px", "fontWeight": "700" }],
+                        "label-md": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+                        "label-lg": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #131313; /* background */
+            color: #e5e2e1; /* on-background */
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #131313;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #353534;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3b4a40;
+        }
+        
+        /* Radix UI Focus States */
+        .focus-visible-ring:focus-visible {
+            outline: 2px solid #00f5a0;
+            outline-offset: 2px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col pt-[72px] pb-[80px] md:pb-0 md:pl-80">
+<!-- TopAppBar -->
+<header class="bg-background border-b border-outline-variant fixed full-width top-0 w-full z-30 h-[72px]" role="banner">
+<div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-lg max-w-container-max mx-auto h-full">
+<div class="flex items-center gap-sm">
+<button aria-controls="main-nav" aria-expanded="false" aria-label="Open Navigation Menu" class="md:hidden text-primary dark:text-primary-fixed-dim hover:text-primary transition-colors duration-200 focus-visible-ring rounded">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="menu" aria-hidden="true" class="lucide lucide-menu"><path d="M4 5h16"></path><path d="M4 12h16"></path><path d="M4 19h16"></path></svg>
+</button>
+<div class="flex items-baseline gap-2">
+<h1 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg font-bold text-on-background">Laundry room</h1>
+<span aria-hidden="true" class="text-headline-sm font-headline-sm text-on-surface-variant font-normal">· settings</span>
+</div>
+</div>
+<button aria-label="Global Settings" class="text-primary dark:text-primary-fixed-dim hover:text-primary transition-colors duration-200 hidden md:block focus-visible-ring rounded">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="settings" aria-hidden="true" class="lucide lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+</button>
+</div>
+</header>
+<!-- NavigationDrawer (Desktop) -->
+<nav aria-label="Main Navigation" class="bg-surface-container border-r border-outline-variant hidden md:flex flex-col fixed left-0 top-0 h-full z-40 w-80 pt-[72px]" id="main-nav">
+<div class="px-lg py-md mb-sm">
+<h2 class="text-primary font-bold text-title-lg font-title-lg">Laundry Management</h2>
+</div>
+<div class="flex flex-col gap-xs px-sm" role="list">
+<a class="flex items-center gap-md px-lg py-md text-on-surface-variant hover:bg-surface-variant rounded-r-full transition-colors font-body-lg text-body-lg focus-visible-ring" href="#" role="listitem">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="activity" aria-hidden="true" class="lucide lucide-activity"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path></svg>
+                Live Status
+            </a>
+<a class="flex items-center gap-md px-lg py-md text-on-surface-variant hover:bg-surface-variant rounded-r-full transition-colors font-body-lg text-body-lg focus-visible-ring" href="#" role="listitem">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shield-alert" aria-hidden="true" class="lucide lucide-shield-alert"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
+                Integrator View
+            </a>
+<a aria-current="page" class="flex items-center gap-md px-lg py-md bg-secondary-container text-on-secondary-container rounded-r-full font-bold transition-colors font-body-lg text-body-lg focus-visible-ring" href="#" role="listitem">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sliders-horizontal" aria-hidden="true" class="lucide lucide-sliders-horizontal"><path d="M10 5H3"></path><path d="M12 19H3"></path><path d="M14 3v4"></path><path d="M16 17v4"></path><path d="M21 12h-9"></path><path d="M21 19h-5"></path><path d="M21 5h-7"></path><path d="M8 10v4"></path><path d="M8 12H3"></path></svg>
+                System Settings
+            </a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-lg" id="main-content" role="main">
+<!-- Back Link -->
+<a class="inline-flex items-center gap-xs text-on-surface-variant hover:text-on-surface mb-lg text-body-md font-body-md group focus-visible-ring rounded" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-left" aria-hidden="true" class="lucide lucide-arrow-left w-[18px] h-[18px] group-hover:-translate-x-1 transition-transform"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+            Back to integrator
+        </a>
+<!-- Settings Container -->
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-md md:p-lg">
+<!-- Section Header -->
+<button aria-controls="machine-list" aria-expanded="true" class="flex items-center gap-sm mb-sm cursor-pointer hover:opacity-80 transition-opacity focus-visible-ring rounded w-full text-left">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-down" aria-hidden="true" class="lucide lucide-chevron-down text-on-background"><path d="m6 9 6 6 6-6"></path></svg>
+<h2 class="text-headline-sm font-headline-sm text-on-background m-0">Machines (32)</h2>
+</button>
+<p class="text-body-md font-body-md text-on-surface-variant mb-lg max-w-2xl leading-relaxed">
+                Configure individual machine properties. Changes write to <code class="bg-surface-container-high px-1 py-0.5 rounded text-secondary-fixed text-sm font-mono">data/machines.json</code>.
+            </p>
+<!-- Machine List -->
+<div class="flex flex-col gap-md" id="machine-list" role="list">
+<!-- Machine Item 1 -->
+<form aria-label="Configuration for machine W-01" class="bg-surface-container border border-outline-variant rounded-lg p-md transition-colors hover:border-outline focus-within:border-primary-fixed group relative" role="listitem">
+<div class="flex flex-col gap-md">
+<!-- Input Row: ID -->
+<div class="flex flex-col gap-xs">
+<label class="text-label-lg font-label-lg text-on-surface-variant truncate" for="machine-id-1">Machine ID</label>
+<input aria-required="true" class="bg-surface-container-high border border-outline-variant rounded-md px-sm py-xs text-body-lg font-body-lg text-on-background font-mono focus-visible-ring outline-none transition-all w-full max-w-[200px] truncate focus:border-primary" id="machine-id-1" type="text" value="W-01">
+</div>
+<!-- Input Row: Type -->
+<div class="flex flex-col gap-xs">
+<label class="text-label-lg font-label-lg text-on-surface-variant truncate" for="machine-type-1">Machine Type</label>
+<div class="relative w-full max-w-[200px]">
+<select aria-required="true" class="appearance-none bg-surface-container-high border border-outline-variant rounded-md px-sm py-xs pr-8 text-body-lg font-body-lg text-on-background focus-visible-ring outline-none transition-all w-full cursor-pointer focus:border-primary" id="machine-type-1">
+<option selected="" value="washer">washer</option>
+<option value="dryer">dryer</option>
+</select>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-down" aria-hidden="true" class="lucide lucide-chevron-down absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant w-5 h-5"><path d="m6 9 6 6 6-6"></path></svg>
+</div>
+</div>
+<!-- Action Buttons (Positioned strategically for mobile flow) -->
+<div class="flex justify-end gap-sm mt-xs">
+<button aria-label="Save changes to W-01" class="bg-surface-variant hover:bg-surface-bright text-on-surface px-md py-xs rounded-md text-label-lg font-label-lg transition-colors flex items-center justify-center border border-transparent focus-visible-ring active:scale-95" type="submit">
+                                save
+                            </button>
+<button aria-haspopup="dialog" aria-label="Delete machine W-01" class="bg-transparent border border-outline-variant hover:bg-error-container hover:border-error-container hover:text-on-error-container text-error rounded-md w-[36px] h-[36px] flex items-center justify-center transition-colors focus-visible-ring active:bg-error-container/50" type="button">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash-2" aria-hidden="true" class="lucide lucide-trash-2 w-[18px] h-[18px]"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+</button>
+</div>
+<!-- Input Row: Prompt Fragment -->
+<div class="flex flex-col gap-xs mt-xs pt-md border-t border-outline-variant/50">
+<label class="text-label-lg font-label-lg text-on-surface-variant flex items-center gap-xs truncate" for="prompt-fragment-1">
+                                Prompt fragment <span aria-hidden="true" class="text-on-surface-variant/50">—</span> <span class="sr-only">Description of</span> how to read this machine's indicator
+                            </label>
+<input class="bg-surface-container-high border border-outline-variant rounded-md px-sm py-xs text-body-md font-body-md text-on-background placeholder:text-on-surface-variant/50 focus-visible-ring outline-none transition-all w-full focus:border-primary" id="prompt-fragment-1" placeholder="e.g. left digits = minutes left; so" type="text">
+</div>
+</div>
+</form>
+<!-- Machine Item 2 -->
+<form aria-label="Configuration for machine W-02" class="bg-surface-container border border-outline-variant rounded-lg p-md transition-colors hover:border-outline focus-within:border-primary-fixed group relative" role="listitem">
+<div class="flex flex-col gap-md">
+<!-- Input Row: ID -->
+<div class="flex flex-col gap-xs">
+<label class="text-label-lg font-label-lg text-on-surface-variant truncate" for="machine-id-2">Machine ID</label>
+<input aria-required="true" class="bg-surface-container-high border border-outline-variant rounded-md px-sm py-xs text-body-lg font-body-lg text-on-background font-mono focus-visible-ring outline-none transition-all w-full max-w-[200px] truncate focus:border-primary" id="machine-id-2" type="text" value="W-02">
+</div>
+<!-- Input Row: Type -->
+<div class="flex flex-col gap-xs">
+<label class="text-label-lg font-label-lg text-on-surface-variant truncate" for="machine-type-2">Machine Type</label>
+<div class="relative w-full max-w-[200px]">
+<select aria-required="true" class="appearance-none bg-surface-container-high border border-outline-variant rounded-md px-sm py-xs pr-8 text-body-lg font-body-lg text-on-background focus-visible-ring outline-none transition-all w-full cursor-pointer focus:border-primary" id="machine-type-2">
+<option selected="" value="washer">washer</option>
+<option value="dryer">dryer</option>
+</select>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-down" aria-hidden="true" class="lucide lucide-chevron-down absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant w-5 h-5"><path d="m6 9 6 6 6-6"></path></svg>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex justify-end gap-sm mt-xs">
+<button aria-label="Save changes to W-02" class="bg-surface-variant hover:bg-surface-bright text-on-surface px-md py-xs rounded-md text-label-lg font-label-lg transition-colors flex items-center justify-center border border-transparent focus-visible-ring active:scale-95" type="submit">
+                                save
+                            </button>
+<button aria-haspopup="dialog" aria-label="Delete machine W-02" class="bg-transparent border border-outline-variant hover:bg-error-container hover:border-error-container hover:text-on-error-container text-error rounded-md w-[36px] h-[36px] flex items-center justify-center transition-colors focus-visible-ring active:bg-error-container/50" type="button">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash-2" aria-hidden="true" class="lucide lucide-trash-2 w-[18px] h-[18px]"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+</button>
+</div>
+<!-- Input Row: Prompt Fragment -->
+<div class="flex flex-col gap-xs mt-xs pt-md border-t border-outline-variant/50">
+<label class="text-label-lg font-label-lg text-on-surface-variant flex items-center gap-xs truncate" for="prompt-fragment-2">
+                                Prompt fragment <span aria-hidden="true" class="text-on-surface-variant/50">—</span> <span class="sr-only">Description of</span> how to read this machine's indicator
+                            </label>
+<input class="bg-surface-container-high border border-outline-variant rounded-md px-sm py-xs text-body-md font-body-md text-on-background placeholder:text-on-surface-variant/50 focus-visible-ring outline-none transition-all w-full focus:border-primary" id="prompt-fragment-2" placeholder="e.g. left digits = minutes left; so" type="text">
+</div>
+</div>
+</form>
+<!-- Add New Machine Button (Implicit UX improvement) -->
+<button class="w-full py-md border border-dashed border-outline-variant rounded-lg text-on-surface-variant hover:text-primary hover:border-primary hover:bg-surface-container-high transition-colors flex items-center justify-center gap-xs text-label-lg font-label-lg focus-visible-ring" type="button">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus" aria-hidden="true" class="lucide lucide-plus w-5 h-5"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+                    Add Machine
+                </button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav aria-label="Mobile Navigation" class="bg-surface-container-highest border-t border-outline-variant fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-sm pb-md pt-base md:hidden shadow-lg rounded-t-xl h-[80px]">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant rounded-full w-[64px] h-[48px] transition-colors focus-visible-ring active:opacity-70" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="server" aria-hidden="true" class="lucide lucide-server mb-1 w-6 h-6"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6.01" y1="6" y2="6"></line><line x1="6" x2="6.01" y1="18" y2="18"></line></svg>
+<span class="text-[10px] font-label-md font-medium leading-none">Equipment</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant rounded-full w-[64px] h-[48px] transition-colors focus-visible-ring active:opacity-70" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="layout-dashboard" aria-hidden="true" class="lucide lucide-layout-dashboard mb-1 w-6 h-6"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+<span class="text-[10px] font-label-md font-medium leading-none">Control</span>
+</a>
+<a aria-current="page" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full w-[64px] h-[48px] transition-all scale-105 shadow-sm focus-visible-ring active:opacity-70" href="#">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="settings" aria-hidden="true" class="lucide lucide-settings mb-1 w-6 h-6"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span class="text-[10px] font-label-md font-bold leading-none">Settings</span>
+</a>
+</nav>
+<script>
+    lucide.createIcons();
+</script>
+
+
+</body></html>

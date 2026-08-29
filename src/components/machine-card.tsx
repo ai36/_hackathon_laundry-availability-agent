@@ -10,15 +10,42 @@ import { useStore } from "@/stores";
 import type { MachineState } from "@/eval/types";
 import type { MachineView } from "@/portal/room-status";
 
-export const STATE_STYLE: Record<MachineState, { label: string; dot: string; card: string }> = {
-  free: { label: "Free", dot: "bg-emerald-500", card: "border-emerald-500/40 bg-emerald-500/5" },
-  occupied: { label: "In use", dot: "bg-amber-500", card: "border-amber-500/40 bg-amber-500/5" },
+/**
+ * Per-state visuals. `dot`/`card`/`glow` are helper classes from globals.css; `text` is a
+ * Lumina token colour for the status word.
+ */
+export const STATE_STYLE: Record<
+  MachineState,
+  { label: string; dot: string; card: string; glow: string; text: string }
+> = {
+  free: {
+    label: "Free",
+    dot: "dot-free",
+    card: "card-free",
+    glow: "glow-free",
+    text: "text-primary-container",
+  },
+  occupied: {
+    label: "In use",
+    dot: "dot-occupied",
+    card: "card-occupied",
+    glow: "",
+    text: "text-secondary-container",
+  },
   out_of_order: {
     label: "Out of order",
-    dot: "bg-red-500",
-    card: "border-red-500/40 bg-red-500/5",
+    dot: "dot-out_of_order",
+    card: "card-out_of_order",
+    glow: "glow-out_of_order",
+    text: "text-error",
   },
-  unknown: { label: "Unknown", dot: "bg-zinc-400", card: "border-zinc-400/40 bg-zinc-400/5" },
+  unknown: {
+    label: "Unknown",
+    dot: "dot-unknown",
+    card: "card-unknown",
+    glow: "",
+    text: "text-on-surface-variant",
+  },
 };
 
 const STATES: MachineState[] = ["free", "occupied", "out_of_order", "unknown"];
@@ -60,16 +87,16 @@ function MarkWrong({ m }: { m: MachineView }) {
 
   if (!open) {
     return (
-      <Button variant="outline" onClick={() => setOpen(true)} className="mt-1 self-start">
-        <X size={12} /> mark wrong
+      <Button variant="outline" onClick={() => setOpen(true)} className="mt-2 self-start">
+        <X size={13} /> mark wrong
       </Button>
     );
   }
 
   return (
-    <div className="mt-2 flex flex-col gap-1.5 rounded-md border border-zinc-300 p-2 dark:border-zinc-700">
+    <div className="border-outline-variant bg-surface-container mt-3 flex flex-col gap-2 rounded border p-2.5">
       <Label>Correct state for {m.machineId}:</Label>
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1.5">
         {STATES.filter((s) => s !== m.state).map((s) => (
           <Button key={s} variant="default" disabled={busy} onClick={() => submit(s)}>
             {STATE_STYLE[s].label}
@@ -82,15 +109,15 @@ function MarkWrong({ m }: { m: MachineView }) {
         placeholder="note (e.g. bare E = error)"
         className="w-full"
       />
-      <label className="flex items-center gap-1.5 text-xs text-zinc-500">
+      <label className="text-on-surface-variant flex items-center gap-1.5 text-[13px]">
         <input type="checkbox" checked={durable} onChange={(e) => setDurable(e.target.checked)} />
         applies to this machine in every view (durable)
       </label>
-      {err && <span className="text-xs break-words text-red-500">{err}</span>}
+      {err && <span className="text-error text-[13px] break-words">{err}</span>}
       <button
         type="button"
         onClick={() => setOpen(false)}
-        className="self-start text-xs text-zinc-400 underline"
+        className="text-outline self-start text-[13px] underline"
       >
         cancel
       </button>
@@ -108,30 +135,30 @@ export const MachineCard = observer(function MachineCard({
 }) {
   const s = STATE_STYLE[m.state];
   return (
-    <div className={`flex min-w-0 flex-col gap-1 rounded-lg border p-3 ${s.card}`}>
+    <div
+      className={`bg-surface-container-high hover:bg-surface-container-highest flex min-w-0 flex-col gap-1.5 rounded-lg border p-4 transition-colors ${s.card}`}
+    >
       <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-sm font-semibold">{m.machineId}</span>
-        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${s.dot}`} aria-hidden />
+        <span className="truncate text-lg font-bold">{m.machineId}</span>
+        <span className={`h-3 w-3 shrink-0 rounded-full ${s.dot} ${s.glow}`} aria-hidden />
       </div>
-      <span className="text-sm">
-        {s.label}
-        {m.corrected && (
-          <span className="ml-1 rounded bg-sky-500/15 px-1 text-xs text-sky-600 dark:text-sky-400">
-            {m.correction?.scope === "machine" ? "integrator · durable" : "integrator"}
-          </span>
-        )}
-      </span>
+      <span className={`text-xl font-semibold ${s.text}`}>{s.label}</span>
+      {m.corrected && (
+        <span className="bg-primary-container/15 text-primary-container w-fit rounded px-1.5 py-0.5 text-[11px] font-bold tracking-wide uppercase">
+          {m.correction?.scope === "machine" ? "integrator · durable" : "integrator"}
+        </span>
+      )}
       {(m.state === "free" || m.state === "unknown") && !m.corrected && (
-        <span className="text-xs text-zinc-500">confirm on arrival</span>
+        <span className="text-on-surface-variant text-[13px] opacity-80">confirm on arrival</span>
       )}
       {integrator && (
         <>
-          <span className="mt-1 text-xs break-words text-zinc-400">
+          <span className="text-outline mt-1 text-[12px] break-words">
             {m.corrected ? "set by integrator" : `agent · conf ${m.confidence.toFixed(2)}`} ·{" "}
             {m.seenIn} view{m.seenIn === 1 ? "" : "s"} · {m.source}
           </span>
           {m.correction?.note && (
-            <span className="text-xs break-words text-zinc-400">“{m.correction.note}”</span>
+            <span className="text-outline text-[12px] break-words">“{m.correction.note}”</span>
           )}
           <MarkWrong m={m} />
         </>

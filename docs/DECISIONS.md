@@ -40,6 +40,31 @@ on top: `src/components/ui/` — `PageShell` (one header/width/padding shape), `
 (variants), `Section` (collapsible panel), `field` (`TextInput` / `Select` / `Label`),
 `switch`. Every page uses it, so the three routes look the same.
 
+**Amendment (2026-08-28) — "Lumina Wash" design system.** The owner supplied a reference
+design in `docs/design-reference/` (token sheet `lumina_wash/DESIGN.md` + annotated screens).
+The portal now implements it:
+
+- **Single dark theme.** `src/app/globals.css` carries the full token set as Tailwind v4
+  `@theme` custom properties — `surface` / `surface-container*` layering (`#131313` →
+  `#353534`), `on-surface` / `on-surface-variant` / `outline` text, `primary-container`
+  `#00f5a0` (mint) as the one saturated accent, `secondary-container` `#feb700` (amber) and
+  `error` `#ffb4ab` (red) for state only. Status colours live once as `.dot-*` / `.card-*` /
+  `.glow-*` helper classes. The earlier `html { font-size: 150% }` zoom is **removed** — the
+  reference defines its own px type scale (body 14–16, headlines 26–32) and is the source of
+  truth for sizing now.
+- **Font:** `Inter` via `next/font/google` (replaces Geist), exposed as `--font-inter`.
+- **Navigation shell:** new `src/components/ui/app-shell.tsx` (mounted in `layout.tsx`) — a
+  fixed left rail on `md+`, a fixed bottom bar on phones, three destinations mapping 1:1 to
+  the URL routes (`/tenant` "Live status", `/integrator` "Integrator", `/integrator/settings`
+  "Settings"). No query-param mode toggle (keeps D — URL routing).
+- **Components:** `Button` (mint fill + near-black text for primary; outline/ghost; red only
+  for delete), `field` (dark fill, 1px outline, mint focus border), `switch` (slim track,
+  mint when on), `Section` / `PageShell` / `MachineCard` / grids restyled to the surface
+  tokens. Machine cards get a status-tinted border + a glowing status dot.
+- Verified: `typecheck` / `lint` / `build` / `format:check` pass, `npm test` 51/51; Chrome
+  check at a 486 px CSS viewport (all three pages, both editors expanded) — no page
+  horizontal scroll, every control visible. Screenshots in `docs/assets/` regenerated.
+
 ---
 
 ## D-0002 — MobX store architecture
@@ -609,7 +634,7 @@ the override only).
 
 - **Date:** 2026-08-28
 - **Status:** Partial (built incrementally). **Built:**
-  - Separate URL routes: `/tenant` (state only, static), `/integrator` (console), `/integrator/settings` (CRUD); `/` redirects to `/tenant`. Root font 150%; responsive, no mobile horizontal scroll.
+  - Separate URL routes: `/tenant` (state only, static), `/integrator` (console), `/integrator/settings` (CRUD); `/` redirects to `/tenant`. Responsive, no mobile horizontal scroll. _(Font: "root font 150%" was superseded 2026-08-28 by the "Lumina Wash" design system — see the D-0001 2nd amendment.)_
   - Per-machine "mark wrong" → `POST /api/corrections` write loop; `buildRoomStatus` overlays
     corrections and iterates the **full roster** (uncovered machine → `unknown` / `seenIn: 0`).
   - **"↻ refresh recognition"** — manual button **and an auto toggle** (a client interval at
@@ -620,8 +645,9 @@ the override only).
     `data/corrections/`. Key-free it degrades to a plain re-fusion. "Site overview" =
     roster stats + mock-frame → machine map.
   - **Consistent design:** all pages built from `src/components/ui/` (`PageShell`, `Button`,
-    `Section`, `field`), `radix-ui` `Switch`, `lucide-react` icons (D-0001 amendment). Root
-    font 150%; verified no page-level horizontal scroll at a 575 px CSS viewport (stacked editors).
+    `Section`, `field`), `radix-ui` `Switch`, `lucide-react` icons (D-0001 amendment).
+    Restyled to the "Lumina Wash" design system 2026-08-28 (D-0001 2nd amendment); verified
+    no page-level horizontal scroll at a 486 px CSS viewport (stacked editors).
   - **Machines CRUD** (`/api/machines` GET/POST/PATCH/DELETE, `src/eval/roster.ts`,
     `MachinesEditor`): add / remove / rename, set `type`, set an optional **`promptFragment`**
     (the agent hint from this decision). Writes `data/machines.json`.
