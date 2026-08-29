@@ -73,9 +73,8 @@ Both show the **Final "classify + corrections" config** (80.0%,
 `docs/artifacts/eval-baseline-corrected-2026-08-28.json`), not the Iteration-1 verify pass.
 Reservations and a live feed are P2, not wired.
 
-![laundry3 portal — tenant view: state only, "confirm on arrival"](docs/assets/portal-top.jpg)
-![laundry3 portal — integrator view: agent confidence, source frame, "mark wrong" on every card, W-04 corrected out-of-order](docs/assets/portal-machines.jpg)
-![laundry3 portal — integrator settings: 32-machine roster, mock camera → machine map, D-11–D-16 not covered](docs/assets/portal-integrator-settings.jpg)
+![laundry3 portal — tenant view (/): state only, "confirm on arrival"](docs/assets/portal-top.jpg)
+![laundry3 portal — integrator view (/integrator): agent confidence, source frame, "mark wrong" on every card, refresh button, W-04 corrected out-of-order](docs/assets/portal-machines.jpg)
 
 Every card is one machine from `data/machines.json` (**16 washers + 16 dryers**); the mock
 photos only cover 26 of them, so `D-11…D-16` show as `unknown` / "not covered".
@@ -88,10 +87,12 @@ npm run dev            # http://localhost:3000
 ```
 
 1. Open `http://localhost:3000/integrator` — every card shows the agent's confidence, the
-   frame it came from, and a **“✕ mark wrong”** control. The **Site overview** lists the
-   32-machine roster and which mock frame currently drives each machine's state;
-   **“↻ refresh recognition”** re-runs the fusion (in the D-0016 container this is where a
-   real re-capture + re-classify would run).
+   frame it came from, and a **“✕ mark wrong”** control. Collapsible sections below the grid:
+   **Machines** (add / remove / rename, set type, set a per-machine `promptFragment` the
+   agent gets — writes `data/machines.json`), **Cameras** (id + free-text machine-id list +
+   optional stub / annotated image upload — writes `data/site-config.json`), and **Site
+   overview** (roster + mock-frame → machine map). **“↻ refresh recognition”** re-runs the
+   fusion (the D-0016 container's re-capture + re-classify hook).
 2. Find a machine the agent got wrong (e.g. a `free` washer shown as `In use`). Click
    **mark wrong**, pick the correct state, optionally tick **“applies to this machine in
    every view (durable)”**, add a note, submit.

@@ -4,7 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { observer } from "mobx-react-lite";
 
+import { CamerasEditor } from "@/components/cameras-editor";
 import { MachineCard } from "@/components/machine-card";
+import { MachinesEditor } from "@/components/machines-editor";
 import { useStore } from "@/stores";
 
 export const IntegratorView = observer(function IntegratorView() {
@@ -37,7 +39,7 @@ export const IntegratorView = observer(function IntegratorView() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+    <main className="mx-auto w-full max-w-[1100px] px-4 py-8 sm:px-6">
       <header className="mb-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -78,7 +80,7 @@ export const IntegratorView = observer(function IntegratorView() {
         <h2 className="mb-2 text-xs font-semibold tracking-widest text-zinc-500 uppercase">
           Washers
         </h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {machines.washers.map((m) => (
             <MachineCard key={m.machineId} m={m} integrator />
           ))}
@@ -86,16 +88,19 @@ export const IntegratorView = observer(function IntegratorView() {
         <h2 className="mt-6 mb-2 text-xs font-semibold tracking-widest text-zinc-500 uppercase">
           Dryers
         </h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {machines.dryers.map((m) => (
             <MachineCard key={m.machineId} m={m} integrator />
           ))}
         </div>
       </section>
 
-      <section className="mb-8 rounded-lg border border-zinc-200/60 p-4 text-xs dark:border-zinc-800">
-        <h2 className="mb-3 text-sm font-semibold">Site overview</h2>
-        <div className="flex flex-col gap-3">
+      <MachinesEditor />
+      <CamerasEditor />
+
+      <details className="mb-8 rounded-lg border border-zinc-200/60 p-4 text-xs dark:border-zinc-800">
+        <summary className="cursor-pointer text-sm font-semibold">Site overview</summary>
+        <div className="mt-3 flex flex-col gap-3">
           <div>
             <div className="font-semibold text-zinc-500">Roster ({machines.machines.length})</div>
             <div className="break-words text-zinc-500">
@@ -123,7 +128,7 @@ export const IntegratorView = observer(function IntegratorView() {
             </ul>
           </div>
         </div>
-      </section>
+      </details>
 
       <footer className="border-t border-zinc-200/60 pt-4 text-xs break-words text-zinc-400 dark:border-zinc-800">
         Status from <span className="font-mono">{machines.model}</span> — offline snapshot from{" "}

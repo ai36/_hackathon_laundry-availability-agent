@@ -103,6 +103,28 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-28 — integrator console: Cameras CRUD + upload; layout fixes (D-0015)
+
+- `src/eval/site-config.ts` (`data/site-config.json`; validate/sort; `parseMachineIds`;
+  upsert/remove), `GET/POST/PATCH/DELETE /api/cameras`, `POST /api/upload` (multipart,
+  jpeg/png/webp ≤ 4 MB → `data/site-config/<id>/`, git-ignored), `CamerasEditor`. +5 tests
+  (51 total).
+- Trust-boundary docstrings mirrored into `/api/machines`, `/api/cameras`, `/api/upload`.
+- Layout: `max-w-[1100px]` (px, no 2×-scale overflow), `sm:grid-cols-2`, editors are
+  `<details>` collapsed. Screenshots regenerated; stale settings screenshot removed.
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **51/51**.
+  Routes: `ƒ /api/cameras`, `ƒ /api/upload` added.
+
+### 2026-08-28 — integrator console: Machines CRUD (D-0015)
+
+- `src/eval/roster.ts` (typed roster + validate/sort + upsert/remove; `promptFragment` per
+  machine), `POST/PATCH/DELETE /api/machines` writing `data/machines.json`,
+  `MachinesEditor` table on `/integrator`. +6 tests (46 total).
+- Curl round-trip (add → patch → traversal-blocked → delete) leaves `data/machines.json`
+  byte-identical. `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` —
+  **46/46**. Routes: `ƒ /api/machines` added.
+- Next: cameras CRUD + image upload, per-machine reference screenshots.
+
 ### 2026-08-28 — portal: 2× font + split tenant / integrator pages
 
 - `html { font-size: 200% }`; px-literal text classes → `text-xs`; `max-w-6xl`; responsive

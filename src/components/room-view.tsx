@@ -12,7 +12,7 @@ export const RoomView = observer(function RoomView() {
   const c = machines.counts;
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+    <main className="mx-auto w-full max-w-[1100px] px-4 py-8 sm:px-6">
       <header className="mb-6">
         <div className="flex items-center justify-between gap-3">
           <h1 className="text-2xl font-semibold tracking-tight">Laundry room</h1>
@@ -37,7 +37,7 @@ export const RoomView = observer(function RoomView() {
         <h2 className="mb-2 text-xs font-semibold tracking-widest text-zinc-500 uppercase">
           Washers
         </h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {machines.washers.map((m) => (
             <MachineCard key={m.machineId} m={m} />
           ))}
@@ -48,7 +48,7 @@ export const RoomView = observer(function RoomView() {
         <h2 className="mb-2 text-xs font-semibold tracking-widest text-zinc-500 uppercase">
           Dryers
         </h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {machines.dryers.map((m) => (
             <MachineCard key={m.machineId} m={m} />
           ))}

@@ -12,6 +12,58 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Integrator console: Cameras CRUD + image upload; layout fixes (D-0015)
+
+- `src/eval/site-config.ts` — `data/site-config.json` (cameras), typed load/write
+  (validate camera + machine ids `[A-Za-z0-9_-]+`, no dups; sort), `parseMachineIds`
+  (free-text → clean list), `upsertCamera` / `removeCamera`. +5 tests (51 total).
+- `src/app/api/cameras/route.ts` — GET/POST/PATCH/DELETE → `data/site-config.json`.
+- `src/app/api/upload/route.ts` — `POST` multipart: `kind` ∈ {camera-stub, camera-annotated,
+  machine-reference}, `ownerId` (regex-restricted), `state` (for machine-reference) → saves
+  jpeg/png/webp ≤ 4 MB to `data/site-config/<ownerId>/<name>.<ext>`, returns the repo path.
+  `data/site-config/` git-ignored (arbitrary user images); `data/site-config.json` committed
+  (starts `{"cameras": []}`). Curl-verified upload + `ownerId` traversal → 400.
+- `src/components/cameras-editor.tsx` — CRUD on `/integrator`: per camera id + machine-id
+  free-text + stub/annotated image upload + delete; add row.
+- **Trust-boundary docstrings** in `/api/machines`, `/api/cameras`, `/api/upload` mirror the
+  full `/api/corrections` warning (no auth → integrator-only local/on-prem; not for a shared
+  or public host).
+- **Layout:** container `max-w-6xl` → `max-w-[1100px]` (px, so it doesn't 2×-scale with the
+  root font and cause page-wide horizontal scroll); card grid → `sm:grid-cols-2`; Machines /
+  Cameras / Site-overview are `<details>` collapsed by default. Verified in Chrome — 2× font,
+  no page overflow, editors expand cleanly.
+- Screenshots regenerated (`portal-top.jpg` = tenant `/`, `portal-machines.jpg` = integrator
+  `/integrator`); stale `portal-integrator-settings.jpg` removed.
+- Compliance: 3 passes (font/split, Machines CRUD, Cameras CRUD) — all PASS / PASS WITH
+  RISKS, no blockers. Consolidated record:
+  `docs/trajectories/compliance/2026-08-28-integrator-console.md` (backfills the earlier
+  passes too). Risk fixes applied: trust-boundary docstrings mirrored; `REPRODUCTION.md`
+  reset note; screenshots regenerated; **`/api/upload` now magic-byte-sniffs** the content
+  so the on-disk extension comes from the bytes, not the client mime.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**;
+  `npm test` — **51/51**. Routes: `○ /`, `ƒ /integrator`, `ƒ /api/{corrections,room,machines,cameras,upload}`.
+
+### 2026-08-28 — Integrator console: Machines CRUD (D-0015)
+
+- `src/eval/roster.ts` — typed roster (`RosterMachine` now carries optional `promptFragment`
+  + `referenceShots`), `loadRoster` / `writeRoster` (validate id `[A-Za-z0-9_-]+`, type,
+  no dups; sort washers-then-dryers, natural id order), `upsertMachine` / `removeMachine`.
+  `buildRoomStatus` and `/api/room` now go through it. +6 tests (46 total).
+- `src/app/api/machines/route.ts` — `GET` list, `POST` add (409 on dup), `PATCH` edit /
+  rename (`targetId` = old id), `DELETE` remove. Node runtime, `force-dynamic`, no auth
+  (same integrator-only local/on-prem boundary as `/api/corrections`, D-0016). Writes
+  `data/machines.json`.
+- `src/components/machines-editor.tsx` — table on `/integrator`: per-row id / type /
+  `promptFragment` inline edit + delete, an add row. After any change it re-fetches
+  `/api/room` so the grid reflects the new roster.
+- Curl-tested add → patch(promptFragment) → path-traversal(400) → delete; `data/machines.json`
+  byte-identical after the round-trip, restored from backup regardless.
+- Build routes: `○ /`, `ƒ /integrator`, `ƒ /api/{corrections,room,machines}`.
+- **Still to build:** cameras CRUD + stub/annotated image upload, per-machine reference-state
+  screenshots, `site-config.json` (cameras). Screenshots refresh after that.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**;
+  `npm test` — **46/46**.
+
 ### 2026-08-28 — Portal: 2× font, split tenant / integrator pages
 
 - **Owner feedback:** text too small; integrator settings should be their own page; the

@@ -593,15 +593,25 @@ the override only).
 ## D-0015 — Integrator calibration model: cameras, masks, per-machine reference states + prompt
 
 - **Date:** 2026-08-28
-- **Status:** Partial. **Built:** portal roles (`?role=integrator`), the per-machine
-  "mark wrong" → `POST /api/corrections` write loop, `buildRoomStatus` overlaying corrections
-  and now iterating the **full roster** (a machine no camera covers shows `unknown` /
-  `seenIn: 0`), an "Integrator settings" panel (roster stats + mock-camera → machine map +
-  this spec's not-built list), and a **"refresh recognition"** button (`GET /api/room`
-  re-fuses; in the D-0016 container this is the re-capture + re-classify hook). D-0016 P0 —
-  judge-walkable, key-free. **Not built:** camera/machine CRUD, mask upload, reference-state
-  screenshots, per-machine prompt fragment editor, `site-config.json` schema, the
-  correction→prompt feedback synthesis (D-0014 amendment). Spec below stands for those.
+- **Status:** Partial (built incrementally). **Built:**
+  - Separate pages: `/` tenant (state only), `/integrator` console (`force-dynamic`), 2× font.
+  - Per-machine "mark wrong" → `POST /api/corrections` write loop; `buildRoomStatus` overlays
+    corrections and iterates the **full roster** (uncovered machine → `unknown` / `seenIn: 0`).
+  - **"↻ refresh recognition"** button (`GET /api/room` re-fuses; the D-0016 container's
+    re-capture + re-classify hook). "Site overview" (roster stats + mock-frame → machine map).
+  - **Machines CRUD** (`/api/machines` GET/POST/PATCH/DELETE, `src/eval/roster.ts`,
+    `MachinesEditor`): add / remove / rename, set `type`, set an optional **`promptFragment`**
+    (the agent hint from this decision). Writes `data/machines.json`.
+  - **Cameras CRUD** (`/api/cameras`, `src/eval/site-config.ts`, `CamerasEditor`): add /
+    remove / rename, a **free-text machine-id list**, and optional **stub image** (test feed,
+    the D-0016 `StaticImageFrameSource`) + **annotated shot** (spatial key) uploaded via
+    `POST /api/upload` (jpeg/png/webp ≤ 4 MB → `data/site-config/<id>/`). Writes
+    `data/site-config.json`. All ids restricted to `[A-Za-z0-9_-]+`; `data/site-config/`
+    (uploaded images) is git-ignored, `data/site-config.json` is committed.
+  - D-0016 P0 — judge walks the correction loop key-free.
+  **Not built:** per-machine reference-state screenshots (the upload route supports the
+  `machine-reference` kind, no UI yet); the site-config is **not read by the eval / agent
+  yet** (D-0015/D-0016 runtime); the correction→prompt feedback synthesis (D-0014 amendment).
 
 **Context.** D-0009 / D-0010 name a `data/site-config.json` produced during onboarding
 (per-machine ROIs, reference crops, few-shot exemplars, thresholds). D-0014 adds a correction

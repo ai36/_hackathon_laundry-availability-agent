@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { config } from "@/config";
 import { correctionFor, loadCorrections } from "@/eval/corrections";
+import { loadRoster } from "@/eval/roster";
 import type { MachineState, MachineType } from "@/eval/types";
 
 /** One machine as the portal shows it, fused across every camera angle that sees it. */
@@ -36,7 +37,6 @@ type Report = {
     { machines: { machineId: string; state: MachineState; confidence: number }[] }
   >;
 };
-type Roster = { machines: { machineId: string; type: MachineType }[] };
 
 const ACTIONABLE: MachineState[] = ["free", "occupied", "out_of_order"];
 
@@ -54,7 +54,7 @@ export function buildRoomStatus(
   correctionsDir = join(config.paths.dataset, "corrections"),
 ): RoomStatus {
   const report = JSON.parse(readFileSync(reportPath, "utf8")) as Report;
-  const roster = JSON.parse(readFileSync(rosterPath, "utf8")) as Roster;
+  const roster = loadRoster(rosterPath);
   const corrections = loadCorrections(correctionsDir);
 
   const obs = new Map<string, { frameId: string; state: MachineState; confidence: number }[]>();

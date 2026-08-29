@@ -74,6 +74,10 @@ next-env.d.ts
 /data/cache/*
 !/data/cache/README.md
 
+# integrator-uploaded images (camera stubs, annotated shots, machine reference states) —
+# arbitrary user content, kept local. data/site-config.json (the camera list) IS committed.
+/data/site-config/
+
 # private per-site config overrides
 /laundry3.config.local.ts
 

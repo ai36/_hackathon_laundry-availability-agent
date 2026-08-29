@@ -35,10 +35,16 @@ reproduction — it may resolve newer versions.
 ## Run the app
 
 ```bash
-npm run dev      # http://localhost:3000
+npm run dev      # http://localhost:3000  (/ tenant, /integrator console)
 npm run build    # production build
 npm start        # serve the production build
 ```
+
+> The `/integrator` console writes to the repo: `data/corrections/` (mark-wrong),
+> `data/machines.json` (Machines editor), `data/site-config.json` + `data/site-config/`
+> (Cameras editor; the image dir is git-ignored). This is expected — the container in D-0016
+> owns that state on a writable volume. To restore the submitted state:
+> `git checkout -- data/ && git clean -fd data/site-config/`.
 
 ## Checks
 
@@ -46,7 +52,7 @@ npm start        # serve the production build
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint (flat config)
 npm run format:check # prettier
-npm test             # tsx --test — config, scoring, reply-parser (expect: 23/23 pass)
+npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config (expect: 51/51 pass)
 npm run check:data   # dataset privacy gate (also runs as the pre-commit hook)
 ```
 
