@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { observer } from "mobx-react-lite";
+import { ArrowLeft } from "lucide-react";
 
 import { CamerasEditor } from "@/components/cameras-editor";
 import { MachinesEditor } from "@/components/machines-editor";
+import { Button } from "@/components/ui/button";
+import { PageShell } from "@/components/ui/page-shell";
+import { Section } from "@/components/ui/section";
 import { useStore } from "@/stores";
 
 export const IntegratorSettings = observer(function IntegratorSettings() {
@@ -18,25 +22,25 @@ export const IntegratorSettings = observer(function IntegratorSettings() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-[1100px] px-4 py-8 sm:px-6">
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">
+    <PageShell
+      title={
+        <>
           Laundry room <span className="text-zinc-400">· settings</span>
-        </h1>
-        <Link
-          href="/integrator"
-          className="rounded border border-zinc-300 px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-        >
-          ← integrator
+        </>
+      }
+      nav={
+        <Link href="/integrator">
+          <Button variant="ghost">
+            <ArrowLeft size={14} /> integrator
+          </Button>
         </Link>
-      </header>
-
+      }
+    >
       <MachinesEditor />
       <CamerasEditor />
 
-      <section className="mb-8 rounded-lg border border-zinc-200/60 p-4 text-xs dark:border-zinc-800">
-        <h2 className="mb-3 text-sm font-semibold">Site overview</h2>
-        <div className="flex flex-col gap-3">
+      <Section title="Site overview">
+        <div className="flex flex-col gap-3 text-xs">
           <div>
             <div className="font-semibold text-zinc-500">Roster ({machines.machines.length})</div>
             <div className="break-words text-zinc-500">
@@ -64,7 +68,7 @@ export const IntegratorSettings = observer(function IntegratorSettings() {
             </ul>
           </div>
         </div>
-      </section>
-    </main>
+      </Section>
+    </PageShell>
   );
 });

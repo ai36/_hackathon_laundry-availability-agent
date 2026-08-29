@@ -103,6 +103,19 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-28 — portal: design system + auto-refresh (radix-ui, lucide-react)
+
+- Deps `radix-ui@1.6.7` + `lucide-react@1.35.0` (portal-only). New `src/components/ui/` kit
+  (`PageShell` / `Button` / `Section` / `field` / `switch`) — all pages rebuilt on it for a
+  consistent look.
+- Machines editor: table → stacked cards; every control visible at a 575 px viewport, no
+  page horizontal scroll.
+- Auto-refresh: `RefreshControl` (manual button + Radix `Switch` at
+  `runtime.stateRefreshSeconds`) → `POST /api/refresh` (captures each camera's stub feed,
+  runs the agent with a key, else re-fuses).
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **51/51**;
+  `check:data` — **pass**. `ƒ /api/refresh` added; `○ /tenant` still static.
+
 ### 2026-08-28 — portal: URL routes, font 150%, mobile responsiveness
 
 - URL-based routing: `/` → `/tenant` (static), `/integrator` (console), new

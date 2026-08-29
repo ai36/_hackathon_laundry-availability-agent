@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Label, Select, TextInput } from "@/components/ui/field";
+import { Section } from "@/components/ui/section";
 import type { MachineType } from "@/eval/types";
 import type { RosterMachine } from "@/eval/roster";
 import { useStore } from "@/stores";
@@ -49,67 +53,74 @@ function MachineRow({
   }
 
   return (
-    <tr className="border-t border-zinc-200/60 align-top dark:border-zinc-800">
-      <td className="py-1 pr-2">
-        <input
-          value={id}
-          onChange={(e) => setId(e.target.value)}
-          className="w-24 min-w-0 rounded border border-zinc-300 px-1 py-0.5 font-mono text-xs dark:border-zinc-700 dark:bg-zinc-900"
-        />
-      </td>
-      <td className="py-1 pr-2">
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value as MachineType)}
-          className="rounded border border-zinc-300 px-1 py-0.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
-        >
-          {TYPES.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </td>
-      <td className="py-1 pr-2">
-        <input
+    <div className="flex flex-col gap-2 rounded-md border border-zinc-200/70 p-2.5 dark:border-zinc-800">
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="flex min-w-0 flex-col gap-0.5">
+          <Label>id</Label>
+          <TextInput
+            value={id}
+            onChange={(e) => setId(e.target.value)}
+            className="w-24 font-mono"
+          />
+        </label>
+        <label className="flex min-w-0 flex-col gap-0.5">
+          <Label>type</Label>
+          <Select
+            value={type}
+            onChange={(e) => setType(e.target.value as MachineType)}
+            className="w-24"
+          >
+            {TYPES.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </Select>
+        </label>
+        <div className="ml-auto flex gap-1.5">
+          <Button
+            variant="default"
+            disabled={busy || !dirty}
+            onClick={() =>
+              run(() =>
+                call("PATCH", {
+                  targetId: m.machineId,
+                  machineId: id.trim(),
+                  type,
+                  promptFragment: prompt,
+                }),
+              )
+            }
+          >
+            save
+          </Button>
+          <Button
+            variant="danger"
+            disabled={busy}
+            onClick={() => {
+              if (confirm(`Remove ${m.machineId} from the roster?`))
+                void run(() => call("DELETE", { machineId: m.machineId }));
+            }}
+            aria-label={`delete ${m.machineId}`}
+          >
+            <Trash2 size={12} />
+          </Button>
+        </div>
+      </div>
+      <label className="flex flex-col gap-0.5">
+        <Label>
+          prompt fragment{" "}
+          <span className="text-zinc-400">&mdash; how to read this machine&rsquo;s indicator</span>
+        </Label>
+        <TextInput
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="agent hint: how to read this machine's indicator"
-          className="w-full min-w-0 rounded border border-zinc-300 px-1 py-0.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+          placeholder="e.g. left digits = minutes left; solid E = out of order"
+          className="w-full"
         />
-        {err && <div className="text-xs break-words text-red-500">{err}</div>}
-      </td>
-      <td className="py-1 whitespace-nowrap">
-        <button
-          type="button"
-          disabled={busy || !dirty}
-          onClick={() =>
-            run(() =>
-              call("PATCH", {
-                targetId: m.machineId,
-                machineId: id.trim(),
-                type,
-                promptFragment: prompt,
-              }),
-            )
-          }
-          className="rounded bg-zinc-900 px-1.5 py-0.5 text-xs text-white disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900"
-        >
-          save
-        </button>{" "}
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            if (confirm(`Remove ${m.machineId} from the roster?`))
-              void run(() => call("DELETE", { machineId: m.machineId }));
-          }}
-          className="rounded border border-red-500/50 px-1.5 py-0.5 text-xs text-red-500 disabled:opacity-40"
-        >
-          delete
-        </button>
-      </td>
-    </tr>
+      </label>
+      {err && <span className="text-xs break-words text-red-500">{err}</span>}
+    </div>
   );
 }
 
@@ -151,9 +162,8 @@ export function MachinesEditor() {
   }
 
   return (
-    <details className="mb-8 rounded-lg border border-zinc-200/60 p-4 dark:border-zinc-800">
-      <summary className="cursor-pointer text-sm font-semibold">Machines ({list.length})</summary>
-      <p className="mt-2 mb-3 text-xs text-zinc-500">
+    <Section title={`Machines (${list.length})`} collapsible>
+      <p className="mb-3 text-xs text-zinc-500">
         id · type · an optional <span className="font-mono">promptFragment</span> the agent gets
         when it reads this machine (D-0015). Writes{" "}
         <span className="font-mono">data/machines.json</span>.
@@ -161,61 +171,41 @@ export function MachinesEditor() {
       {!loaded ? (
         <p className="text-xs text-zinc-500">loading…</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[26rem] text-left text-xs">
-            <thead className="text-zinc-500">
-              <tr>
-                <th className="pr-2 pb-1 font-semibold">id</th>
-                <th className="pr-2 pb-1 font-semibold">type</th>
-                <th className="pr-2 pb-1 font-semibold">prompt fragment</th>
-                <th className="pb-1 font-semibold" />
-              </tr>
-            </thead>
-            <tbody>
-              {list.map((m) => (
-                <MachineRow key={m.machineId} m={m} onList={setList} onRoster={refreshRoom} />
-              ))}
-              <tr className="border-t border-zinc-200/60 dark:border-zinc-800">
-                <td className="py-2 pr-2">
-                  <input
-                    value={newId}
-                    onChange={(e) => setNewId(e.target.value)}
-                    placeholder="W-17"
-                    className="w-24 min-w-0 rounded border border-zinc-300 px-1 py-0.5 font-mono text-xs dark:border-zinc-700 dark:bg-zinc-900"
-                  />
-                </td>
-                <td className="py-2 pr-2">
-                  <select
-                    value={newType}
-                    onChange={(e) => setNewType(e.target.value as MachineType)}
-                    className="rounded border border-zinc-300 px-1 py-0.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
-                  >
-                    {TYPES.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="py-2 pr-2 text-xs text-zinc-400">
-                  add after creating
-                  {addErr && <div className="break-words text-red-500">{addErr}</div>}
-                </td>
-                <td className="py-2">
-                  <button
-                    type="button"
-                    disabled={!newId.trim()}
-                    onClick={add}
-                    className="rounded bg-emerald-600 px-1.5 py-0.5 text-xs text-white disabled:opacity-40"
-                  >
-                    add
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="flex flex-col gap-2">
+          {list.map((m) => (
+            <MachineRow key={m.machineId} m={m} onList={setList} onRoster={refreshRoom} />
+          ))}
+          <div className="flex flex-wrap items-end gap-2 rounded-md border border-dashed border-zinc-300 p-2.5 dark:border-zinc-700">
+            <label className="flex flex-col gap-0.5">
+              <Label>new id</Label>
+              <TextInput
+                value={newId}
+                onChange={(e) => setNewId(e.target.value)}
+                placeholder="W-17"
+                className="w-24 font-mono"
+              />
+            </label>
+            <label className="flex flex-col gap-0.5">
+              <Label>type</Label>
+              <Select
+                value={newType}
+                onChange={(e) => setNewType(e.target.value as MachineType)}
+                className="w-24"
+              >
+                {TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </Select>
+            </label>
+            <Button variant="accent" disabled={!newId.trim()} onClick={add} className="ml-auto">
+              <Plus size={12} /> add
+            </Button>
+            {addErr && <span className="w-full text-xs break-words text-red-500">{addErr}</span>}
+          </div>
         </div>
       )}
-    </details>
+    </Section>
   );
 }

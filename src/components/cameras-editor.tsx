@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Plus, Trash2, Upload } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Label, TextInput } from "@/components/ui/field";
+import { Section } from "@/components/ui/section";
 import type { Camera } from "@/eval/site-config";
 
 async function call(method: string, body: unknown): Promise<Camera[]> {
@@ -44,13 +48,11 @@ function ImageField({
   const [busy, setBusy] = useState(false);
 
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-zinc-500">{label}</span>
-      {current ? (
-        <span className="font-mono break-all text-zinc-400">{current}</span>
-      ) : (
-        <span className="text-zinc-400">none</span>
-      )}
+    <div className="flex flex-col gap-0.5 text-xs">
+      <Label>{label}</Label>
+      <span className={`break-all ${current ? "font-mono text-zinc-400" : "text-zinc-400"}`}>
+        {current ?? "none"}
+      </span>
       <input
         ref={ref}
         type="file"
@@ -71,14 +73,14 @@ function ImageField({
           }
         }}
       />
-      <button
-        type="button"
+      <Button
+        variant="outline"
         disabled={busy}
         onClick={() => ref.current?.click()}
-        className="self-start rounded border border-zinc-300 px-1.5 py-0.5 text-zinc-500 disabled:opacity-40 dark:border-zinc-700"
+        className="self-start"
       >
-        {busy ? "uploading…" : current ? "replace" : "upload"}
-      </button>
+        <Upload size={11} /> {busy ? "uploading…" : current ? "replace" : "upload"}
+      </Button>
       {err && <span className="break-words text-red-500">{err}</span>}
     </div>
   );
@@ -107,42 +109,43 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
     run(() => call("PATCH", { targetId: cam.id, id: id.trim(), machineIdsText: text, ...extra }));
 
   return (
-    <div className="flex flex-col gap-2 border-t border-zinc-200/60 py-3 dark:border-zinc-800">
-      <div className="flex flex-wrap items-center gap-2">
-        <input
-          value={id}
-          onChange={(e) => setId(e.target.value)}
-          className="w-28 min-w-0 rounded border border-zinc-300 px-1 py-0.5 font-mono text-xs dark:border-zinc-700 dark:bg-zinc-900"
-        />
-        <button
-          type="button"
-          disabled={busy || !dirty}
-          onClick={() => patch({})}
-          className="rounded bg-zinc-900 px-1.5 py-0.5 text-xs text-white disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900"
-        >
-          save
-        </button>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            if (confirm(`Remove camera ${cam.id}?`)) void run(() => call("DELETE", { id: cam.id }));
-          }}
-          className="rounded border border-red-500/50 px-1.5 py-0.5 text-xs text-red-500 disabled:opacity-40"
-        >
-          delete
-        </button>
+    <div className="flex flex-col gap-2 rounded-md border border-zinc-200/70 p-2.5 dark:border-zinc-800">
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="flex min-w-0 flex-col gap-0.5">
+          <Label>camera id</Label>
+          <TextInput
+            value={id}
+            onChange={(e) => setId(e.target.value)}
+            className="w-28 font-mono"
+          />
+        </label>
+        <div className="ml-auto flex gap-1.5">
+          <Button variant="default" disabled={busy || !dirty} onClick={() => patch({})}>
+            save
+          </Button>
+          <Button
+            variant="danger"
+            disabled={busy}
+            onClick={() => {
+              if (confirm(`Remove camera ${cam.id}?`))
+                void run(() => call("DELETE", { id: cam.id }));
+            }}
+            aria-label={`delete ${cam.id}`}
+          >
+            <Trash2 size={12} />
+          </Button>
+        </div>
       </div>
-      <label className="flex flex-col gap-0.5 text-xs">
-        <span className="text-zinc-500">machine ids this camera sees (free text)</span>
-        <input
+      <label className="flex flex-col gap-0.5">
+        <Label>machine ids this camera sees (free text)</Label>
+        <TextInput
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="W-01, W-02, W-03"
-          className="w-full min-w-0 rounded border border-zinc-300 px-1 py-0.5 font-mono dark:border-zinc-700 dark:bg-zinc-900"
+          className="w-full font-mono"
         />
       </label>
-      <div className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 min-[520px]:grid-cols-2">
         <ImageField
           label="stub image (test feed — D-0016 StaticImageFrameSource)"
           kind="camera-stub"
@@ -190,48 +193,48 @@ export function CamerasEditor() {
   }
 
   return (
-    <details className="mb-8 rounded-lg border border-zinc-200/60 p-4 dark:border-zinc-800">
-      <summary className="cursor-pointer text-sm font-semibold">Cameras ({list.length})</summary>
-      <p className="mt-2 mb-3 text-xs text-zinc-500">
+    <Section title={`Cameras (${list.length})`} collapsible>
+      <p className="mb-3 text-xs text-zinc-500">
         Each camera: an id, the machine ids it observes (free text), and — optionally — a{" "}
-        <em>stub image</em> to use as its feed for testing and an <em>annotated shot</em> with ids
-        drawn on it. Writes <span className="font-mono">data/site-config.json</span> +{" "}
-        <span className="font-mono">data/site-config/&lt;id&gt;/</span>. Not yet wired into the eval
+        <em>stub image</em> for its feed and an <em>annotated shot</em>. Writes{" "}
+        <span className="font-mono">data/site-config.json</span> +{" "}
+        <span className="font-mono">data/site-config/&lt;id&gt;/</span>. Not yet read by the eval
         runtime (D-0015/D-0016).
       </p>
       {!loaded ? (
         <p className="text-xs text-zinc-500">loading…</p>
       ) : (
-        <>
+        <div className="flex flex-col gap-2">
           {list.length === 0 && <p className="text-xs text-zinc-400">no cameras yet</p>}
           {list.map((cam) => (
             <CameraRow key={cam.id} cam={cam} onList={setList} />
           ))}
-          <div className="flex flex-wrap items-center gap-2 border-t border-zinc-200/60 pt-3 text-xs dark:border-zinc-800">
-            <input
-              value={newId}
-              onChange={(e) => setNewId(e.target.value)}
-              placeholder="cam-1"
-              className="w-28 min-w-0 rounded border border-zinc-300 px-1 py-0.5 font-mono dark:border-zinc-700 dark:bg-zinc-900"
-            />
-            <input
-              value={newText}
-              onChange={(e) => setNewText(e.target.value)}
-              placeholder="W-01, W-02"
-              className="min-w-0 flex-1 rounded border border-zinc-300 px-1 py-0.5 font-mono dark:border-zinc-700 dark:bg-zinc-900"
-            />
-            <button
-              type="button"
-              disabled={!newId.trim()}
-              onClick={add}
-              className="rounded bg-emerald-600 px-1.5 py-0.5 text-white disabled:opacity-40"
-            >
-              add camera
-            </button>
-            {addErr && <span className="w-full break-words text-red-500">{addErr}</span>}
+          <div className="flex flex-wrap items-end gap-2 rounded-md border border-dashed border-zinc-300 p-2.5 dark:border-zinc-700">
+            <label className="flex flex-col gap-0.5">
+              <Label>new camera id</Label>
+              <TextInput
+                value={newId}
+                onChange={(e) => setNewId(e.target.value)}
+                placeholder="cam-1"
+                className="w-28 font-mono"
+              />
+            </label>
+            <label className="flex min-w-[10rem] flex-1 flex-col gap-0.5">
+              <Label>machine ids</Label>
+              <TextInput
+                value={newText}
+                onChange={(e) => setNewText(e.target.value)}
+                placeholder="W-01, W-02"
+                className="font-mono"
+              />
+            </label>
+            <Button variant="accent" disabled={!newId.trim()} onClick={add}>
+              <Plus size={12} /> add camera
+            </Button>
+            {addErr && <span className="w-full text-xs break-words text-red-500">{addErr}</span>}
           </div>
-        </>
+        </div>
       )}
-    </details>
+    </Section>
   );
 }

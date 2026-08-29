@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { observer } from "mobx-react-lite";
+import { X } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { Label, TextInput } from "@/components/ui/field";
 import { useStore } from "@/stores";
 import type { MachineState } from "@/eval/types";
 import type { MachineView } from "@/portal/room-status";
@@ -36,7 +39,6 @@ function MarkWrong({ m }: { m: MachineView }) {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          // a machine no mock camera covers has no source frame — file it under "_roster"
           frameId: m.seenIn === 0 ? "_roster" : m.source,
           machineId: m.machineId,
           correctState,
@@ -58,39 +60,29 @@ function MarkWrong({ m }: { m: MachineView }) {
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="mt-1 self-start rounded border border-zinc-300 px-1.5 py-0.5 text-xs text-zinc-500 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
-      >
-        ✕ mark wrong
-      </button>
+      <Button variant="outline" onClick={() => setOpen(true)} className="mt-1 self-start">
+        <X size={12} /> mark wrong
+      </Button>
     );
   }
 
   return (
-    <div className="mt-2 flex flex-col gap-1.5 rounded border border-zinc-300 p-2 dark:border-zinc-700">
-      <span className="text-xs text-zinc-500">Correct state for {m.machineId}:</span>
+    <div className="mt-2 flex flex-col gap-1.5 rounded-md border border-zinc-300 p-2 dark:border-zinc-700">
+      <Label>Correct state for {m.machineId}:</Label>
       <div className="flex flex-wrap gap-1">
         {STATES.filter((s) => s !== m.state).map((s) => (
-          <button
-            key={s}
-            type="button"
-            disabled={busy}
-            onClick={() => submit(s)}
-            className="rounded bg-zinc-900 px-1.5 py-0.5 text-xs text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-          >
+          <Button key={s} variant="default" disabled={busy} onClick={() => submit(s)}>
             {STATE_STYLE[s].label}
-          </button>
+          </Button>
         ))}
       </div>
-      <input
+      <TextInput
         value={note}
         onChange={(e) => setNote(e.target.value)}
         placeholder="note (e.g. bare E = error)"
-        className="min-w-0 rounded border border-zinc-300 px-1.5 py-0.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+        className="w-full"
       />
-      <label className="flex items-center gap-1 text-xs text-zinc-500">
+      <label className="flex items-center gap-1.5 text-xs text-zinc-500">
         <input type="checkbox" checked={durable} onChange={(e) => setDurable(e.target.checked)} />
         applies to this machine in every view (durable)
       </label>

@@ -33,6 +33,13 @@ newest published version of every package:
 uses `npm ci`. If we later need TypeScript 7 or newer majors, that is its own decision
 entry with its own verification run.
 
+**Amendment (2026-08-28) — portal UI deps.** Added `radix-ui` (MIT — the unified primitives
+package; `Switch` for the auto-refresh toggle, more available if needed) and `lucide-react`
+(ISC — icons). Both are portal-only, tree-shaken, no runtime config. A small in-repo kit sits
+on top: `src/components/ui/` — `PageShell` (one header/width/padding shape), `Button`
+(variants), `Section` (collapsible panel), `field` (`TextInput` / `Select` / `Label`),
+`switch`. Every page uses it, so the three routes look the same.
+
 ---
 
 ## D-0002 — MobX store architecture
@@ -605,8 +612,16 @@ the override only).
   - Separate URL routes: `/tenant` (state only, static), `/integrator` (console), `/integrator/settings` (CRUD); `/` redirects to `/tenant`. Root font 150%; responsive, no mobile horizontal scroll.
   - Per-machine "mark wrong" → `POST /api/corrections` write loop; `buildRoomStatus` overlays
     corrections and iterates the **full roster** (uncovered machine → `unknown` / `seenIn: 0`).
-  - **"↻ refresh recognition"** button (`GET /api/room` re-fuses; the D-0016 container's
-    re-capture + re-classify hook). "Site overview" (roster stats + mock-frame → machine map).
+  - **"↻ refresh recognition"** — manual button **and an auto toggle** (a client interval at
+    `runtime.stateRefreshSeconds`, the browser stand-in for the D-0016 cron). Each run
+    `POST /api/refresh`: for every declared camera, capture its feed (P0 = the uploaded stub
+    image, a `StaticImageFrameSource`) and — when `ANTHROPIC_API_KEY` is set — run the vision
+    agent on it for that camera's machine ids; then re-fuse the committed report +
+    `data/corrections/`. Key-free it degrades to a plain re-fusion. "Site overview" =
+    roster stats + mock-frame → machine map.
+  - **Consistent design:** all pages built from `src/components/ui/` (`PageShell`, `Button`,
+    `Section`, `field`), `radix-ui` `Switch`, `lucide-react` icons (D-0001 amendment). Root
+    font 150%; verified no page-level horizontal scroll at a 575 px CSS viewport (stacked editors).
   - **Machines CRUD** (`/api/machines` GET/POST/PATCH/DELETE, `src/eval/roster.ts`,
     `MachinesEditor`): add / remove / rename, set `type`, set an optional **`promptFragment`**
     (the agent hint from this decision). Writes `data/machines.json`.

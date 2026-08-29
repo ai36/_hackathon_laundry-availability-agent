@@ -14,16 +14,19 @@ export class MachinesStore {
   reportPath = "";
   correctedCount = 0;
   role: PortalRole = "tenant";
+  /** Auto-refresh period (seconds) — from runtime.stateRefreshSeconds. */
+  refreshSeconds = 30;
 
   constructor(public root: RootStore) {
     makeAutoObservable(this, { root: false }, { autoBind: true });
   }
 
-  hydrate(room: RoomStatus) {
+  hydrate(room: RoomStatus, refreshSeconds?: number) {
     this.machines = room.machines;
     this.model = room.provenance.model;
     this.reportPath = room.provenance.report;
     this.correctedCount = room.provenance.corrections;
+    if (refreshSeconds && refreshSeconds > 0) this.refreshSeconds = refreshSeconds;
   }
 
   setRole(role: PortalRole) {

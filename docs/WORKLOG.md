@@ -12,6 +12,39 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Portal: design system, auto-refresh, radix-ui + lucide-react
+
+- Owner corrections: settings still not adaptive at 375 px; design must be consistent across
+  pages; refresh needs manual + auto (cron) with period from settings, each cycle capturing
+  every camera + running recognition; add `radix-ui` + `lucide-react`.
+- **Deps:** `radix-ui@1.6.7` (unified primitives; `Switch` for the auto toggle) +
+  `lucide-react@1.35.0` (icons). Portal-only. D-0001 amendment.
+- **UI kit** (`src/components/ui/`): `PageShell` (one header / max-width / padding shape),
+  `Button` (default / accent / outline / ghost / danger), `Section` (collapsible panel with
+  a chevron), `field` (`TextInput` / `Select` / `Label`), `switch` (Radix). `RoomView`,
+  `IntegratorView`, `IntegratorSettings`, `MachineCard`, `MachinesEditor`, `CamerasEditor`
+  all rebuilt on it → the three routes now match.
+- **Settings adaptivity:** the Machines editor is no longer a `min-w`-forced table — each
+  machine is a stacked card (id + type + save/delete on a wrapping row, prompt fragment
+  full-width below). Verified at a 575 px CSS viewport: every control visible, no page
+  horizontal scroll. `field` inputs no longer force `w-full` (id/type stay narrow).
+- **Auto-refresh** (`src/components/refresh-control.tsx` + `POST /api/refresh`): a manual
+  button and a **Radix `Switch`** ("auto · every Ns", N = `runtime.stateRefreshSeconds`,
+  threaded through `RootStoreHydration.refreshSeconds`). Each run: load cameras, "capture"
+  each one's stub feed, and — with `ANTHROPIC_API_KEY` — run `AnthropicVisionClient` +
+  `baselinePrompt` per feed (cached under `data/cache/live/`). The live per-machine reads are
+  **fused into the returned room** (below D-0014 corrections). Key-free it degrades to a
+  plain re-fusion. Browser-tested: manual click shows "0 cameras captured" with no cameras.
+- **Compliance risk fixes** (PASS WITH RISKS): the live branch now fuses its assessments
+  instead of just counting them (was dead spend); auto-refresh caps at **60 cycles** then
+  turns itself off; `docs/REPRODUCTION.md` gets a `/api/refresh` cost note; D-0001 amendment
+  names the licenses (MIT / ISC); viewport claim standardised to 575 px.
+- Screenshots: `portal-top.jpg` (`/tenant`), `portal-machines.jpg` (`/integrator`, with the
+  refresh control), **new** `portal-settings.jpg` (`/integrator/settings`, Machines editor).
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**;
+  `npm test` — **51/51**; `check:data` — **pass**. Routes: `○ /`, `○ /tenant`,
+  `ƒ /integrator`, `ƒ /integrator/settings`, `ƒ /api/{corrections,room,machines,cameras,upload,refresh}`.
+
 ### 2026-08-28 — Portal: URL routes, font 150%, mobile responsiveness
 
 - Owner corrections: URL-based routing (not query params), font 150% not 200%, kill the

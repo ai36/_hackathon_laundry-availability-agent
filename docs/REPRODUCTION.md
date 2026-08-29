@@ -45,6 +45,12 @@ npm start        # serve the production build
 > (Cameras editor; the image dir is git-ignored). This is expected — the container in D-0016
 > owns that state on a writable volume. To restore the submitted state:
 > `git checkout -- data/ && git clean -fd data/site-config/`.
+>
+> **`POST /api/refresh`** (the "refresh recognition" button + auto toggle) is **key-optional**:
+> with no `ANTHROPIC_API_KEY` it only re-fuses the committed report + corrections (free). With
+> a key **and** at least one camera stub image (none are committed), it also runs one
+> Anthropic call per camera feed per cycle and fuses the live reads (below corrections). The
+> auto toggle is off by default and stops itself after 60 cycles.
 
 ## Checks
 

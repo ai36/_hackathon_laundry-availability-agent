@@ -21,6 +21,7 @@ export class RootStore {
 
 export type RootStoreHydration = Partial<{
   room: RoomStatus;
+  refreshSeconds: number;
 }>;
 
 let browserStore: RootStore | undefined;
@@ -28,7 +29,7 @@ let browserStore: RootStore | undefined;
 export function createRootStore(initialData?: RootStoreHydration): RootStore {
   const store = new RootStore();
   if (initialData?.room) {
-    store.machines.hydrate(initialData.room);
+    store.machines.hydrate(initialData.room, initialData.refreshSeconds);
   }
   return store;
 }

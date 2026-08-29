@@ -24,9 +24,11 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.122.0",
+    "lucide-react": "^1.35.0",
     "mobx": "^7.0.3",
     "mobx-react-lite": "^5.0.3",
     "next": "16.3.3",
+    "radix-ui": "^1.6.7",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },

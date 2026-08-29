@@ -1,3 +1,4 @@
+import { config } from "@/config";
 import { IntegratorView } from "@/components/integrator-view";
 import { buildRoomStatus } from "@/portal/room-status";
 import { StoreProvider } from "@/stores";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default function IntegratorPage() {
   const room = buildRoomStatus();
   return (
-    <StoreProvider initialData={{ room }}>
+    <StoreProvider initialData={{ room, refreshSeconds: config.runtime.stateRefreshSeconds }}>
       <IntegratorView />
     </StoreProvider>
   );
