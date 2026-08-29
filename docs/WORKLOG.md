@@ -12,6 +12,16 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Portal: group the refresh + auto controls in a "recognition" fieldset
+
+- Owner tweak: the "refresh recognition" button and the "auto" switch now sit in one
+  `<fieldset>` with a `RECOGNITION` `<legend>` (Lumina `outline-variant` border); button
+  label shortened to **refresh**.
+- `src/components/refresh-control.tsx` only — presentational markup + label, no logic /
+  deps / data / API change. `typecheck` / `lint` / `build` / `format:check` — pass.
+  No separate compliance run: zero eligibility surface (folded into the design-system pass
+  reviewed above).
+
 ### 2026-08-28 — Portal: "Lumina Wash" design system from `docs/design-reference/`
 
 - Owner placed a reference design in `docs/design-reference/` (token sheet

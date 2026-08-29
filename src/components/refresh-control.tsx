@@ -83,16 +83,19 @@ export const RefreshControl = observer(function RefreshControl() {
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <div className="flex flex-wrap items-center gap-2">
+      <fieldset className="border-outline-variant flex flex-wrap items-center gap-3 rounded-lg border px-3 pt-1 pb-2">
+        <legend className="text-on-surface-variant px-1 text-[11px] font-semibold tracking-[0.08em] uppercase">
+          recognition
+        </legend>
         <Button variant="outline" onClick={run} disabled={busy}>
           <RefreshCw size={13} className={busy ? "animate-spin" : ""} />
-          {busy ? "refreshing…" : "refresh recognition"}
+          {busy ? "refreshing…" : "refresh"}
         </Button>
         <label className="text-on-surface-variant flex items-center gap-1.5 text-[13px]">
           <Switch checked={auto} onCheckedChange={setAuto} />
           auto · every {period}s
         </label>
-      </div>
+      </fieldset>
       {err && <span className="text-error text-[13px] break-words">{err}</span>}
       {last && !err && (
         <span className="text-outline text-[13px] break-words">
