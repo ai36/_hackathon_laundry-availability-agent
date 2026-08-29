@@ -184,15 +184,19 @@ iteration. See `docs/DECISIONS.md` D-0014 "Status (2026-08-29)".
   facts (a broken unit) that carry to every frame. This is the step that actually moved the
   metric (Iteration 2).
 - **`grillme`** skill — a Socratic interview that turned the one-line brief into the scoped
-  problem, metric, and dataset plan (`docs/trajectories/` has the outcome; `docs/PROBLEM.md`
-  the result).
+  problem, metric, and dataset plan. Result: `docs/PROBLEM.md`; scope decision:
+  `docs/DECISIONS.md` D-0005.
+- **ROI agent** (`src/agent/roi.ts`, `--mode=roi`) — crops the frame to each machine's own
+  colour region in an integrator-painted region map and classifies one machine (or one
+  stacked pair) per call. Right architecture, a measured ~4.6 pp shortfall at this sample
+  size — kept in-tree as an iteration. Trajectory: `docs/trajectories/baseline/2026-08-29-roi.md`.
 - **`hackathon-compliance` subagent** (`.claude/agents/`) — an independent reviewer run on
   every change against `docs/HACKATHON-RULES.md`; it caught a reproducibility blocker (the
   cache keyed on image bytes) and several overclaims. Records under
   `docs/trajectories/compliance/`.
 - **`find-skills`** — on-demand skill discovery.
 
-Details: **`docs/SKILLS.md`**, **`docs/DECISIONS.md`** (D-0003, D-0004, D-0011–D-0013).
+Details: **`docs/SKILLS.md`**, **`docs/DECISIONS.md`** (D-0003, D-0004, D-0011–D-0015).
 
 ## Tech stack
 
@@ -204,12 +208,13 @@ Exact versions and rationale: `docs/DECISIONS.md` (D-0001).
 ```bash
 npm ci
 git config core.hooksPath .githooks          # dataset-privacy pre-commit gate
-npm run eval -- --mode=baseline --split=evaluation --replay   # reproduce the baseline — no API key, no cost
-npm run eval -- --mode=agent    --split=evaluation --replay   # reproduce the agent run
+npm run eval -- --mode=baseline --split=evaluation --replay                # reproduce the baseline — no API key, no cost
+npm run eval -- --mode=baseline --split=evaluation --replay --corrections  # the improvement: baseline + integrator corrections (68.2%)
+npm run eval -- --mode=roi      --split=evaluation --replay                # the ROI iteration (40.9%, a documented shortfall)
 ```
 
 Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`,
-`npm test` (27), `npm run check:data`. Full clean-environment walkthrough (including a
+`npm test` (82), `npm run check:data`. Full clean-environment walkthrough (including a
 `--live` re-run and the dataset pipeline): **`docs/REPRODUCTION.md`**.
 
 ## Configuring for a real site
@@ -237,16 +242,17 @@ docs/               Hackathon deliverables (see the table below)
 
 | File | What it holds |
 | --- | --- |
+| `docs/SUBMISSION.md` | **Start here** — the 4 hackathon deliverables → where each lives, and the 1-minute reproduction |
 | `docs/PROBLEM.md` | Problem, user, bottleneck, scope, definition of "good", privacy plan |
 | `docs/CHANGELOG.md` | **Improvement Changelog** — baseline → calibration dead-end → integrator corrections, with evidence |
 | `docs/EVALUATION.md` | Metric, cases, rubric, known limitations, recorded results |
 | `docs/REPRODUCTION.md` | Clean-environment setup, exact commands, expected output, runtime & cost |
-| `docs/DECISIONS.md` | Decision log (D-0001 … D-0013) |
+| `docs/DECISIONS.md` | Decision log (D-0001 … D-0016) |
 | `docs/CONFIGURATION.md` | Every deployment-config setting: type, default, meaning |
 | `docs/LABELING.md` | How an integrator turns frames into ground truth |
 | `docs/SKILLS.md` | Connected agent skills and when to use them |
 | `docs/HACKATHON-RULES.md` | Full transcription of the hackathon rules |
-| `docs/trajectories/` | Agent trajectory records — `runtime/` (solution agent), `compliance/` (reviewer) |
+| `docs/trajectories/` | Agent trajectory records — `baseline/` (baseline + calibrated dead-end + ROI), `runtime/` (retired verification pass), `compliance/` (reviewer), plus the integrator-correction loop |
 | `docs/WORKLOG.md` | Chronological record of every change |
 | `CLAUDE.md` | Agent working agreement for this repo |
 

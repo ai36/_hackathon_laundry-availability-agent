@@ -7,14 +7,20 @@ ground rule 9 (every claim tied to evidence).
 
 | Sub-folder | Contents | Present |
 | --- | --- | --- |
-| `baseline/` | The single-prompt baseline on one frame (the fair-comparison reference), and the calibrated-agent dead-end. | `2026-08-29-recalibrated.md` (current); `2026-08-28-img_1823.md` (historical) |
-| `runtime/` | The verification-pass agent (`runAgent`) — retired 2026-08-29 as net-negative; see `docs/CHANGELOG.md` "Historical". | — |
-| `compliance/` | Each `hackathon-compliance` review run — verdict, blockers, risks, and the fixes applied. | 14 files |
+| `baseline/` | The single-prompt baseline (the fair-comparison reference), the calibrated-agent dead-end, and the ROI agent. | `2026-08-29-recalibrated.md` (baseline + calibrated), `2026-08-29-roi.md` (ROI agent); `2026-08-28-img_1823.md` (historical) |
+| `runtime/` | The verification-pass agent (`runAgent`) — retired 2026-08-29 as net-negative. | `2026-08-29-verification-pass-retired.md` |
+| _(top level)_ | The integrator-correction loop (Iteration 2 — the improvement). | `2026-08-29-integrator-corrections.md` |
+| `compliance/` | Each `hackathon-compliance` review run — verdict, blockers, risks, and the fixes applied. | 32 files |
 | `calibration/` | The calibration agent (per-site ROI config from human-confirmed frames). | — (P1, not built) |
 
-Every trajectory here is reproducible offline: the `baseline/` and `runtime/` runs replay
-from `data/cache/` with `npm run eval -- --mode=… --split=evaluation --replay` (no API key);
-the `compliance/` runs summarise a `hackathon-compliance` subagent invocation.
+Most trajectories here are reproducible offline: `baseline/2026-08-29-recalibrated.md`,
+`baseline/2026-08-29-roi.md`, and `2026-08-29-integrator-corrections.md` replay from
+`data/cache/` with `npm run eval -- --mode=… --split=evaluation --replay [--corrections]`
+(no API key). `runtime/2026-08-29-verification-pass-retired.md` was measured on the retired
+9-frame set — its cache was removed in the 2026-08-29 recut and is recoverable from git
+history; the per-frame predictions are preserved in
+`docs/artifacts/historical/eval-agent-2026-08-28.json`. The `compliance/` runs summarise a
+`hackathon-compliance` subagent invocation.
 
 ## What does NOT go here
 

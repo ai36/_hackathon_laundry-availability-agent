@@ -12,6 +12,42 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Packaging for judge review (deliverables sweep)
+
+- **README fixes:** Quick-start replaced the retired `--mode=agent --replay` line with
+  `--mode=baseline … --corrections` (the improvement) + `--mode=roi --replay`; `npm test`
+  count 27 → 82; DECISIONS range D-0013 → D-0016 (and D-0011–D-0013 → D-0011–D-0015 in the
+  agents section); trajectories doc-table row rewritten to match the folders; `grillme`
+  bullet now points at `docs/PROBLEM.md` + D-0005 instead of a nonexistent trajectory; new
+  ROI bullet under "How agents are used"; new `docs/SUBMISSION.md` row (marked "start here").
+- **Trajectories (deliverable #4) — filled 3 gaps:**
+  `docs/trajectories/baseline/2026-08-29-roi.md` (ROI agent, per-frame verdicts, 3 prompt
+  variants, 40.9 %); `docs/trajectories/runtime/2026-08-29-verification-pass-retired.md`
+  (the removed Iteration-1 verify pass, per-cell flips from the historical report, −4.4 pp);
+  `docs/trajectories/2026-08-29-integrator-corrections.md` (the improvement — 5 cells
+  flipped, +22.7 pp, human checkpoint). `docs/trajectories/README.md` table + reproducibility
+  note updated (runtime cache no longer committed).
+- **`docs/VIDEO-SCRIPT.md`** — timed ~5-min shot list: problem+baseline, one end-to-end
+  portal run, comparison table, changelog walkthrough, the removed experiment, contribution +
+  hot take. Recording is the owner's to make.
+- **`docs/SUBMISSION.md`** — one-page map: 1-minute reproduction, the 4 deliverables →
+  location, agents → trajectories, ground-rules compliance table, branch-access note
+  (`dev`; owner merges `dev → main`).
+- No `LICENSE` file added (owner call — hackathon rule 3 concerns others' licenses; nothing
+  in `docs/HACKATHON-RULES.md` requires stating ours).
+- Doc-only. `typecheck` / `lint` / `format:check` / `build` / `check:data` — pass;
+  `npm test` — 82/82; `--replay` of baseline / calibrated / roi / baseline+corr reproduces
+  45.5 / 31.8 / 40.9 / 68.2 % exactly. No code / data / number change.
+- **Compliance:** `hackathon-compliance` subagent — **PASS WITH RISKS**, no blockers
+  (`docs/trajectories/compliance/2026-08-29-final-packaging.md`). Two risks fixed before
+  commit: (1) compliance-run count said "15", corrected to **32** in `trajectories/README.md`
+  + `SUBMISSION.md`; (2) the ROI trajectory's "three prompt variants" sub-table cited a
+  Harmful column for runs `eval-roi-samples-2026-08-29.md` says were not retained and the
+  assignment contradicted that artifact — dropped the column, labelled the sub-table
+  non-reproducible session notes, moved the harmful-error caveat to prose. All headline
+  numbers, the ROI per-frame table, the correction flips, and the verify-pass figures were
+  verified cell-by-cell against `docs/artifacts/`.
+
 ### 2026-08-29 — Doc: correction → prompt-synthesis feedback loop = designed, deferred, next iteration
 
 - Owner call: the shipped model (a correction is a permanent override; the model keeps
