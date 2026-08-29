@@ -12,6 +12,13 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Added `docs/BACKLOG.md`
+
+- Owner queued 4 presentational portal-polish items (button-label consistency across the
+  camera/machine delete controls, a `save` + labelled `cancel` in the mark-wrong panel,
+  and stripping internal decision ids like `D-0015` from user-facing copy). Recorded in
+  `docs/BACKLOG.md` to pick up after the token-limit reset; no code touched.
+
 ### 2026-08-28 — Portal: seeded cameras + mask/preview/delete, unified lists, tenant labels
 
 - Owner, several messages: restore the coloured count labels on Live status (drop the drab
