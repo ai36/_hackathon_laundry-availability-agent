@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\"machines\":[{\"machineId\":\"W-04\",\"state\":\"occupied\",\"confidence\":0.85,\"rationale\":\"Control panel displays what appears to be a countdown time or cycle status (red digits visible on dark display). Door/lid appears closed and drum is not visibly empty, consistent with an active or queued cycle.\"}]}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 309,
+  "outputTokens": 79,
+  "costUsd": 0.000704
+}

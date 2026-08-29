@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\"machines\":[{\"machineId\":\"W-16\",\"state\":\"free\",\"confidence\":0.85,\"rationale\":\"Drum appears empty with clear view inside, door/lid in open position, control panel visible but display not clearly showing an active countdown or error code, no indication of running cycle\"}]}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 357,
+  "outputTokens": 72,
+  "costUsd": 0.000717
+}

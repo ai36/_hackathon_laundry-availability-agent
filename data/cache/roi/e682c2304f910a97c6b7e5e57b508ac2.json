@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-05\",\n      \"state\": \"unknown\",\n      \"confidence\": 0.3,\n      \"rationale\": \"Left readout is obscured by gray overlay/redaction in the image; cannot reliably read display content\"\n    },\n    {\n      \"machineId\": \"D-06\",\n      \"state\": \"unknown\",\n      \"confidence\": 0.3,\n      \"rationale\": \"Right readout is obscured by gray overlay/redaction in the image; cannot reliably read display content\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1054,
+  "outputTokens": 152,
+  "costUsd": 0.001814
+}

@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"W-03\",\n      \"state\": \"free\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Control panel displays a blue screen with what appears to be a price or status number (no active countdown timer visible). The door/lid appears closed and the machine shows no signs of active operation or error messages. The drum appears empty based on the visible interior.\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 357,
+  "outputTokens": 115,
+  "costUsd": 0.000932
+}

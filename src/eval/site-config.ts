@@ -19,11 +19,18 @@ export interface Camera {
   /** A still with machine ids drawn on it — the spatial key for the agent (D-0015). */
   annotatedShot?: string;
   /**
-   * An analysis mask (D-0015): a transparent image where opaque black `rgb(0,0,0)` regions
-   * cover parts of the frame the agent should ignore. Stored here; runtime application is
-   * pending (D-0016).
+   * A region map (D-0015): a PNG where each machine's body/panel is painted one solid
+   * colour and everything else is black. `--mode=roi` reads it with `maskLegend` to crop the
+   * live frame per machine. (Earlier this field held a transparent analysis mask; the
+   * `--mode=calibrated` dead-end was measured against that — see docs/DECISIONS.md D-0015.)
    */
   mask?: string;
+  /**
+   * `hex → machineId` for `mask`, one entry per machine this camera scopes. Hex is the
+   * nominal fill colour; `--mode=roi` matches each region to the nearest legend colour, so
+   * small drift from resizing / anti-aliasing is tolerated.
+   */
+  maskLegend?: Record<string, string>;
 }
 
 export interface SiteConfig {
@@ -81,6 +88,7 @@ export function upsertCamera(cfg: SiteConfig, cam: Camera & { targetId?: string 
     stubImage: cam.stubImage,
     annotatedShot: cam.annotatedShot,
     mask: cam.mask,
+    maskLegend: cam.maskLegend,
   };
   if (idx === -1) cameras.push(next);
   else cameras[idx] = { ...cameras[idx], ...next };

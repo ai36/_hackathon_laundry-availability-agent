@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\"machines\":[{\"machineId\":\"D-07\",\"state\":\"unknown\",\"confidence\":0.7,\"rationale\":\"Control panel display is too blurry and backlit to read clearly. Door appears closed. Unable to determine if running, stopped, or in error state with certainty.\"}]}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 501,
+  "outputTokens": 71,
+  "costUsd": 0.000856
+}

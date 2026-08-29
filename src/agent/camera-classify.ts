@@ -1,22 +1,15 @@
 /**
- * Camera-aware classify prompt for the portal runtime (`POST /api/refresh`, D-0015 / D-0016).
+ * Camera-aware classify prompt used by the eval's `--mode=calibrated` (`src/agent/
+ * calibrated.ts`) and by `POST /api/refresh` (D-0015 / D-0016). It sends the camera's
+ * `annotatedShot` and `mask` as extra images (`VisionRequest.extraImagePaths`, annotated
+ * first, then mask) and this text describes them in that order.
  *
- * Deliberately SEPARATE from the eval's `baselinePrompt` (`src/agent/baseline.ts`) and
- * `classifyPrompt` (`src/agent/pipeline.ts`): those are frozen so the committed 9-frame eval
- * reproduces byte-for-byte. This builder layers in what an integrator has actually
- * calibrated for one camera —
- *
- *   1. per-machine `promptFragment` hints from the roster (`data/machines.json`),
- *   2. an annotated "spatial key" still (`camera.annotatedShot`) — ids drawn on the frame,
- *   3. an analysis mask (`camera.mask`) — solid-black regions the agent must ignore.
- *
- * The two images are sent via `VisionRequest.extraImagePaths` (annotated first, then mask);
- * this text must describe them in that order. With a bare config (no fragments, no
- * annotated/mask — the state every seeded camera is in today) it degrades to the same
- * instruction the baseline uses, so this path is inert until a camera is calibrated.
- *
- * ACCURACY EFFECT IS UNMEASURED. The frozen eval scores the CLI agent on 9 frames, not this
- * route; changing it does not move any reported metric.
+ * NOTE (2026-08-29): `--mode=calibrated` is a **retired dead-end** (−13.7 pp — see
+ * `docs/CHANGELOG.md`) and `camera.mask` was afterwards repainted as a colour-coded region
+ * map for `--mode=roi`. This prompt still calls it a "transparent analysis mask" because the
+ * committed `data/cache/calibrated/` was recorded against the earlier transparent masks and
+ * `--replay` is path-keyed, so it reproduces regardless. Do not re-run `--mode=calibrated
+ * --live` expecting the recorded numbers.
  */
 
 export interface CameraClassifyInput {

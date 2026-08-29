@@ -199,10 +199,12 @@ decides during dataset construction and the decision is recorded next to the fra
   each scoped to the machines that camera owns. Well below the "10+ cases" guideline and
   small enough that a single stochastic run shifts the numbers several points — read the
   magnitudes as indicative, not precise. Multi-sample averaging deferred on API budget.
-- **Calibration images tested negative.** The `--mode=calibrated` run feeds each camera's
-  annotated shot + analysis mask as extra vision inputs; it scored −13.7 pp vs the plain
-  baseline and is retained only as a reproducible dead-end (see Results). The reported
-  improvement is from integrator corrections, not from calibration.
+- **Two calibration attempts, neither a win.** `--mode=calibrated` (annotated shot + mask as
+  vision inputs) is a −13.7 pp dead-end. `--mode=roi` (per-machine crops from a colour-coded
+  region map) is the layout-independent architecture that *should* work, but the frozen
+  config scores 40.9% on all 3 samples — a consistent ~4.6 pp below the baseline. Both are
+  retained only as reproducible results (see Results). The reported improvement is from
+  integrator corrections.
 - **Corrections are measured against the same labels they were derived from.** A `machine`
   correction sets each of its cells to its label-consistent value, so it *always* scores
   100% on its own cell by construction. "+22.7 pp" therefore means "an integrator overrode
@@ -217,8 +219,11 @@ decides during dataset construction and the decision is recorded next to the fra
 ## Results
 
 Model `claude-haiku-4-5`, 5 committed frames (one per calibrated camera), 22 determinate
-observations, single sample per mode. All `--replay`-reproducible from `data/cache/`
-byte-for-byte. Raw outputs under `docs/artifacts/eval-*-2026-08-29.json`.
+observations, **one recorded sample per config**. Re-running the ROI config held accuracy at
+40.9% but moved harmful-error 4.5–13.6% and coverage 82–86%
+(`docs/artifacts/eval-roi-samples-2026-08-29.md`) — read few-point gaps with that in mind.
+All `--replay`-reproducible from `data/cache/` byte-for-byte. Raw outputs under
+`docs/artifacts/eval-*-2026-08-29.json`.
 
 _(The earlier 9-frame / 45-observation results — baseline 62.2%, verify pass 57.8%,
 +corrections 75.6–80.0% — are retired; see `docs/CHANGELOG.md` "Historical".)_
@@ -261,6 +266,34 @@ artefact of never saying `free`. Also tried on `claude-sonnet-5` (31.8%) and fou
 phrasings (27–36%); none beat the plain baseline. **Not shipped** — kept in-tree
 (`--mode=calibrated`, cache committed) so the negative result reproduces.
 
+### ROI — 2026-08-29 (`data/cache/roi/`) — right architecture, not a measured win
+
+`npm run eval -- --mode=roi --split=evaluation --live`. The integrator paints each machine's
+body/panel one solid colour in `camera.mask` (`hex → id` in `camera.maskLegend`);
+`--mode=roi` crops the live frame to each machine's colour region and classifies one machine
+(or, for a stacked pair, one shared-panel crop) per call. **No positional inference** — the
+id follows the painted colour, so camera angle and stack layout do not matter.
+
+| Metric | Value | vs baseline |
+| --- | --- | --- |
+| Per-machine accuracy (determinate GT, n=22) | 40.9% | **−4.6 pp** |
+| Harmful-error rate | 9.1% | ±0 |
+| Coverage | 86.4% | −13.6 pp |
+| `out_of_order` recall | 0/5 | ±0 |
+| Cost | ~$0.022 (16 calls) | ×1.3 |
+
+Confusion (gt → free / occupied / out_of_order / unknown): free 7/3/0/0, occupied 1/2/2/2,
+out_of_order 1/3/0/1. Per camera: **C-01 3/4, C-04 3/6, C-05 2/3, C-03 0/2, C-02 1/7**.
+The frozen config re-ran to **40.9% on all 3 samples** (`eval-roi-samples-2026-08-29.md`) —
+a small consistent shortfall vs the baseline's 45.5%. Earlier prompt variants (vaguer
+up/down wording) reached 50–54.5% but by guessing more (harmful-error up to 13.6%). The tight
+crops plus a "2.25 is a price, not a countdown" rule help `free` precision on the front-on
+camera; `claude-haiku-4-5` cannot reliably read the small worn 7-segment displays in the wide
+angled
+shots. `out_of_order` stays 0/5 — the corrections layer owns that. **Kept as an iteration**
+(`--mode=roi`, cache committed) — the layout-independent per-machine architecture is the
+right one for a real deployment, but it does not beat the naive baseline here.
+
 ### Baseline + integrator corrections (D-0014) — 2026-08-29 — recommended
 
 `npm run eval -- --mode=baseline --split=evaluation --replay --corrections`. Report:
@@ -276,7 +309,9 @@ phrasings (27–36%); none beat the plain baseline. **Not shipped** — kept in-
 
 Corrections on file: **3**, all `machine`-scope (`W-04`, `D-02`, `D-06` = "out of service"),
 covering **5** determinate observations across cameras C-01–C-04 (all 5 were baseline errors).
-Confusion (gt → …): free 4/6/0/0, occupied 1/6/0/0, out_of_order 0/0/5/0.
+Confusion (gt → …): free 4/6/0/0, occupied 1/6/0/0, out_of_order 0/0/5/0. Applied on the ROI
+base instead (`--mode=roi --replay --corrections`) it gives **63.6%** — the corrections
+dominate whichever base they sit on.
 
 **Model capability, corrections excluded:** on the **17** observations no correction touches,
 the baseline model scores **10/17 = 58.8%** — that is the honest "what the model can do"

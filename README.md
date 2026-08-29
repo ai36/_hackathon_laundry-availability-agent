@@ -25,30 +25,43 @@ Full problem statement, scope, phasing, and the data/privacy plan: **`docs/PROBL
 The core P0: given a laundry-room frame, produce a **verified per-machine status list**.
 
 - **Baseline** — one whole-frame vision call, told which machine ids the camera covers.
-- **Calibrated agent** — the same call plus the camera's D-0015 calibration: an annotated
-  "location map" still (ids drawn on the view) and an analysis mask (transparent over the
-  panels that decide state). **This did not work** — see below.
+- **Calibrated agent** — the same call plus the camera's annotated shot + mask as extra
+  vision inputs (D-0015). **Dead-end** — see below.
+- **ROI agent** — crop the frame to each machine's own colour region in an integrator-painted
+  region map, one call per machine (`src/agent/roi.ts`). The architecturally-right approach;
+  not a measured win at this sample size — see below.
 - **Integrator corrections (D-0014)** — an integrator records a machine's true state once;
   a `machine`-scope correction overrides the agent for that unit in every frame and every
   future capture.
 
 ### Results — `claude-haiku-4-5`, 5 committed frames (one per calibrated camera), 22 determinate observations, single sample
 
-| Metric | Baseline | Calibrated | Baseline + corr. | **Calibrated + corr.** |
-| --- | --- | --- | --- | --- |
-| Per-machine accuracy | 45.5% | 31.8% | **68.2%** | 54.5% |
-| **Harmful-error rate** (told `free`, actually not) | 9.1% | 0.0% | 4.5% | **0.0%** |
-| Coverage (gave an actionable answer) | 100% | 100% | 100% | 100% |
-| **`out_of_order` recall** | 0/5 | 0/5 | **5/5** | 5/5 |
-| Model cost per frame | ~$0.003 | ~$0.007 | ~$0.003 | ~$0.007 |
+| Metric | Baseline | Calibrated (images) | ROI (region crops) | **Baseline + corr.** | ROI + corr. |
+| --- | --- | --- | --- | --- | --- |
+| Per-machine accuracy | 45.5% | 31.8% | 40.9% | **68.2%** | 63.6% |
+| **Harmful-error rate** (told `free`, actually not) | 9.1% | 0.0% | 9.1% | 4.5% | **4.5%** |
+| Coverage (gave an actionable answer) | 100% | 100% | 86% | 100% | 91% |
+| **`out_of_order` recall** | 0/5 | 0/5 | 0/5 | **5/5** | 5/5 |
+| Model cost per frame | ~$0.003 | ~$0.007 | ~$0.004 | ~$0.003 | ~$0.004 |
 
-**The calibration images are a documented dead-end.** Feeding the annotated shot and the
-mask as extra vision inputs is **net-negative** (−13.7 pp): the model reads state off the
-flat-colour annotation, and the mostly-black mask image collapses it onto "occupied" for
-every machine (`free` recall 0/10). Tried across two models and four prompt phrasings — see
-`docs/CHANGELOG.md`. Kept in-tree (`--mode=calibrated`, `data/cache/calibrated/`) as a
-reproducible negative result. The calibrated column shows 0% harmful only because it never
-says `free`.
+**Two calibration attempts, one dead-end and one architecturally-right-but-not-a-win:**
+
+- **Calibrated (feeding the annotated shot + mask as extra vision inputs) is a dead-end**
+  (−13.7 pp): the model reads state off the flat-colour annotation, and the mostly-black
+  mask image collapses it onto "occupied" for every machine (`free` recall 0/10). Tried on
+  two models and four prompt phrasings; none beat baseline.
+- **ROI (crop the live frame to each machine's own colour region in an integrator-painted
+  region map, one call per machine — `src/agent/roi.ts`)** is the right architecture: no
+  positional inference, robust to camera angle and stacked units. But the frozen config
+  scores **40.9 % — a small, consistent ~4.6 pp shortfall below the baseline** (stable across
+  3 samples; `docs/artifacts/eval-roi-samples-2026-08-29.md`). The mechanism visibly helps on
+  the front-on camera (C-01, 3–4/4) and on `free` precision, but `claude-haiku-4-5` can't
+  reliably read small / worn 7-segment displays in the wide, angled shots (C-02: 1/7), and
+  `out_of_order` stays 0/5 (the corrections layer owns that). Earlier prompt variants reached
+  ~50–54 % — but by guessing more, which also pushed harmful-error to 13.6 %.
+
+Both are kept in-tree (`--mode=calibrated` / `--mode=roi`, caches committed) so the negative
+and neutral results reproduce. Full write-up: `docs/CHANGELOG.md`.
 
 **Integrator corrections are the improvement: 45.5% → 68.2% (+22.7 pp).** The vision model
 cannot tell a hard-error display (`E rot`) from a running cycle, so `out_of_order` recall is
@@ -61,9 +74,11 @@ scores 100% on its own cell by construction — "+22.7 pp" means "an integrator 
 22 cells to their known-correct value." On the **17 observations no correction touches**, the
 model scores **10/17 = 58.8%** — that is the model-capability number; 68.2% is that plus the
 5 overrides. What the delta legitimately shows: the `out_of_order` failure is real and fixed
-by neither prompting nor image calibration, and one durable fact per broken unit clears it
-everywhere for free. **n = 22, single sample** — read the magnitudes as indicative. All runs
-`--replay`-reproducible offline. Full write-up: **`docs/CHANGELOG.md`**.
+by none of prompting, image calibration, or per-machine cropping, and one durable fact per
+broken unit clears it everywhere for free. **n = 22, single sample per config** — accuracy is
+fairly stable on re-runs but harmful-error / coverage swing several points
+(`docs/artifacts/eval-roi-samples-2026-08-29.md`). All runs `--replay`-reproducible offline.
+Full write-up: **`docs/CHANGELOG.md`**.
 
 ### The portal
 

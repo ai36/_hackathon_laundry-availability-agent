@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"W-01\",\n      \"state\": \"free\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Control panel is lit and displays what appears to be a price or default state (not a countdown timer with colons). Door/lid appears closed but not locked in a cycle. No error codes visible. Machine appears idle and available.\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 357,
+  "outputTokens": 110,
+  "costUsd": 0.000907
+}

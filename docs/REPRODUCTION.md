@@ -65,7 +65,7 @@ npm start        # serve the production build
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint (flat config)
 npm run format:check # prettier
-npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations, calibration-config guard, requestHash, camera-classify + calibrated eval (expect: 75/75 pass)
+npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations, calibration-config guard, requestHash, camera-classify, calibrated + ROI eval (expect: 82/82 pass)
 npm run check:data   # dataset privacy gate (also runs as the pre-commit hook)
 ```
 
@@ -144,6 +144,29 @@ image collapses it onto `occupied` for every machine (`free` recall 0/10; the 0%
 an artefact of never saying `free`). Reproduced on `claude-sonnet-5` and four prompt
 phrasings; none beat the baseline. Kept only so the negative result reproduces — see
 `docs/CHANGELOG.md` "Recalibrated evaluation".
+
+## ROI agent — right architecture, not a measured win
+
+```bash
+npm run eval -- --mode=roi --split=evaluation --replay   # NO key, NO cost — reproduces the recorded run
+npm run eval -- --mode=roi --split=evaluation --live     # re-sample: paid (~16 calls); needs sharp (installed by next)
+```
+
+`camera.mask` is a **region map** — each machine's body/panel painted one solid colour,
+`camera.maskLegend` maps `hex → id`. `--mode=roi` crops the live frame to each machine's
+colour region and classifies one machine (or one stacked pair) per call — no positional
+inference. `data/cache/roi/`, `claude-haiku-4-5`, 2026-08-29:
+
+| accuracy | harmful-error | coverage | `out_of_order` | cost |
+| --- | --- | --- | --- | --- |
+| 40.9% | 9.1% | 86.4% | 0/5 | ~$0.022 (`--live`) / $0 (`--replay`) |
+
+The frozen config scores **40.9% on all 3 samples** (`docs/artifacts/eval-roi-samples-2026-08-29.md`)
+— a small consistent shortfall vs the baseline's 45.5%. Helps `free` precision and the
+front-on camera (C-01 3/4); haiku can't read the small worn 7-segment displays in the wide
+angled shots (C-02 1/7). `--mode=roi … --corrections` → 63.6%. Kept as an iteration — see
+`docs/CHANGELOG.md`. `--mode=roi` needs `sharp` (an explicit `devDependency`; `npm ci`
+installs it).
 
 ## Baseline + integrator corrections (D-0014) — recommended
 

@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-03\",\n      \"state\": \"free\",\n      \"confidence\": 0.95,\n      \"rationale\": \"LEFT readout shows '225' with up-arrow, which is a price display (bare number, no colon), indicating the unit is available and not running.\"\n    },\n    {\n      \"machineId\": \"D-04\",\n      \"state\": \"free\",\n      \"confidence\": 0.95,\n      \"rationale\": \"RIGHT readout shows '225' with down-arrow, which is a price display (bare number, no colon), indicating the unit is available and not running.\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1226,
+  "outputTokens": 174,
+  "costUsd": 0.002096
+}

@@ -10,7 +10,13 @@
       ],
       "stubImage": "data/public/frames/img_1819.jpg",
       "annotatedShot": "data/public/frames/img_1819.annotated.jpg",
-      "mask": "data/public/frames/img_1819.mask.png"
+      "mask": "data/public/frames/img_1819.mask.png",
+      "maskLegend": {
+        "ff0000": "W-01",
+        "0000ff": "W-02",
+        "00ff00": "W-03",
+        "ffff00": "W-04"
+      }
     },
     {
       "id": "C-02",
@@ -25,7 +31,16 @@
       ],
       "stubImage": "data/public/frames/img_1821.jpg",
       "annotatedShot": "data/public/frames/img_1821.annotated.jpg",
-      "mask": "data/public/frames/img_1821.mask.png"
+      "mask": "data/public/frames/img_1821.mask.png",
+      "maskLegend": {
+        "ff0000": "D-01",
+        "ff6a00": "D-02",
+        "ffd800": "D-03",
+        "00ffff": "D-04",
+        "4cff00": "D-05",
+        "0094ff": "D-06",
+        "0026ff": "D-07"
+      }
     },
     {
       "id": "C-03",
@@ -35,7 +50,11 @@
       ],
       "stubImage": "data/public/frames/img_1822.jpg",
       "annotatedShot": "data/public/frames/img_1822.annotated.jpg",
-      "mask": "data/public/frames/img_1822.mask.png"
+      "mask": "data/public/frames/img_1822.mask.png",
+      "maskLegend": {
+        "ff0000": "D-01",
+        "ff6a00": "D-02"
+      }
     },
     {
       "id": "C-04",
@@ -51,7 +70,17 @@
       ],
       "stubImage": "data/public/frames/img_1823.jpg",
       "annotatedShot": "data/public/frames/img_1823.annotated.jpg",
-      "mask": "data/public/frames/img_1823.mask.png"
+      "mask": "data/public/frames/img_1823.mask.png",
+      "maskLegend": {
+        "ff0000": "D-03",
+        "ff6a00": "D-04",
+        "ffd800": "D-05",
+        "4cff00": "D-06",
+        "00ffff": "D-07",
+        "0094ff": "D-08",
+        "0026ff": "D-09",
+        "8200ff": "D-10"
+      }
     },
     {
       "id": "C-05",
@@ -62,7 +91,12 @@
       ],
       "stubImage": "data/public/frames/img_8633.jpg",
       "annotatedShot": "data/public/frames/img_8633.annotated.jpg",
-      "mask": "data/public/frames/img_8633.mask.png"
+      "mask": "data/public/frames/img_8633.mask.png",
+      "maskLegend": {
+        "ff0000": "W-14",
+        "ff6a00": "W-15",
+        "ffd800": "W-16"
+      }
     }
   ]
 }

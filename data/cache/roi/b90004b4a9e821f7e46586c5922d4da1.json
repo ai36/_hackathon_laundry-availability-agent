@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"W-15\",\n      \"state\": \"free\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Control panel displays a numeric value (appears to be price/cost information), lid is open showing empty drum, no active cycle indicators visible, machine appears idle and available\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 534,
+  "outputTokens": 97,
+  "costUsd": 0.001019
+}

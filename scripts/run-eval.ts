@@ -23,6 +23,7 @@ import { config } from "@/config";
 import { runBaseline } from "@/agent/baseline";
 import { runCalibrated } from "@/agent/calibrated";
 import { runAgent } from "@/agent/pipeline";
+import { runRoi } from "@/agent/roi";
 import { AnthropicVisionClient, CachedVisionClient, FakeVisionClient } from "@/agent/vision";
 import type { VisionClient } from "@/agent/types";
 import { cameraForFrame } from "@/eval/calibration";
@@ -38,7 +39,7 @@ const args = new Map(
     return [k, v ?? "true"] as const;
   }),
 );
-const mode = (args.get("mode") ?? "baseline") as "baseline" | "agent" | "calibrated";
+const mode = (args.get("mode") ?? "baseline") as "baseline" | "agent" | "calibrated" | "roi";
 const split = args.get("split") ?? "evaluation";
 const replay = args.has("replay");
 const fake = args.has("fake");
@@ -49,8 +50,8 @@ const outPath =
   args.get("out") ??
   `docs/artifacts/eval-${mode}${withCorrections ? "-corrected" : ""}-${today}.json`;
 
-if (mode !== "baseline" && mode !== "agent" && mode !== "calibrated") {
-  console.error(`--mode must be "baseline", "agent", or "calibrated"`);
+if (mode !== "baseline" && mode !== "agent" && mode !== "calibrated" && mode !== "roi") {
+  console.error(`--mode must be "baseline", "agent", "calibrated", or "roi"`);
   process.exit(1);
 }
 if (Number(replay) + Number(fake) + Number(live) !== 1) {
@@ -102,12 +103,15 @@ async function main(): Promise<void> {
     if (camera) scope.set(frameId, new Set(machineIds));
 
     let pred: FramePrediction;
-    if (mode === "calibrated") {
+    if (mode === "calibrated" || mode === "roi") {
       if (!camera) {
-        console.warn(`! ${frameId}: label has no camera — skipping (calibrated mode needs one)`);
+        console.warn(`! ${frameId}: label has no camera — skipping (${mode} mode needs one)`);
         continue;
       }
-      pred = await runCalibrated(frameId, vision, camera);
+      pred =
+        mode === "roi"
+          ? await runRoi(frameId, vision, camera, !replay)
+          : await runCalibrated(frameId, vision, camera);
     } else if (mode === "baseline") {
       pred = await runBaseline(frameId, vision, machineIds);
     } else {

@@ -37,40 +37,58 @@ decision it led to. Include experiments that were later removed and what they ta
 | Iteration 2 (P0) | **Integrator corrections** (D-0014). The integrator marks a machine wrong once; the correction is stored (`data/corrections/`) and applied as an authoritative override. `observation`-scope fixes one (frame, machine); `machine`-scope (for durable properties like `out_of_order`) applies to that machine in **every** frame. | **3 `machine`-scope corrections** (`W-04`, `D-02`, `D-06` = "out of service"). On the 9-frame set: accuracy **57.8% → 75.6%**, **`out_of_order` recall 0/8 → 8/8**, no extra model cost (post-hoc). Report kept at `docs/artifacts/historical/eval-agent-corrected-2026-08-28.json`. The same 3 corrections carry to the recalibrated set — see the row below. | **Kept — the improvement.** The vision model can't distinguish a hard-error display from a running cycle; one durable fact per broken machine fixes it in every angle and every future capture. Ceiling: the remaining errors are `free`→`occupied` over-calls, time-varying (`observation`-scope) — per-frame hand-labelling, not learning, left as the honest limit. |
 | Recalibration (2026-08-29) — dataset | Rebuilt the eval around the D-0015 calibration model: 5 committed stills, one per camera C-01…C-05, each re-retouched, each with a `camera` field in its label. `data/site-config.json` scopes every camera to the machines it owns + carries its annotated shot and analysis mask. Dropped the 4 close-up frames that no camera covered. New eval mode `--mode=calibrated`; baseline re-run on the new scoped set. | Baseline (`claude-haiku-4-5`, whole frame + scoped id list): **accuracy 45.5%**, harmful-error 9.1%, coverage 100%, `out_of_order` 0/5 (22 determinate obs / 5 frames). `docs/artifacts/eval-baseline-2026-08-29.json`, cache `data/cache/baseline/` (5). | Smaller, harder set — the 5 frames concentrate the dryer-wall panels and every `out_of_order` case. `free`→`occupied` over-call (6/10) and `out_of_order` 0/5 are the same failures as before, sharper. The old 9-frame numbers (62.2 / 57.8 / 75.6 / 80.0) do not carry over and are retired. |
 | Recalibration (2026-08-29) — calibrated agent | **Feed the camera's annotated shot + analysis mask as extra vision inputs**, with a prompt that names them ("IMAGE 2 is a location map — never read state from it; IMAGE 3 is a mask — its clear windows are the panels to read in IMAGE 1"). `npm run eval -- --mode=calibrated`. | accuracy **31.8%** (baseline 45.5% — **−13.7 pp**), harmful-error 0.0%, coverage 100%, `out_of_order` 0/5. `docs/artifacts/eval-calibrated-2026-08-29.json`, cache `data/cache/calibrated/` (5). Also tried on `claude-sonnet-5` (31.8%) and across four prompt phrasings (27–36%); none beat the plain baseline. | **Removed — a documented dead-end.** The model reads state off the flat-colour annotation ("Red washer… control panel visible → occupied"), and the mostly-black mask image drives it to answer `occupied` for every machine (`free` recall 0/10). The 0% harmful rate is an artefact of never saying `free`, not a safety gain. Kept in-tree (`--mode=calibrated`, cache committed) so the negative result reproduces. What calibration *did* leave: per-camera machine scoping, which is neutral. |
-| Recalibration (2026-08-29) — integrator corrections | **Same 3 `machine`-scope corrections** (`W-04`, `D-02`, `D-06` = "out of service"), re-scored on the new set. `--replay --corrections`. | Baseline + corrections: accuracy **45.5% → 68.2%** (+22.7 pp), `out_of_order` recall **0/5 → 5/5**, harmful-error **9.1% → 4.5%**, coverage 100%, no extra model cost. `docs/artifacts/eval-baseline-corrected-2026-08-29.json`. (Calibrated + corrections: 54.5%, from the lower calibrated base.) | **Kept — the improvement.** Unchanged conclusion from the old set: the vision model cannot tell a hard-error display from a running cycle, and one durable fact per broken unit clears it in every camera at no model cost. Now also halves the harmful-error rate. Remaining error is `free`→`occupied` over-calls, which are time-varying and out of scope for durable corrections. |
+| Recalibration (2026-08-29) — ROI agent | **Per-machine crops.** The integrator paints each machine's body/panel one solid colour in a region-map PNG (`camera.mask`) + a `hex → id` `maskLegend`; `--mode=roi` (`src/agent/roi.ts`) reads it (nearest-colour match), crops the live frame to each machine's region — stacked pairs cropped together on the shared panel — and classifies one machine (or one pair) per call. No positional inference: id follows the painted colour, so camera angle / stack layout do not matter. | accuracy **40.9%** (baseline 45.5% — **−4.6 pp**), harmful-error 9.1%, coverage 86.4%, `out_of_order` 0/5, 16 calls, ~$0.02. `docs/artifacts/eval-roi-2026-08-29.json`, cache `data/cache/roi/`. Frozen config is **stable at 40.9% across 3 samples** (`eval-roi-samples-2026-08-29.md`); +corrections 63.6%. | **Kept as an iteration — the right architecture, a small measured shortfall.** As frozen it is a consistent ~4.6 pp below the baseline: it visibly helps on the front-on camera (C-01, 3–4/4) and on `free` precision (tight crop + a "2.25 is a price, not a countdown" rule), but `claude-haiku-4-5` can't reliably read the small / worn 7-segment displays in the wide angled shots (C-02: 1/7, C-03: 0/2), and `out_of_order` stays 0/5. Earlier prompt variants reached ~50–54% — by guessing more (harmful-error up to 13.6%). The improvement path stays the corrections layer. |
+| Recalibration (2026-08-29) — integrator corrections | **Same 3 `machine`-scope corrections** (`W-04`, `D-02`, `D-06` = "out of service"), re-scored on the new set. `--replay --corrections`. | Baseline + corrections: accuracy **45.5% → 68.2%** (+22.7 pp), `out_of_order` recall **0/5 → 5/5**, harmful-error **9.1% → 4.5%**, coverage 100%, no extra model cost. `docs/artifacts/eval-baseline-corrected-2026-08-29.json`. (Calibrated + corrections: 54.5%; ROI + corrections: 63.6% — corrections dominate either base.) | **Kept — the improvement.** Unchanged conclusion from the old set: the vision model cannot tell a hard-error display from a running cycle, and one durable fact per broken unit clears it in every camera at no model cost. Now also halves the harmful-error rate. Remaining error is `free`→`occupied` over-calls, which are time-varying and out of scope for durable corrections. |
 
 ## Recalibrated evaluation (2026-08-29)
 
 The eval was rebuilt around the D-0015 calibration model. **What changed:** the frame set
 went from 9 unscoped stills to **5 stills, one per calibrated camera** (`C-01…C-05`), each
 re-retouched by the author and each scoped — via `data/site-config.json` — to the machines
-that camera is responsible for. The 4 close-up frames no camera covered were dropped. A new
-`--mode=calibrated` feeds each camera's annotated shot + analysis mask as extra images.
+that camera is responsible for. The 4 close-up frames no camera covered were dropped. Two
+new modes: `--mode=calibrated` (annotated shot + mask as extra images) and `--mode=roi`
+(per-machine crops from a colour-coded region map — `src/agent/roi.ts`, `src/eval/mask-
+regions.ts`).
 
 **Why the old numbers do not carry over:** different frames, different (author-redrawn)
 redactions, and per-camera scoping change the observation set entirely (45 determinate → 22).
 The 2026-08-28 reports and the 62.2 / 57.8 / 75.6 / 80.0 figures are **retired**; the
 Progression rows above them are kept as history.
 
-**One sample per mode** (`claude-haiku-4-5`; stochastic — a single run shifts these several
-points, and n = 22 is small; treat magnitudes as indicative). All score the same 22
-determinate observations on the same 5 committed frames; all `--replay`-reproducible from
-`data/cache/` byte-for-byte.
+**One recorded sample per config** (`claude-haiku-4-5`), n = 22 — small. Re-runs of the ROI
+config held accuracy at 40.9% but moved harmful-error 4.5–13.6% and coverage 82–86%
+(`docs/artifacts/eval-roi-samples-2026-08-29.md`); read few-point gaps with that in mind. All
+score the same 22 determinate observations on the same 5 committed frames; all
+`--replay`-reproducible from `data/cache/` byte-for-byte.
 
-| Metric | Baseline | Calibrated | **Baseline + corr.** | Calibrated + corr. |
-| --- | --- | --- | --- | --- |
-| Per-machine accuracy (determinate GT, n=22) | 45.5% | 31.8% | **68.2%** | 54.5% |
-| Harmful-error rate | 9.1% | 0.0% | **4.5%** | 0.0% |
-| Coverage | 100% | 100% | 100% | 100% |
-| Accuracy on covered | 45.5% | 31.8% | **68.2%** | 54.5% |
-| `out_of_order` recall | 0/5 | 0/5 | **5/5** | 5/5 |
-| Model cost per frame | ~$0.003 | ~$0.007 | ~$0.003 | ~$0.007 |
+| Metric | Baseline | Calibrated | ROI | **Baseline + corr.** | ROI + corr. |
+| --- | --- | --- | --- | --- | --- |
+| Per-machine accuracy (determinate GT, n=22) | 45.5% | 31.8% | 40.9% | **68.2%** | 63.6% |
+| Harmful-error rate | 9.1% | 0.0% | 9.1% | **4.5%** | 4.5% |
+| Coverage | 100% | 100% | 86.4% | 100% | 90.9% |
+| Accuracy on covered | 45.5% | 31.8% | 47.4% | **68.2%** | 70.0% |
+| `out_of_order` recall | 0/5 | 0/5 | 0/5 | **5/5** | 5/5 |
+| Model cost per frame | ~$0.003 | ~$0.007 | ~$0.004 | ~$0.003 | ~$0.004 |
 
 **Calibrated** (annotated shot + mask as vision inputs) is a **documented dead-end**: −13.7 pp
 vs baseline, the model reads state off the annotation layer, and the mask image collapses it
-onto `occupied` (`free` recall 0/10 — hence the misleading 0% harmful). Not shipped; kept
-in-tree for reproducibility. **Baseline + integrator corrections** is the improvement:
-+22.7 pp, `out_of_order` 0/5 → 5/5, harmful-error halved.
+onto `occupied` (`free` recall 0/10 — hence the misleading 0% harmful).
+
+**ROI** (per-machine crops from the colour-coded region map) is the **architecturally-right
+approach with a small measured shortfall**: id follows the painted colour, so a camera at an
+angle or a non-standard stack is handled without any positional guessing — but the frozen
+config scores **40.9% across 3 samples, ~4.6 pp below the baseline**. It clearly helps on the
+front-on camera and on `free` precision; `claude-haiku-4-5` just cannot read the small worn
+7-segment displays in the wide angled shots (C-02: 1/7, C-03: 0/2). Three prompt variants
+(vague up/down; explicit left/right; + worn-segment) scored 40.9 / 50.0 / 54.5% — the higher
+numbers from vaguer prompts that also raised harmful-error to 13.6%. The committed config is
+the "left/right" variant (which re-ran to 40.9% here); the worn-segment caveat was kept out
+(disclosed — it is `out_of_order` guidance, which the corrections layer owns).
+
+Both are kept in-tree (`--mode=calibrated` / `--mode=roi`, caches committed) so the results
+reproduce. **Baseline + integrator corrections** remains the improvement: +22.7 pp,
+`out_of_order` 0/5 → 5/5, harmful-error halved (and it dominates either alternative base —
+ROI + corrections is 63.6%).
 
 ### Historical — Baseline → Iteration 1 → Iteration 2 (9-frame set, retired 2026-08-29)
 
@@ -127,6 +145,40 @@ then let the metric — not the demo — tell you whether the agent is better.
 ## Verification runs
 
 Record the result of each infra verification here (append, newest first).
+
+### 2026-08-29 — ROI mode: per-machine crops from a colour-coded region map
+
+- **Region map:** `camera.mask` is now a PNG where each machine's body/panel is painted one
+  solid colour; `camera.maskLegend` (`data/site-config.json`) is `hex → machineId`, one per
+  machine. The author drew all 5 (`img_*.mask.png`, replacing the earlier transparent masks).
+  `src/eval/mask-regions.ts` reads it — nearest-legend-colour per pixel (tolerates
+  resize / anti-alias drift), unions same-colour pixels, one bbox per machine; `groupRegions`
+  merges a **vertical** x-overlapping pair into one stacked-panel crop and keeps a
+  perspective-diagonal row as separate crops.
+- **`--mode=roi`** (`src/agent/roi.ts`, `runRoi`): crop the live frame to each group's region
+  (via `sharp`, `--live` only), one classify call per group; a stacked pair is told which
+  readout is the upper unit's (left, up-arrow) and which the lower's (right, down-arrow). The
+  cache is keyed by the crop bbox, not image bytes, so `--replay` reproduces without cropping
+  — `sharp` (now an explicit `devDependency`, pinned to the `^0.35.3` `next` expects) derives
+  bboxes on replay.
+- **`--live` (haiku, 16 calls, ~$0.02):** accuracy **40.9%** / harmful 9.1% / coverage 86.4%
+  / `out_of_order` 0/5; `--replay --corrections` → **63.6%** / harmful 4.5%. The frozen config
+  re-ran to **40.9% accuracy on all 3 samples** (harmful 4.5–13.6%, coverage 82–86%) —
+  ~4.6 pp below the baseline's single 45.5% (`eval-roi-samples-2026-08-29.md`). Per camera:
+  C-01 3/4, C-04 3/6, C-05 2/3, C-03 0/2, C-02 1/7 (the wide angled shots defeat haiku's
+  small-display OCR). Reports `docs/artifacts/eval-roi{,-corrected}-2026-08-29.json`, cache
+  `data/cache/roi/` (force-added); both reproduce byte-for-byte.
+- Also tried three prompt variants (vague up/down; explicit left/right; + worn-segment
+  guidance) — 40.9 / 50.0 / 54.5%, harmful 4.5–13.6%; the higher numbers came from vaguer
+  prompts guessing more. Froze the left/right variant; kept the worn-segment caveat OUT (it
+  shifted free/occupied the wrong
+  way here, and `out_of_order` is the corrections layer's job, not ROI's) — a disclosed call.
+- `src/eval/site-config.ts` `Camera` gains `maskLegend?`; `src/eval/types.ts` `meta.mode`
+  gains `"roi"`; `run-eval.ts` gains `--mode=roi`. Tests: `mask-regions.test.ts` (6),
+  `roi.test.ts` (2) — **82/82**. `typecheck` / `lint` / `format:check` / `check:data` /
+  `build` pass.
+- **Verdict:** kept as an iteration — the right architecture (layout-independent per-machine
+  crops), not a measured win on this set. The improvement path stays integrator corrections.
 
 ### 2026-08-29 — recalibrated eval: 5 camera-scoped frames; calibration images = dead-end; new baseline
 

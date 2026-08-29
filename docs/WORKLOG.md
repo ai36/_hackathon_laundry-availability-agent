@@ -12,6 +12,52 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — `--mode=roi`: per-machine crops from a colour-coded region map
+
+- **Owner-driven.** After the annotated-shot + mask-as-image calibration failed, the owner
+  repainted all 5 `camera.mask` PNGs so each machine's body/panel is one solid colour, and
+  supplied a `hex → id` legend per camera. Goal: crop the frame to each machine's own region
+  and classify it alone — no positional (left-to-right / top-to-bottom) inference, robust to
+  camera angle and non-standard stacks.
+- **Code:** `src/eval/mask-regions.ts` — reads the region map, assigns each non-black pixel to
+  the nearest legend colour (Euclidean RGB, tolerant of resize/anti-alias drift), unions
+  same-colour pixels → one bbox per machine; `groupRegions` merges a *vertically* stacked
+  x-overlapping pair into one shared-panel crop, keeps a perspective-diagonal row separate.
+  `src/agent/roi.ts` `runRoi` — crop per group via `sharp` (`--live` only; the cache is
+  bbox-keyed so `--replay` never crops), one classify call per group, stacked pair told
+  which readout is upper (left/↑) vs lower (right/↓). `data/site-config.json` `Camera` gains
+  `maskLegend`; `meta.mode` gains `"roi"`; `run-eval.ts` gains `--mode=roi`.
+- **`--live` (haiku, 16 calls, ~$0.02):** **40.9%** / harmful 9.1% / coverage 86.4% / oo 0/5.
+  `--replay --corrections` → **63.6%** / harmful 4.5%. Frozen config re-ran to **40.9%
+  accuracy on all 3 samples** (`eval-roi-samples-2026-08-29.md`; harmful 4.5–13.6%, coverage
+  82–86%) — a consistent **~4.6 pp below baseline** (45.5%). Per camera: C-01 3/4, C-04 3/6,
+  C-05 2/3, C-03 0/2, C-02 1/7 (haiku can't read small worn displays in the wide angled
+  shots). Tried 3 prompt variants (vague / +left-right / +worn-segment) 40.9 / 50.0 / 54.5% —
+  the higher numbers from vaguer prompts guessing more (harmful up to 13.6%). Froze the
+  left/right variant; kept worn-segment guidance OUT (disclosed — it's `out_of_order`
+  guidance, which the corrections layer owns).
+- Reports `docs/artifacts/eval-roi{,-corrected,-samples}-2026-08-29.{json,md}`, cache
+  `data/cache/roi/` (force-added), reports reproduce byte-for-byte. `sharp` added as an
+  explicit `devDependency` (`^0.35.3`, the range `next` uses) — `--mode=roi` needs it, and it
+  was only an optional transitive dep before. Tests `mask-regions.test.ts` (6) +
+  `roi.test.ts` (2) → **82/82**. `typecheck` / `lint` / `format:check` / `check:data` /
+  `build` pass.
+- **Verdict:** kept as an iteration — right architecture (layout-independent per-machine
+  crops), a small measured shortfall (~4.6 pp) on this set. Improvement path stays integrator
+  corrections.
+- Docs: README (Results table + bullets), `docs/CHANGELOG.md` (Progression row + Recalibrated
+  table + Verification run), `docs/EVALUATION.md` (Results + limitations), `docs/DECISIONS.md`
+  D-0015 amendment, `docs/REPRODUCTION.md`.
+- **Compliance:** `hackathon-compliance` → **PASS WITH RISKS**
+  (`docs/trajectories/compliance/2026-08-29-mode-roi.md`). No blockers. Three risks handled
+  before push: (1) the "run spread" claim had only one committed report — ran the frozen
+  config 2 more times, found accuracy stable at 40.9% (not 41–55% — that was the *prompt
+  variants*), committed `eval-roi-samples-2026-08-29.md`, and corrected every doc to "40.9%,
+  ~4.6 pp below baseline" (the "within noise / indistinguishable" framing was an over-claim);
+  (2) `sharp` was only an optional transitive dep — added as an explicit `devDependency`
+  pinned to `^0.35.3`, lockfile updated, noted in REPRODUCTION; (3) this WORKLOG line + the
+  trajectory file.
+
 ### 2026-08-29 — Recalibrated eval: 5 camera-scoped frames; calibration-images tested negative; new baseline
 
 - **Owner-driven.** Built the D-0015 calibration set camera by camera: for each of C-01…C-05

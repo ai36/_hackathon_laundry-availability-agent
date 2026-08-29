@@ -923,9 +923,26 @@ Reproduced on `claude-sonnet-5` (31.8%) and across four prompt phrasings (27–3
 the baseline. **Kept in-tree** (`--mode=calibrated`, `data/cache/calibrated/` committed) as a
 reproducible negative result, like the D-0014 verification pass. What survives from
 calibration in the eval: per-camera machine **scoping** (neutral). The portal / `/api/refresh`
-path still sends the images — it is a live operator tool, not a scored claim — but the
-integrator should treat annotated shot + mask as optional and low-value on current models.
+path still sends the images — it is a live operator tool, not a scored claim.
 Full write-up: `docs/CHANGELOG.md` "Recalibrated evaluation".
+
+**Amendment (2026-08-29) — `camera.mask` is now a colour-coded region map; `--mode=roi`.**
+The transparent analysis mask was replaced by a **region map**: a PNG where each machine's
+body/panel is painted one solid colour, plus `camera.maskLegend` (`hex → machineId`, one per
+machine). `src/eval/mask-regions.ts` reads it — nearest-legend-colour per pixel (tolerates
+resize / anti-alias drift), unions same-colour pixels into one bbox per machine — and
+`--mode=roi` (`src/agent/roi.ts`) crops the live frame to each machine's region and
+classifies **one machine per call** (a vertically-stacked pair is cropped together on its
+shared panel, told which readout is which). This removes all positional inference: the id
+follows the painted colour, so a camera at an angle or a non-standard stack layout is
+handled without any left-to-right / top-to-bottom convention. **Result:** the frozen config
+scores 40.9% on all 3 samples (`docs/artifacts/eval-roi-samples-2026-08-29.md`) — a small
+consistent ~4.6 pp shortfall below the baseline. It helps `free` precision and the front-on
+camera, but `claude-haiku-4-5` cannot read the small worn 7-segment displays in the wide
+angled shots (C-02: 1/7). **Kept as an iteration** (`--mode=roi`, `data/cache/roi/`
+committed): the layout-independent per-machine architecture is the right one for a real
+deployment, but it does not beat the naive baseline here. The `--mode=calibrated` `--replay`
+cache is unaffected (path-keyed, not byte-keyed), so that dead-end still reproduces.
 
 ---
 

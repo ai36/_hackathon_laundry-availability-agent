@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-01\",\n      \"state\": \"out_of_order\",\n      \"confidence\": 0.95,\n      \"rationale\": \"Left readout (up-arrow) displays 'E rot' - a hard error code indicating the upper machine is out of service\"\n    },\n    {\n      \"machineId\": \"D-02\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Right readout (down-arrow) shows a countdown time display; machine is running or holding laundry\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1570,
+  "outputTokens": 161,
+  "costUsd": 0.002375
+}
