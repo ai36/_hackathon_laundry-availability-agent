@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { observer } from "mobx-react-lite";
 
 import { useStore } from "@/stores";
@@ -148,9 +148,22 @@ export const RoomStatus = observer(function RoomStatus() {
   const integrator = machines.role === "integrator";
 
   useEffect(() => {
-    const role = new URLSearchParams(window.location.search).get("role");
-    machines.setRole(role === "integrator" ? "integrator" : "tenant");
+    const read = () => {
+      const role = new URLSearchParams(window.location.search).get("role");
+      machines.setRole(role === "integrator" ? "integrator" : "tenant");
+    };
+    read();
+    window.addEventListener("popstate", read);
+    return () => window.removeEventListener("popstate", read);
   }, [machines]);
+
+  function toggleRole(e: MouseEvent) {
+    e.preventDefault();
+    const next = integrator ? "tenant" : "integrator";
+    const url = next === "integrator" ? "/?role=integrator" : "/";
+    window.history.pushState(null, "", url);
+    machines.setRole(next);
+  }
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-10">
@@ -158,7 +171,8 @@ export const RoomStatus = observer(function RoomStatus() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold tracking-tight">Laundry room</h1>
           <a
-            href={integrator ? "?" : "?role=integrator"}
+            href={integrator ? "/" : "/?role=integrator"}
+            onClick={toggleRole}
             className="rounded border border-zinc-300 px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800"
           >
             {integrator ? "tenant view" : "integrator view"}
