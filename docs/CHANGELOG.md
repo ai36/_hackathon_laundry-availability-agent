@@ -103,6 +103,17 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-29 — portal: button-label consistency + no dev ids in UI copy
+
+- Mark-wrong panel (`machine-card.tsx`): instant-submit state buttons → state selection +
+  `save` + icon `cancel`.
+- `cameras-editor.tsx`: per-image `remove` → icon-only; delete-camera → icon + "remove";
+  image labels + intro reworded (no `D-00xx` / `StaticImageFrameSource`).
+- `machines-editor.tsx`: delete → icon + "remove". `integrator-view.tsx`: dropped `(D-0014)`
+  from the info box.
+- Presentational only. `typecheck` / `lint` / `build` / `format:check` — **pass**;
+  `npm test` — **51/51**; `check:data` — **pass**. Screenshots regenerated. Backlog cleared.
+
 ### 2026-08-28 — portal: seeded cameras, mask/preview/delete, unified lists, tenant labels
 
 - New shared `DisclosureButton` (`ui/collapsible.tsx`) + `CountRow` (`ui/count-row.tsx`).

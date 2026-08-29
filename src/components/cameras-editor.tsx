@@ -95,8 +95,9 @@ function ImageField({
                 disabled={busy}
                 onClick={() => onChange(null)}
                 aria-label={`remove ${label}`}
+                className={ICON_BUTTON}
               >
-                <Trash2 size={16} aria-hidden="true" /> remove
+                <Trash2 size={16} aria-hidden="true" />
               </Button>
             </div>
           </div>
@@ -171,21 +172,21 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
       </label>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <ImageField
-          label="stub image (test feed — D-0016 StaticImageFrameSource)"
+          label="stub image — stands in as this camera's feed"
           kind="camera-stub"
           ownerId={cam.id}
           current={cam.stubImage}
           onChange={(p) => patch({ stubImage: p })}
         />
         <ImageField
-          label="annotated shot (ids drawn on it — spatial key, D-0015)"
+          label="annotated shot — machine ids drawn on the view"
           kind="camera-annotated"
           ownerId={cam.id}
           current={cam.annotatedShot}
           onChange={(p) => patch({ annotatedShot: p })}
         />
         <ImageField
-          label="mask (black regions = ignore in analysis, D-0015)"
+          label="mask — black regions are ignored during analysis"
           kind="camera-mask"
           ownerId={cam.id}
           current={cam.mask}
@@ -202,10 +203,9 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
           onClick={() => {
             if (confirm(`Remove camera ${cam.id}?`)) void run(() => call("DELETE", { id: cam.id }));
           }}
-          aria-label={`delete ${cam.id}`}
-          className={ICON_BUTTON}
+          aria-label={`remove camera ${cam.id}`}
         >
-          <Trash2 size={24} aria-hidden="true" />
+          <Trash2 size={16} aria-hidden="true" /> remove
         </Button>
         {err && (
           <span role="alert" className="text-error text-xs break-words">
@@ -250,11 +250,9 @@ export function CamerasEditor() {
         <span className="font-mono">C-02</span>… to match <span className="font-mono">W-</span>/
         <span className="font-mono">D-</span> machines), the machine ids it observes (free text),
         and — optionally — a <em>stub image</em> for its feed, an <em>annotated shot</em>, and a{" "}
-        <em>mask</em> (black regions the agent should ignore). Writes{" "}
-        <span className="font-mono">data/site-config.json</span> +{" "}
-        <span className="font-mono">data/site-config/&lt;id&gt;/</span>. The stub image is fed to{" "}
-        <span className="font-mono">refresh</span>; the annotated shot and mask are stored but not
-        yet applied at runtime (D-0015/D-0016).
+        <em>mask</em> (black regions the agent ignores). The stub image is what{" "}
+        <span className="font-mono">refresh</span> analyses; the annotated shot and mask are saved
+        but not yet applied.
       </p>
       {!loaded ? (
         <p className="text-on-surface-variant text-xs">loading…</p>

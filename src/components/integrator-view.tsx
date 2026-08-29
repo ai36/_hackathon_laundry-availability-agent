@@ -41,8 +41,8 @@ export const IntegratorView = observer(function IntegratorView() {
         </div>
         <p className="border-primary-container/30 bg-primary-container/10 text-primary mt-4 rounded border px-3 py-2 text-sm">
           “Mark wrong” on any card overrides the agent. A <em>durable</em> correction carries to
-          every view and every future capture of that machine (D-0014). Cameras &amp; machines are
-          in <span className="font-mono">settings</span>.
+          every view and every future capture of that machine. Cameras &amp; machines are in{" "}
+          <span className="font-mono">settings</span>.
         </p>
       </div>
 

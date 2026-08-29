@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
-import { Button, ICON_BUTTON } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Label, TextInput } from "@/components/ui/field";
 import { Section } from "@/components/ui/section";
 import type { MachineType } from "@/eval/types";
@@ -97,10 +97,9 @@ function MachineRow({
             if (confirm(`Remove ${m.machineId} from the roster?`))
               void run(() => call("DELETE", { machineId: m.machineId }));
           }}
-          aria-label={`delete ${m.machineId}`}
-          className={ICON_BUTTON}
+          aria-label={`remove ${m.machineId}`}
         >
-          <Trash2 size={24} aria-hidden="true" />
+          <Trash2 size={16} aria-hidden="true" /> remove
         </Button>
         {err && (
           <span role="alert" className="text-error text-xs break-words">

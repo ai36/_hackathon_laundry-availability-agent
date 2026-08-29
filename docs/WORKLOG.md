@@ -12,6 +12,35 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Portal: button-label consistency + no dev ids in UI copy (backlog)
+
+- Cleared the 4 items from `docs/BACKLOG.md`. Presentational only; no logic / API / data /
+  deps change.
+- **`machine-card.tsx` mark-wrong panel:** was instant-submit state buttons + a bare
+  `cancel`. Now: the state buttons are a **selection** (`aria-pressed`, primary when
+  chosen), a **`save`** button commits (disabled until a state is picked), and **`cancel`**
+  is icon + text — the standard form shape used elsewhere. Same `POST /api/corrections`
+  payload.
+- **`cameras-editor.tsx`:** the per-image `remove` is now **icon-only** (`ICON_BUTTON`,
+  keeps its `aria-label`); the **delete-camera** button gained the visible word **remove**
+  (icon + text). Image-field labels + the panel intro reworded to plain language — no
+  `D-0015` / `D-0016` / `StaticImageFrameSource`.
+- **`machines-editor.tsx`:** the delete button is now icon + **remove** (was icon-only),
+  matching the camera one. Dropped the now-unused `ICON_BUTTON` import.
+- **`integrator-view.tsx`:** removed `(D-0014)` from the "Mark wrong" info box.
+- Left decision ids in code comments and docs (only UI copy was swept). Frame ids
+  (`img_1819`) in the provenance line stay — that's real data provenance, not a dev id.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` —
+  **51/51**; `check:data` — **pass**. Chrome: mark-wrong panel selects a state → `save`
+  enables; camera image `remove` is 40×40 icon-only; camera + machine delete read
+  `🗑 remove`; camera labels carry no dev ids. `docs/assets/portal-{machines,settings}.jpg`
+  regenerated.
+- **Compliance** (`hackathon-compliance`): **PASS WITH RISKS** — no eligibility blockers
+  (approval checkpoints intact, and the mark-wrong panel is now stricter — explicit `save`
+  before the POST). One process risk fixed before push: added a dated amendment to D-0014
+  in `docs/DECISIONS.md` for the select-then-`save` interaction. Review:
+  `docs/trajectories/compliance/2026-08-29-portal-button-consistency.md`.
+
 ### 2026-08-28 — Added `docs/BACKLOG.md`
 
 - Owner queued 4 presentational portal-polish items (button-label consistency across the

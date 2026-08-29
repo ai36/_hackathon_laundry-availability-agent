@@ -53,12 +53,21 @@ const STATES: MachineState[] = ["free", "occupied", "out_of_order", "unknown"];
 function MarkWrong({ m }: { m: MachineView }) {
   const { machines } = useStore();
   const [open, setOpen] = useState(false);
+  const [choice, setChoice] = useState<MachineState | null>(null);
   const [note, setNote] = useState("");
   const [durable, setDurable] = useState(m.state === "out_of_order");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  async function submit(correctState: MachineState) {
+  function close() {
+    setOpen(false);
+    setChoice(null);
+    setNote("");
+    setErr(null);
+  }
+
+  async function save() {
+    if (!choice) return;
     setBusy(true);
     setErr(null);
     try {
@@ -68,7 +77,7 @@ function MarkWrong({ m }: { m: MachineView }) {
         body: JSON.stringify({
           frameId: m.seenIn === 0 ? "_roster" : m.source,
           machineId: m.machineId,
-          correctState,
+          correctState: choice,
           scope: durable || m.seenIn === 0 ? "machine" : "observation",
           note: note.trim() || undefined,
         }),
@@ -76,8 +85,7 @@ function MarkWrong({ m }: { m: MachineView }) {
       const data = (await res.json()) as { ok?: boolean; error?: string; room?: unknown };
       if (!res.ok || !data.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
       machines.applyRoom(data.room as Parameters<typeof machines.applyRoom>[0]);
-      setOpen(false);
-      setNote("");
+      close();
     } catch (e) {
       setErr(e instanceof Error ? e.message : "failed");
     } finally {
@@ -98,7 +106,13 @@ function MarkWrong({ m }: { m: MachineView }) {
       <Label>Correct state for {m.machineId}:</Label>
       <div className="flex flex-wrap gap-2">
         {STATES.filter((s) => s !== m.state).map((s) => (
-          <Button key={s} variant="default" disabled={busy} onClick={() => submit(s)}>
+          <Button
+            key={s}
+            variant={choice === s ? "default" : "outline"}
+            aria-pressed={choice === s}
+            disabled={busy}
+            onClick={() => setChoice(s)}
+          >
             {STATE_STYLE[s].label}
           </Button>
         ))}
@@ -125,9 +139,14 @@ function MarkWrong({ m }: { m: MachineView }) {
           {err}
         </span>
       )}
-      <Button variant="ghost" onClick={() => setOpen(false)} className="self-start px-0">
-        cancel
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="default" disabled={busy || !choice} onClick={save}>
+          save
+        </Button>
+        <Button variant="ghost" disabled={busy} onClick={close}>
+          <X size={16} aria-hidden="true" /> cancel
+        </Button>
+      </div>
     </div>
   );
 }

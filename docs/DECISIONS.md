@@ -670,6 +670,12 @@ guaranteed fix; the prompt update is the durable learning that, over time, makes
 unnecessary. Demonstrable with `--live` or in the container (the frozen 9-frame eval measures
 the override only).
 
+**Amendment (2026-08-29) — mark-wrong panel commits on explicit `save`.** The portal's
+"mark wrong" control was reworked from instant-submit (clicking a state button POSTed the
+correction) to select-then-`save`: the integrator picks the correct state, optionally adds a
+note / durable flag, and `POST /api/corrections` fires only on the `save` button. Same
+payload, same write path — a deliberate confirmation step before a state override lands.
+
 ---
 
 ## D-0015 — Integrator calibration model: cameras, masks, per-machine reference states + prompt
