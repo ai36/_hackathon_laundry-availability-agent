@@ -12,6 +12,32 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Settings: read-only "Configuration" section
+
+- Owner: surface the deployment config (`src/config/defaults.ts` / `laundry3.config.ts`)
+  in the Settings page.
+- **`GET /api/config`** (new, `src/app/api/config/route.ts`) — returns the resolved config
+  (`config` from `@/config`) plus `overridden`: the dotted paths whose value differs from
+  `DEFAULT_CONFIG`. Read-only, Node runtime, no write path.
+- **`ConfigView`** (`src/components/config-view.tsx`) — a new collapsible "Configuration"
+  section on `/integrator/settings`, matching the other lists' `DisclosureButton` style. It
+  fetches `/api/config` and lays every value out grouped (Site / Agent / Frames / Runtime /
+  Cycles / Reservation / Portal / Paths) as a 2-col monospace `<dl>`; a `•` marks values
+  overridden from the built-in default (currently `site.machines.washers/dryers` = 16).
+- **Read-only on purpose:** the same knobs feed the offline eval (`src/agent/*`,
+  `src/eval/*`), so editing stays in `laundry3.config.ts` (validated on load). Noted in the
+  section's own copy and in D-0008 (amendment).
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` —
+  **51/51**; `check:data` — **pass**. Route table adds `ƒ /api/config`. Chrome: the
+  section renders all 8 groups, `overridden` dots on the two machine counts, no page
+  overflow (`scrollWidth == clientWidth`). `docs/assets/portal-settings.jpg` regenerated.
+- **Compliance** (`hackathon-compliance`): **PASS WITH RISKS** — no eligibility blockers
+  (`Laundry3Config` has no secrets; GET-only, no write path; eval boundary untouched).
+  Fixed before push: (1) added the standard `TRUST BOUNDARY` note to `api/config/route.ts`;
+  (2) `site.machines.*` caveat added to the section copy ("declared sanity-check, not the
+  live roster"); (3) review saved to
+  `docs/trajectories/compliance/2026-08-29-settings-config-section.md`.
+
 ### 2026-08-29 — Portal: button-label consistency + no dev ids in UI copy (backlog)
 
 - Cleared the 4 items from `docs/BACKLOG.md`. Presentational only; no logic / API / data /

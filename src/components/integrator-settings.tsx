@@ -4,6 +4,7 @@ import { observer } from "mobx-react-lite";
 import { ArrowLeft } from "lucide-react";
 
 import { CamerasEditor } from "@/components/cameras-editor";
+import { ConfigView } from "@/components/config-view";
 import { MachinesEditor } from "@/components/machines-editor";
 import { LinkButton } from "@/components/ui/link-button";
 import { PageShell } from "@/components/ui/page-shell";
@@ -31,6 +32,7 @@ export const IntegratorSettings = observer(function IntegratorSettings() {
     >
       <MachinesEditor />
       <CamerasEditor />
+      <ConfigView />
 
       <Section title="Site overview">
         <div className="flex flex-col gap-3 text-sm">

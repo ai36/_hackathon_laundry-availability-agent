@@ -381,6 +381,13 @@ sanity-check split by type. P2 features default off (`reservation.enabled: false
 `agent.changeDetection.enabled: false`) — the other values in those groups are the intended
 production settings.
 
+**Amendment (2026-08-29) — surfaced read-only in the portal.** `GET /api/config` returns the
+resolved config plus an `overridden` list (dotted paths that differ from
+`DEFAULT_CONFIG`), and `ConfigView` renders it as a "Configuration" section on
+`/integrator/settings` — grouped, monospace, with a dot on overridden values. It is
+**read-only**: the same knobs drive the offline eval (`src/agent/*`, `src/eval/*`), so they
+stay edited in one place (`laundry3.config.ts`, validated on load). No write path.
+
 ---
 
 ## D-0009 — Dataset pipeline and eval/agent code layout

@@ -103,6 +103,15 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-29 — settings: read-only "Configuration" section
+
+- New `GET /api/config` (resolved config + `overridden` dotted-path list) and `ConfigView`
+  — a "Configuration" collapsible on `/integrator/settings` showing every deployment knob
+  grouped, monospace, with a `•` on overridden values. Read-only (same values feed the
+  offline eval; edited in `laundry3.config.ts`). D-0008 amendment.
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **51/51**;
+  `check:data` — **pass**. Route table adds `ƒ /api/config`. Screenshot regenerated.
+
 ### 2026-08-29 — portal: button-label consistency + no dev ids in UI copy
 
 - Mark-wrong panel (`machine-card.tsx`): instant-submit state buttons → state selection +
