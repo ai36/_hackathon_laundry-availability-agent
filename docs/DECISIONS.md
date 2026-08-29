@@ -90,6 +90,14 @@ entry and a worklog line.
 Gen / Socket / Snyk assessments at install time. `find-skills` is part of the base
 Claude Code skill set.
 
+**Amendment (2026-08-28) — frontend build skills.** Added four `vercel-labs/agent-skills`
+(GitHub, used as agent guidance only) to inform the portal work: `vercel-react-best-practices`,
+`vercel-composition-patterns`, `web-design-guidelines`, `deploy-to-vercel`. Installed
+project-local (`.agents/skills/`, symlinked into `.claude/skills/` — both git-ignored);
+declared in `skills-lock.json` (committed) so the set reproduces with `npx skills install`.
+Anthropic's `claude-api` skill is already bundled with Claude Code (no install) and covers
+`src/agent/vision.ts`. Details in `docs/SKILLS.md`.
+
 ---
 
 ## D-0004 — Git workflow and automated compliance review

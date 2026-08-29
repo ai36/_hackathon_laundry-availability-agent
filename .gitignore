@@ -81,3 +81,8 @@ next-env.d.ts
 # private per-site config overrides
 /laundry3.config.local.ts
 
+# agent skills — declared in skills-lock.json (committed); vendored copies + symlinks are
+# fetched with `npx skills install`, not committed.
+/.agents/
+/.claude/skills/
+

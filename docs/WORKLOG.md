@@ -12,6 +12,20 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Connected 4 Vercel frontend skills
+
+- User: connect the best Vercel + Anthropic skills for frontend web apps.
+- `npx skills add` (project-local — the `-g` global install is unsupported by PromptScript,
+  same as `grillme`): **`vercel-react-best-practices`**, **`vercel-composition-patterns`**,
+  **`web-design-guidelines`**, **`deploy-to-vercel`** (all `vercel-labs/agent-skills`,
+  672K–588K installs each). Now available via the Skill tool.
+- Vendored copies land in `.agents/skills/` + `.claude/skills/` symlinks → **git-ignored**;
+  `skills-lock.json` (source + hash per skill) is **committed** so the set reproduces with
+  `npx skills install`.
+- Anthropic: the bundled `claude-api` skill already covers LLM/SDK code (`src/agent/vision.ts`)
+  — nothing to install.
+- Recorded: `docs/DECISIONS.md` D-0003 amendment, `docs/SKILLS.md` table. No code change.
+
 ### 2026-08-28 — Integrator console: Cameras CRUD + image upload; layout fixes (D-0015)
 
 - `src/eval/site-config.ts` — `data/site-config.json` (cameras), typed load/write
