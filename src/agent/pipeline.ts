@@ -7,9 +7,20 @@ import type { FramePrediction, MachinePrediction } from "@/eval/types";
 import { parseAssessments } from "./parse";
 import type { MachineAssessment, SiteConfig, VisionClient } from "./types";
 
+/**
+ * The eval's *calibration* config (per-machine ROIs — D-0015, still aspirational). It shares
+ * a path with the portal's camera list (`config.paths.siteConfig`), which has a different
+ * shape (`{ cameras: [...] }`); return `null` for anything that isn't the calibration shape,
+ * so a seeded camera list doesn't crash the agent prompt builder.
+ */
 export function loadSiteConfig(path = config.paths.siteConfig): SiteConfig | null {
   if (!existsSync(path)) return null;
-  return JSON.parse(readFileSync(path, "utf8")) as SiteConfig;
+  try {
+    const j = JSON.parse(readFileSync(path, "utf8")) as Partial<SiteConfig>;
+    return Array.isArray(j.machines) ? (j as SiteConfig) : null;
+  } catch {
+    return null;
+  }
 }
 
 /**

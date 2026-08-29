@@ -858,6 +858,16 @@ must also apply corrections so the portal reflects the corrected state.
   into type-fixed `Washers` / `Dryers` sections, so the field was redundant; PATCH still
   carries the machine's existing `type`. Re-classifying = delete + re-add.
 
+**Amendment (2026-08-29) — `config.paths.siteConfig` is a schema collision; guarded.**
+That path (`data/site-config.json`) is read by two `loadSiteConfig()` — the portal camera
+list (`{ cameras: [...] }`, `src/eval/site-config.ts`) and the eval's calibration config
+(`{ camera, machines: [...] }`, `src/agent/pipeline.ts` — a shape that was never actually
+produced). Seeding the camera list broke `npm run eval -- --mode=agent --replay`.
+`pipeline.ts loadSiteConfig` now shape-sniffs (`Array.isArray(j.machines)`) and returns
+`null` for anything that isn't the calibration shape, restoring the recorded-cache replay
+byte-for-byte. A proper separation (a distinct path/file for calibration) is **deferred** —
+whoever finally authors a real calibration file must not reuse `config.paths.siteConfig`.
+
 ---
 
 ## D-0016 — Deployment: Docker service, `FrameSource` abstraction, static-image mock

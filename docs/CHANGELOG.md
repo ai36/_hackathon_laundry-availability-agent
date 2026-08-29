@@ -103,6 +103,19 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-29 — fix: agent `--replay` restored (path collision on `data/site-config.json`)
+
+- `npm run eval -- --mode=agent --split=evaluation --replay` had thrown since `d4da68e`
+  (the portal camera list at `config.paths.siteConfig` isn't the eval's calibration shape).
+  `src/agent/pipeline.ts` `loadSiteConfig` now returns `null` unless the file has a
+  `machines[]` array — the state the recorded cache was made in. Guarded by
+  `src/agent/pipeline.test.ts` (3 new cases).
+- **Re-verified against the committed artifacts:** agent replay →
+  57.8% / harmful 0.0% / coverage 100% / 14 calls / $0.0506; `--replay --corrections` →
+  75.6% / `out_of_order` 8/8. Both match this file's Progression rows. Baseline replay
+  (62.2%) unchanged. `typecheck` / `lint` / `format:check` pass; `npm test` 64/64;
+  `check:data` pass.
+
 ### 2026-08-29 — configuration: surface overrides-file vs laundry3.config.ts
 
 - `GET/PATCH /api/config` add `base` + `fromFile` (paths changed from `laundry3.config.ts`,

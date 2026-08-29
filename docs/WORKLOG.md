@@ -12,6 +12,35 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Fix: `npm run eval --mode=agent --replay` was broken since `d4da68e`
+
+- Found while reviewing the recognition pipeline: `npm run eval -- --mode=agent
+  --split=evaluation --replay` (a documented reproduction step) threw
+  `Cannot read properties of undefined (reading 'map')`. Baseline replay was fine.
+- **Cause:** a path collision. `config.paths.siteConfig` (`data/site-config.json`) is read by
+  two different `loadSiteConfig()` — the portal's camera list (`{ cameras: [...] }`) and the
+  eval's *calibration* config (`{ camera, machines[] }`, D-0015, never actually produced).
+  Once the file existed as a camera list (`d4da68e`, empty; `fc29fbe`, seeded),
+  `pipeline.ts`'s `classifyPrompt` did `site.machines.map(...)` on an object with no
+  `machines` → crash.
+- **Fix:** `src/agent/pipeline.ts` `loadSiteConfig` now returns `null` for anything that
+  isn't the calibration shape (`Array.isArray(j.machines)`), wrapped in try/catch. This is
+  the state the recorded `data/cache/agent/` was made in (`site === null` → no "Calibration
+  says…" line), so `--replay` reproduces byte-for-byte.
+- Added `src/agent/pipeline.test.ts` — 3 cases pinning the guard (missing file → `null`;
+  `{ cameras: [...] }` / `{ cameras: [] }` → `null`; `{ camera, machines[] }` → parsed).
+- Verification: `npm run eval -- --mode=agent --split=evaluation --replay` →
+  **57.8% / harmful 0.0% / coverage 100% / 14 calls / $0.0506** (matches
+  `docs/CHANGELOG.md`); `--replay --corrections` → **75.6% / out_of_order 8/8** (matches).
+  `typecheck` / `lint` / `format:check` — pass; `npm test` — **64/64**; `check:data` — pass.
+  Stray `docs/artifacts/eval-*-2026-08-29.json` from the replay runs deleted.
+- **Compliance:** `hackathon-compliance` → **PASS WITH RISKS**
+  (`docs/trajectories/compliance/2026-08-29-agent-replay-fix.md`). Two process risks, both
+  handled before push: (1) documented the schema collision as a D-0015 amendment in
+  `docs/DECISIONS.md`; (2) added the `pipeline.test.ts` guard test and bumped the expected
+  count in `docs/REPRODUCTION.md` (61 → 64). No hackathon-rule blockers — this is a fix to a
+  broken reproduction step, offline/`--replay` path unchanged byte-for-byte.
+
 ### 2026-08-29 — Configuration: show what's in `config-overrides.json` vs `laundry3.config.ts`
 
 - Owner asked whether `laundry3.config.ts` is still the main config now that portal edits
