@@ -103,6 +103,17 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-29 — reservations on by default; per-tenant limit 2, enforced client + server
+
+- `laundry3.config.ts`: `reservation.enabled` `false → true`, `maxActivePerUser` `1 → 2`
+  (owner decision). `src/config/defaults.ts` unchanged — a bare deployment stays read-only.
+- Tenant UI no longer hard-blocks a second hold: `machine-card.tsx` counts the tenant's
+  active holds against `machines.reservationLimit` (new field, hydrated from
+  `reservation.maxActivePerUser`), matching the server guard in `POST /api/reservations`.
+- No metric moved — reservations are portal-only, never read by `src/agent/*` / `src/eval/*`.
+  `typecheck` / `lint` / `format:check` pass; `npm test` 64/64; `check:data` pass;
+  `npm run build` pass. D-0007 amendment records the supersession of "one at a time".
+
 ### 2026-08-29 — fix: agent `--replay` restored (path collision on `data/site-config.json`)
 
 - `npm run eval -- --mode=agent --split=evaluation --replay` had thrown since `d4da68e`

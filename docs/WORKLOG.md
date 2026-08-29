@@ -12,6 +12,29 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Reservations ON by default; per-tenant limit raised to 2 and enforced in the UI
+
+- Owner decision (kept + committed): `laundry3.config.ts` `reservation.enabled: false → true`,
+  `maxActivePerUser: 1 → 2`. The hold flow is built and tested, so the shipped demo config
+  should exercise it; two holds covers "start a washer, grab a dryer" without one party
+  locking the room (`maxReservedFractionOfFree` still caps the total).
+- **Consistency fix.** The tenant UI had a hard `iHaveAHold` block — one hold, regardless of
+  config — so `maxActivePerUser: 2` would have had no visible effect. Replaced it with a
+  count: `machine-card.tsx` now compares the tenant's active holds to
+  `machines.reservationLimit` (new store field, hydrated from `reservation.maxActivePerUser`
+  via `root-store.ts` / `tenant/page.tsx`). Client and server (`POST /api/reservations`)
+  now enforce the same ceiling; the 409 message is limit-aware.
+- Docs: D-0007 amendment (supersedes the "one at a time" framing), D-0008 note, README,
+  `docs/CONFIGURATION.md` (DEFAULT_CONFIG stays `false`/`1` for a bare deployment; shipped
+  `laundry3.config.ts` differs — now spelled out). `laundry3.config.ts` comments refreshed.
+- Verification: `typecheck` / `lint` / `format:check` — pass; `npm test` — **64/64**;
+  `check:data` — pass; `npm run build` — pass. No eval impact (reservations are portal-only;
+  the 9 committed frames carry no reservation state).
+- **Compliance:** `hackathon-compliance` → **PASS** (no blockers, no material risks;
+  `docs/trajectories/compliance/2026-08-29-reservations-on-by-default.md`). Reviewer
+  independently verified the eval never reads the `reservation.*` config group, both runtime
+  JSON files are git-ignored, and EVALUATION case S3 (pre-emption sim) stays out of scope.
+
 ### 2026-08-29 — Fix: `npm run eval --mode=agent --replay` was broken since `d4da68e`
 
 - Found while reviewing the recognition pipeline: `npm run eval -- --mode=agent

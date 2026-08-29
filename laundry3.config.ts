@@ -26,9 +26,9 @@ export default defineConfig({
     visionModel: "claude-haiku-4-5",
   },
   reservation: {
-    enabled: false, // flip on once the reservation simulation (P2) is built
-    holdMinutes: 5,
-    maxActivePerUser: 1,
+    enabled: true, // tenants can hold a free machine on the Live view (P2, D-0007)
+    holdMinutes: 5, // a hold auto-lapses after this; there is no cancel
+    maxActivePerUser: 2, // simultaneous holds per tenant; UI + API both enforce this
     maxReservedFractionOfFree: 0.5,
   },
 });

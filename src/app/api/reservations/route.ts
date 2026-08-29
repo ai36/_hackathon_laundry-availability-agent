@@ -7,10 +7,12 @@
  * A hold on a currently-free machine, auto-expiring after `reservation.holdMinutes`. A held
  * machine reads `occupied` to everyone (D-0007); the owner's client shows a badge via
  * `reservedBy`. There is **no cancel** — the user cannot release a hold or move it; it only
- * lapses on its own, and only then can they reserve again (`maxActivePerUser`, server-side).
+ * lapses on its own. A tenant may hold up to `maxActivePerUser` machines at once (server-
+ * side); once at that limit they must wait for one to lapse before reserving again.
  *
  * Guards (all server-side): the feature must be enabled; the machine must still read `free`;
- * one active hold per `by`; a fraction cap on how much of the free capacity may be held.
+ * `maxActivePerUser` active holds per `by`; a fraction cap on how much of the free capacity
+ * may be held.
  * `by` is an anonymous per-browser id, not an authenticated user — the per-`by` cap is
  * best-effort (id rotation bypasses it); the fraction cap is the real backstop.
  *
@@ -54,10 +56,11 @@ export async function POST(req: Request) {
 
   const active = activeReservations();
   if (active.filter((r) => r.by === by).length >= cfg.maxActivePerUser) {
-    return NextResponse.json(
-      { error: "you already have a reservation — wait for it to end" },
-      { status: 409 },
-    );
+    const msg =
+      cfg.maxActivePerUser === 1
+        ? "you already have a reservation — wait for it to end"
+        : `you're at your limit of ${cfg.maxActivePerUser} reservations — wait for one to end`;
+    return NextResponse.json({ error: msg }, { status: 409 });
   }
 
   const before = buildRoomStatus(undefined, undefined, undefined, active);

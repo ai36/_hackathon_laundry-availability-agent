@@ -357,17 +357,19 @@ Mechanic (owner requirements, 2026-08-29):
   until HH:MM" badge, everyone else just sees "In use". This means the "washers free" figure
   and `counts.free` already exclude held machines — no special-casing.
 - **No cancel, no move.** There is no `DELETE` route. A user cannot release a hold or shift
-  it; it only lapses on its own. `maxActivePerUser` (default 1) is then the whole story:
-  while you hold a machine, every other free card is non-interactive; once your hold ends
-  you can reserve again. **Accepted tradeoff:** a mis-confirmed reservation is unrecoverable
-  for the full `reservation.holdMinutes` (default 5) — the confirm dialog says so, and the
-  short window keeps the cost bounded. The `release()` primitive is kept in
+  it; it only lapses on its own. `maxActivePerUser` is then the whole story: while you hold
+  that many machines every other free card is non-interactive, and once a hold ends you can
+  reserve again. Both sides enforce it — the server guard in `POST /api/reservations` and
+  the tenant UI, which counts your active holds against `machines.reservationLimit`
+  (hydrated from the same config value). **Accepted tradeoff:** a mis-confirmed reservation
+  is unrecoverable for the full `reservation.holdMinutes` (default 5) — the confirm dialog
+  says so, and the short window keeps the cost bounded. The `release()` primitive is kept in
   `reservations.ts` (tested) for a future admin/expiry-sweep tool, but no route exposes it.
 - **Only free machines are interactive.** Reserved (now `occupied`), in-use, out-of-order,
   unknown, and corrected machines are plain `<div>`s.
-- Server guards: feature enabled (`config.reservation.enabled`, off by default — the
-  integrator flips it on in Settings → Configuration); `maxActivePerUser` per anonymous
-  browser id (best-effort — id rotation bypasses it); the machine must still read `free`;
+- Server guards: feature enabled (`config.reservation.enabled`); `maxActivePerUser` per
+  anonymous browser id (best-effort — id rotation bypasses it); the machine must still read
+  `free`;
   `maxReservedFractionOfFree` of the free count is the real backstop against one party
   holding the room. Pre-emption reconciliation (a walk-in taking a held machine) is still
   P2 — a hold simply vanishes when the machine stops reading `free`.
@@ -375,6 +377,16 @@ Mechanic (owner requirements, 2026-08-29):
 The `data/reservations.json` read-modify-write is unlocked (fine at laundry-room request
 rates; self-correcting via expiry; noted in the code). No eval impact: reservations are
 portal-only, the file is never read by `src/agent/*` / `src/eval/*`.
+
+**Amendment (2026-08-29) — reservations ON by default; limit raised to 2.**
+`laundry3.config.ts` now ships `reservation.enabled: true` and `maxActivePerUser: 2` (was
+`false` / `1`). Rationale: the hold flow is built and tested, so the shipped demo config
+should exercise it; two holds per tenant matches the common "start a washer, grab a dryer"
+case without letting one party lock the room (`maxReservedFractionOfFree` still caps total
+holds). This supersedes the earlier "one at a time" framing in this decision — the UI no
+longer hard-blocks a second hold; it counts active holds against `maxActivePerUser`, the
+same ceiling the server enforces. Reproduction is unaffected: the eval never reads this
+config group, and the 9 committed frames carry no reservation state.
 
 ---
 
@@ -408,9 +420,9 @@ machine-generated.
 **Consequences.** Framework-agnostic — the same config loads in Next.js and in the Node eval
 scripts. If the schema grows, revisit adopting `zod` for the validator. The machine roster
 still comes from the calibration config; `site.machines.{washers,dryers}` is only a declared
-sanity-check split by type. P2 features default off (`reservation.enabled: false`,
-`agent.changeDetection.enabled: false`) — the other values in those groups are the intended
-production settings.
+sanity-check split by type. `agent.changeDetection.enabled` still defaults off (P1, not
+built); `reservation.enabled` was flipped on 2026-08-29 once the hold flow shipped (see the
+D-0007 amendment) — the other values in those groups are the intended production settings.
 
 **Amendment (2026-08-29) — surfaced in the portal; editable via an overrides layer.**
 `ConfigView` renders a "Configuration" section on `/integrator/settings` — every knob

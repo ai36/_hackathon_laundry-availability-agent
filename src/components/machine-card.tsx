@@ -170,9 +170,12 @@ export const MachineCard = observer(function MachineCard({
   const [err, setErr] = useState<string | null>(null);
 
   const mine = Boolean(m.reserved && clientId && m.reservedBy === clientId);
-  // While you hold any machine you cannot reserve another — wait for it to lapse.
-  const iHaveAHold =
-    Boolean(clientId) && machines.machines.some((x) => x.reserved && x.reservedBy === clientId);
+  // You may hold up to `reservationLimit` machines; at the limit you must wait for one to
+  // lapse (there is no cancel). Mirrors the server-side `maxActivePerUser` guard.
+  const myHolds = clientId
+    ? machines.machines.filter((x) => x.reserved && x.reservedBy === clientId).length
+    : 0;
+  const atReservationLimit = myHolds >= machines.reservationLimit;
   const canReserve =
     !integrator &&
     m.state === "free" &&
@@ -180,7 +183,7 @@ export const MachineCard = observer(function MachineCard({
     !m.reserved &&
     machines.reservationEnabled &&
     Boolean(clientId) &&
-    !iHaveAHold;
+    !atReservationLimit;
 
   async function reserveNow() {
     setBusy(true);

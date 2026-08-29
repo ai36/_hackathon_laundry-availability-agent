@@ -10,9 +10,15 @@ export const dynamic = "force-dynamic";
 
 export default function TenantPage() {
   const room = buildRoomStatus(undefined, undefined, undefined, activeReservations());
-  const reservationEnabled = resolvePortalConfig().reservation.enabled;
+  const { enabled, maxActivePerUser } = resolvePortalConfig().reservation;
   return (
-    <StoreProvider initialData={{ room, reservationEnabled }}>
+    <StoreProvider
+      initialData={{
+        room,
+        reservationEnabled: enabled,
+        reservationLimit: maxActivePerUser,
+      }}
+    >
       <RoomView />
     </StoreProvider>
   );

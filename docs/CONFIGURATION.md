@@ -38,9 +38,9 @@ This page documents the **deployment config**.
 
 | Key | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `reservation.enabled` | bool | `false` | Master switch. `false` → portal is read-only. Default is `false` until the reservation simulation (P2) is built; the other `reservation.*` values are the intended production settings. |
-| `reservation.holdMinutes` | number > 0 | `5` | How long a reservation holds a free machine before auto-expiry. |
-| `reservation.maxActivePerUser` | int ≥ 1 | `1` | Concurrent reservations one tenant may hold. |
+| `reservation.enabled` | bool | `false` | Master switch. `false` → portal is read-only. `src/config/defaults.ts` keeps this `false` so a bare deployment is read-only; the shipped **`laundry3.config.ts` sets it `true`** now that the hold flow is built (D-0007 amendment, 2026-08-29). |
+| `reservation.holdMinutes` | number > 0 | `5` | How long a reservation holds a free machine before auto-expiry. There is no cancel — a hold only lapses. |
+| `reservation.maxActivePerUser` | int ≥ 1 | `1` | Concurrent holds one tenant may have; enforced on both the client and `POST /api/reservations`. Default `1`; shipped `laundry3.config.ts` sets `2`. |
 | `reservation.maxReservedFractionOfFree` | 0..1 | `0.5` | Cap on the share of currently-free machines that may be reserved at once. |
 | `reservation.reconcileOnExpiry` | bool | `true` | Re-derive real state from the camera when a hold ends. |
 

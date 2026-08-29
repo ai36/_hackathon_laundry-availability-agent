@@ -66,8 +66,9 @@ camera angle and **overlay the integrator corrections** (`src/portal/room-status
 - **`/tenant`** — the tenant room view: current state per machine, plus per-kind
   free counts. Tapping a free machine opens a confirm dialog to **reserve** it (a short
   auto-expiring hold). A held machine reads **In use** for everyone; the owner's view adds a
-  "your reservation" badge. No cancel — a hold only lapses, and you can hold one machine at a
-  time. Server-rendered per request. `/` redirects here.
+  "your reservation" badge. No cancel — a hold only lapses; you can hold up to
+  `reservation.maxActivePerUser` machines at once (default 2), enforced on both the client
+  and the server. Server-rendered per request. `/` redirects here.
 - **`/integrator`** — the integrator console: per-card agent confidence + source frame + a
   **“✕ mark wrong”** control and a **“↻ refresh recognition”** button.
 - **`/integrator/settings`** — Machines + Cameras CRUD + a site overview.
@@ -82,9 +83,9 @@ scroll, and a left-rail / bottom-bar nav shell. The
 **“↻ refresh recognition”** control on `/integrator` has a manual button **and an auto
 toggle** — every cycle `POST /api/refresh` captures each camera's feed and (with a key) runs
 the agent, then re-fuses. Tenant **reservations** are wired (`POST /api/reservations`,
-git-ignored `data/reservations.json`), off until the integrator enables them in Settings →
-Configuration; pre-emption reconciliation (a walk-in taking a held machine) stays P2. A live
-camera feed is P2, not wired.
+git-ignored `data/reservations.json`) and on by default (`reservation.enabled`); the
+integrator can toggle them in Settings → Configuration. Pre-emption reconciliation (a
+walk-in taking a held machine) stays P2. A live camera feed is P2, not wired.
 
 ![laundry3 portal — tenant view (/tenant): per-kind free counts, per-machine state, tap a free machine to reserve](docs/assets/portal-top.jpg)
 ![laundry3 portal — integrator console (/integrator): agent confidence, source frame, "mark wrong" on every card, manual + auto refresh](docs/assets/portal-machines.jpg)

@@ -23,6 +23,7 @@ export type RootStoreHydration = Partial<{
   room: RoomStatus;
   refreshSeconds: number;
   reservationEnabled: boolean;
+  reservationLimit: number;
 }>;
 
 let browserStore: RootStore | undefined;
@@ -34,6 +35,7 @@ export function createRootStore(initialData?: RootStoreHydration): RootStore {
       initialData.room,
       initialData.refreshSeconds,
       initialData.reservationEnabled,
+      initialData.reservationLimit,
     );
   }
   return store;

@@ -18,18 +18,26 @@ export class MachinesStore {
   refreshSeconds = 30;
   /** Whether tenants may reserve a free machine (config.reservation.enabled). */
   reservationEnabled = false;
+  /** Max simultaneous holds one tenant may have (config.reservation.maxActivePerUser). */
+  reservationLimit = 1;
 
   constructor(public root: RootStore) {
     makeAutoObservable(this, { root: false }, { autoBind: true });
   }
 
-  hydrate(room: RoomStatus, refreshSeconds?: number, reservationEnabled?: boolean) {
+  hydrate(
+    room: RoomStatus,
+    refreshSeconds?: number,
+    reservationEnabled?: boolean,
+    reservationLimit?: number,
+  ) {
     this.machines = room.machines;
     this.model = room.provenance.model;
     this.reportPath = room.provenance.report;
     this.correctedCount = room.provenance.corrections;
     if (refreshSeconds && refreshSeconds > 0) this.refreshSeconds = refreshSeconds;
     if (reservationEnabled !== undefined) this.reservationEnabled = reservationEnabled;
+    if (reservationLimit && reservationLimit > 0) this.reservationLimit = reservationLimit;
   }
 
   setRole(role: PortalRole) {
