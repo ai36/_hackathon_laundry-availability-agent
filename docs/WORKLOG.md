@@ -12,6 +12,21 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Doc: correction → prompt-synthesis feedback loop = designed, deferred, next iteration
+
+- Owner call: the shipped model (a correction is a permanent override; the model keeps
+  erring, the correction keeps hiding it) is a demo answer, not a product answer — nobody
+  hand-corrects a model forever. The fix is the D-0014 feedback loop (correction →
+  `promptFragment` synthesis so future captures classify right without a human).
+- Not built, on purpose: (a) synthesis trigger + (b) `promptFragment` injection into
+  `--mode=roi` / the live `/api/refresh` baseline call (only `--mode=calibrated` reads
+  fragments today) + (c) a temporal / held-out capture split to measure it — (c) is the real
+  blocker, the 5 frozen frames can't show "future captures classified right". Same validation
+  gap that put calibration-images and ROI inside the n=22 noise band.
+- Doc-only: D-0014 gains a "Status (2026-08-29) — designed, NOT built; first post-hackathon
+  iteration" note; D-0015 "Not built" list updated; README hot-take gains an "Honest gap"
+  paragraph. No code / data / number change.
+
 ### 2026-08-29 — Doc: machine-model reading quirks are calibration, not the base prompt (D-0015)
 
 - Owner call: don't bake machine-specific display-reading rules (price `2.25` format,

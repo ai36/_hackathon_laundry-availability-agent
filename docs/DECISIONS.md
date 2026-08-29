@@ -750,8 +750,24 @@ feeds a **per-machine prompt-synthesis** step so the model itself stops making t
 Scope is deliberately narrow: **only the one machine's integration prompt changes.** The
 global classify prompt is never edited from corrections. The override (step 0) stays as the
 guaranteed fix; the prompt update is the durable learning that, over time, makes the override
-unnecessary. Demonstrable with `--live` or in the container (the frozen 9-frame eval measures
-the override only).
+unnecessary.
+
+**Status (2026-08-29) — designed, NOT built; the first post-hackathon iteration.** What ships
+is the override only: a correction permanently replaces the model's output for that cell, the
+model keeps making the same mistake, and the correction keeps hiding it. That is an
+acceptable *demo* answer (one durable fact per broken unit, applied everywhere for free — see
+the D-0014 consequences) but not a product answer at scale: nobody hand-corrects a model
+forever. Building the loop properly means (a) the synthesis trigger in `/api/corrections`,
+(b) wiring the resulting `promptFragment` into the recognition path — `runRoi` and the live
+`/api/refresh` baseline call do **not** consume fragments today, only `--mode=calibrated`
+does — and (c) a way to measure it. (c) is the real blocker: the value of the loop is
+*future, unseen captures classified right without a human*, and the 5 committed frames have
+no temporal / held-out split to show that. Every calibration attempt this session
+(annotated-shot + mask as vision inputs; per-machine ROI crops; individually-correct prompt
+rules) landed inside the n = 22 single-sample noise band; the feedback loop has the same
+validation gap and was out of scope for the hackathon window. **If the product develops, the
+correction → `promptFragment` synthesis loop (steps 1–3 above) + fragment injection into the
+classify path is the intended next step, measured on a temporal capture split.**
 
 **Amendment (2026-08-29) — mark-wrong panel commits on explicit `save`.** The portal's
 "mark wrong" control was reworked from instant-submit (clicking a state button POSTed the
@@ -792,8 +808,10 @@ payload, same write path — a deliberate confirmation step before a state overr
     the amendments below.)_
   - D-0016 P0 — judge walks the correction loop key-free.
   **Not built:** per-machine reference-state screenshots (the upload route supports the
-  `machine-reference` kind, no UI yet); the site-config is **not read by the eval / agent
-  yet** (D-0015/D-0016 runtime); the correction→prompt feedback synthesis (D-0014 amendment).
+  `machine-reference` kind, no UI yet); the **correction → `promptFragment` synthesis
+  feedback loop** — designed in D-0014, deferred to the first post-hackathon iteration (see
+  D-0014 "Status (2026-08-29)"); `promptFragment` injection into `--mode=roi` / the live
+  `/api/refresh` call (only `--mode=calibrated` consumes fragments today).
 
 **Context.** D-0009 / D-0010 name a `data/site-config.json` produced during onboarding
 (per-machine ROIs, reference crops, few-shot exemplars, thresholds). D-0014 adds a correction

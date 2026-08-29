@@ -165,6 +165,14 @@ richer input: it was letting an integrator write **3 authoritative facts** the m
 getting wrong. Decide what each error costs, encode it in the metric, and recognise the
 failures a human should just overrule rather than the agent re-litigate.
 
+**Honest gap:** as shipped, a correction is a permanent override — the model keeps making the
+mistake and the correction keeps hiding it. Nobody hand-corrects a model forever. The
+designed fix is the **correction → `promptFragment` synthesis loop** (D-0014): a durable
+correction rewrites that machine's reading hint so future captures classify right without a
+human. It is deferred — building it well needs a temporal / held-out capture split to
+measure, which the 5 frozen frames don't have — and it is the first post-hackathon
+iteration. See `docs/DECISIONS.md` D-0014 "Status (2026-08-29)".
+
 ## How agents are used
 
 - **The solution agent** (`src/agent/`) — a two-step vision pipeline (classify → verify),
