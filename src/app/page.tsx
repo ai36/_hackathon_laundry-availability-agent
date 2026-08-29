@@ -1,14 +1,6 @@
-import { RoomView } from "@/components/room-view";
-import { buildRoomStatus } from "@/portal/room-status";
-import { StoreProvider } from "@/stores";
+import { redirect } from "next/navigation";
 
-// Server Component: read the committed eval report + corrections at request time (no API
-// call) and hydrate the MobX store with the fused per-machine status.
+// The room lives at /tenant; / is just an entry point.
 export default function Home() {
-  const room = buildRoomStatus();
-  return (
-    <StoreProvider initialData={{ room }}>
-      <RoomView />
-    </StoreProvider>
-  );
+  redirect("/tenant");
 }

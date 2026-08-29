@@ -59,22 +59,24 @@ for free. All runs `--replay`-reproducible offline. Full write-up: **`docs/CHANG
 
 ### The portal
 
-`npm run dev` → two pages that fuse the agent's per-machine assessments across every camera
-angle and **overlay the integrator corrections** (`src/portal/room-status.ts` +
+`npm run dev` → URL-routed pages that fuse the agent's per-machine assessments across every
+camera angle and **overlay the integrator corrections** (`src/portal/room-status.ts` +
 `src/stores/machines-store.ts`, MobX):
 
-- **`/`** — the tenant room view: current state per machine, nothing else. No API call, so it
-  prerenders (`○ /`).
+- **`/tenant`** — the tenant room view: current state per machine, nothing else. No API call,
+  so it prerenders (`○ /tenant`). `/` redirects here.
 - **`/integrator`** — the integrator console: per-card agent confidence + source frame + a
-  **“✕ mark wrong”** control, a **“↻ refresh recognition”** button, and a site overview.
-  Server-rendered per request so it reflects live `data/corrections/` + `data/machines.json`.
+  **“✕ mark wrong”** control and a **“↻ refresh recognition”** button.
+- **`/integrator/settings`** — Machines + Cameras CRUD + a site overview.
 
-Both show the **Final "classify + corrections" config** (80.0%,
+`/integrator*` are server-rendered per request so they reflect live `data/corrections/` +
+`data/machines.json`. All show the **Final "classify + corrections" config** (80.0%,
 `docs/artifacts/eval-baseline-corrected-2026-08-28.json`), not the Iteration-1 verify pass.
-Reservations and a live feed are P2, not wired.
+Root font is 150%; the layout is responsive with no horizontal scroll on mobile. Reservations
+and a live feed are P2, not wired.
 
-![laundry3 portal — tenant view (/): state only, "confirm on arrival"](docs/assets/portal-top.jpg)
-![laundry3 portal — integrator view (/integrator): agent confidence, source frame, "mark wrong" on every card, refresh button, W-04 corrected out-of-order](docs/assets/portal-machines.jpg)
+![laundry3 portal — tenant view (/tenant): state only, "confirm on arrival"](docs/assets/portal-top.jpg)
+![laundry3 portal — integrator console (/integrator): agent confidence, source frame, "mark wrong" on every card, refresh button, W-04 corrected out-of-order](docs/assets/portal-machines.jpg)
 
 Every card is one machine from `data/machines.json` (**16 washers + 16 dryers**); the mock
 photos only cover 26 of them, so `D-11…D-16` show as `unknown` / "not covered".
@@ -87,12 +89,12 @@ npm run dev            # http://localhost:3000
 ```
 
 1. Open `http://localhost:3000/integrator` — every card shows the agent's confidence, the
-   frame it came from, and a **“✕ mark wrong”** control. Collapsible sections below the grid:
-   **Machines** (add / remove / rename, set type, set a per-machine `promptFragment` the
-   agent gets — writes `data/machines.json`), **Cameras** (id + free-text machine-id list +
-   optional stub / annotated image upload — writes `data/site-config.json`), and **Site
-   overview** (roster + mock-frame → machine map). **“↻ refresh recognition”** re-runs the
-   fusion (the D-0016 container's re-capture + re-classify hook).
+   frame it came from, and a **“✕ mark wrong”** control. **“↻ refresh recognition”** re-runs
+   the fusion (the D-0016 container's re-capture + re-classify hook). **`/integrator/settings`**
+   has the **Machines** editor (add / remove / rename, set type, set a per-machine
+   `promptFragment` the agent gets — writes `data/machines.json`), the **Cameras** editor
+   (id + free-text machine-id list + optional stub / annotated image upload — writes
+   `data/site-config.json`), and a site overview.
 2. Find a machine the agent got wrong (e.g. a `free` washer shown as `In use`). Click
    **mark wrong**, pick the correct state, optionally tick **“applies to this machine in
    every view (durable)”**, add a note, submit.
@@ -102,7 +104,7 @@ npm run dev            # http://localhost:3000
 4. Re-score with the same correction store:
    `npm run eval -- --mode=baseline --split=evaluation --replay --corrections`.
 
-The tenant view (`/`) shows only the resulting state — no confidence, no controls. Full
+The tenant view (`/tenant`) shows only the resulting state — no confidence, no controls. Full
 deployment shape (Docker, `FrameSource`, static-image mock, the correction→prompt feedback
 loop): `docs/DECISIONS.md` D-0014 / D-0015 / D-0016.
 

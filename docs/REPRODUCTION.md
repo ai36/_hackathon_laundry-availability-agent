@@ -35,7 +35,7 @@ reproduction — it may resolve newer versions.
 ## Run the app
 
 ```bash
-npm run dev      # http://localhost:3000  (/ tenant, /integrator console)
+npm run dev      # http://localhost:3000  (/tenant, /integrator, /integrator/settings)
 npm run build    # production build
 npm start        # serve the production build
 ```

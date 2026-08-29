@@ -12,6 +12,28 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Portal: URL routes, font 150%, mobile responsiveness
+
+- Owner corrections: URL-based routing (not query params), font 150% not 200%, kill the
+  mobile horizontal scroll.
+- **Routes:** `/` → redirect to `/tenant`; `/tenant` = tenant room view (static `○`);
+  `/integrator` = console (room grid + mark-wrong + refresh, no editors); **new**
+  `/integrator/settings` = Machines + Cameras editors + Site overview. New
+  `src/components/integrator-settings.tsx`; `IntegratorView` slimmed; `next/link` for all
+  in-app nav. `?role=` was already gone.
+- **Font:** `html { font-size: 200% → 150% }`.
+- **Mobile:** `body { overflow-x: clip }` backstop (wide tables keep their own
+  `overflow-x-auto`); machines table `min-w-[36rem] → [26rem]`; header button groups
+  `flex-wrap`. Verified in Chrome at a 486 px CSS viewport on all three pages —
+  `document.scrollWidth === clientWidth`, zero real offenders (the machines table scrolls
+  inside its own box, not the page).
+- Screenshots regenerated at 150% (`portal-top.jpg` = `/tenant`, `portal-machines.jpg` =
+  `/integrator`). README portal section + walkthrough, `docs/REPRODUCTION.md`,
+  `docs/DECISIONS.md` D-0015 updated to the new route names.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**;
+  `npm test` — **51/51**. Routes: `○ /`, `○ /tenant`, `ƒ /integrator`,
+  `ƒ /integrator/settings`, `ƒ /api/{corrections,room,machines,cameras,upload}`.
+
 ### 2026-08-28 — Connected 4 Vercel frontend skills
 
 - User: connect the best Vercel + Anthropic skills for frontend web apps.

@@ -602,7 +602,7 @@ the override only).
 
 - **Date:** 2026-08-28
 - **Status:** Partial (built incrementally). **Built:**
-  - Separate pages: `/` tenant (state only), `/integrator` console (`force-dynamic`), 2× font.
+  - Separate URL routes: `/tenant` (state only, static), `/integrator` (console), `/integrator/settings` (CRUD); `/` redirects to `/tenant`. Root font 150%; responsive, no mobile horizontal scroll.
   - Per-machine "mark wrong" → `POST /api/corrections` write loop; `buildRoomStatus` overlays
     corrections and iterates the **full roster** (uncovered machine → `unknown` / `seenIn: 0`).
   - **"↻ refresh recognition"** button (`GET /api/room` re-fuses; the D-0016 container's

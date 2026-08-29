@@ -162,7 +162,7 @@ export function MachinesEditor() {
         <p className="text-xs text-zinc-500">loading…</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[36rem] text-left text-xs">
+          <table className="w-full min-w-[26rem] text-left text-xs">
             <thead className="text-zinc-500">
               <tr>
                 <th className="pr-2 pb-1 font-semibold">id</th>

@@ -103,6 +103,17 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-28 — portal: URL routes, font 150%, mobile responsiveness
+
+- URL-based routing: `/` → `/tenant` (static), `/integrator` (console), new
+  `/integrator/settings` (Machines + Cameras editors). `html` font 200% → **150%**.
+- Mobile: `body { overflow-x: clip }` backstop; machines table `min-w` reduced; header
+  button groups wrap. Verified at a 486 px CSS viewport — no page-level horizontal scroll on
+  any route, zero real offenders.
+- Screenshots regenerated; README / REPRODUCTION / DECISIONS D-0015 route names updated.
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **51/51**.
+  Routes: `○ /`, `○ /tenant`, `ƒ /integrator`, `ƒ /integrator/settings`, `ƒ /api/*`.
+
 ### 2026-08-28 — integrator console: Cameras CRUD + upload; layout fixes (D-0015)
 
 - `src/eval/site-config.ts` (`data/site-config.json`; validate/sort; `parseMachineIds`;
