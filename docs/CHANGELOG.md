@@ -103,6 +103,18 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-28 — portal: 2× font + split tenant / integrator pages
+
+- `html { font-size: 200% }`; px-literal text classes → `text-xs`; `max-w-6xl`; responsive
+  grid; `overflow-wrap: anywhere` + `break-words` so nothing overflows.
+- `/` = tenant `RoomView` (state only, still `○`). `/integrator` = `IntegratorView`
+  (`force-dynamic`) with the mark-wrong loop, refresh button, and a Site-overview section.
+  Shared `MachineCard` extracted; old `room-status.tsx` component + `?role=` toggle removed.
+- Routes: `○ /`, `ƒ /integrator`, `ƒ /api/corrections`, `ƒ /api/room`.
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **41/41**;
+  both pages checked in Chrome.
+- Next: machines + cameras CRUD on `/integrator`, `data/site-config.json` schema (D-0015).
+
 ### 2026-08-28 — portal: full roster + refresh + integrator settings panel
 
 - `buildRoomStatus` iterates the whole 32-machine roster; `D-11…D-16` (not in the mock

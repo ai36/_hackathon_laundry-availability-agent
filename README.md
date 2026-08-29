@@ -59,13 +59,19 @@ for free. All runs `--replay`-reproducible offline. Full write-up: **`docs/CHANG
 
 ### The portal
 
-`npm run dev` → a Next.js page that fuses the agent's per-machine assessments across every
-camera angle, **overlays the integrator corrections**, and shows a room view
-(`src/portal/room-status.ts` + `src/stores/machines-store.ts`, MobX). It reads the committed
-baseline report and applies `data/corrections/` — i.e. it shows the **Final "classify +
-corrections" config** (80.0%, `docs/artifacts/eval-baseline-corrected-2026-08-28.json`), not
-the Iteration-1 verify pass. **No API call**, so `/` still prerenders. Reservations and a
-live feed are P2, not wired.
+`npm run dev` → two pages that fuse the agent's per-machine assessments across every camera
+angle and **overlay the integrator corrections** (`src/portal/room-status.ts` +
+`src/stores/machines-store.ts`, MobX):
+
+- **`/`** — the tenant room view: current state per machine, nothing else. No API call, so it
+  prerenders (`○ /`).
+- **`/integrator`** — the integrator console: per-card agent confidence + source frame + a
+  **“✕ mark wrong”** control, a **“↻ refresh recognition”** button, and a site overview.
+  Server-rendered per request so it reflects live `data/corrections/` + `data/machines.json`.
+
+Both show the **Final "classify + corrections" config** (80.0%,
+`docs/artifacts/eval-baseline-corrected-2026-08-28.json`), not the Iteration-1 verify pass.
+Reservations and a live feed are P2, not wired.
 
 ![laundry3 portal — tenant view: state only, "confirm on arrival"](docs/assets/portal-top.jpg)
 ![laundry3 portal — integrator view: agent confidence, source frame, "mark wrong" on every card, W-04 corrected out-of-order](docs/assets/portal-machines.jpg)
@@ -81,11 +87,11 @@ correction loop on the frozen dataset:
 npm run dev            # http://localhost:3000
 ```
 
-1. Open `http://localhost:3000/?role=integrator` — every card now shows the agent's
-   confidence, the frame it came from, and a **“✕ mark wrong”** control. **“Integrator
-   settings”** expands the 32-machine roster + which mock frame currently drives each
-   machine's state; **“↻ refresh recognition”** re-runs the fusion (in the D-0016 container
-   this is where a real re-capture + re-classify would run).
+1. Open `http://localhost:3000/integrator` — every card shows the agent's confidence, the
+   frame it came from, and a **“✕ mark wrong”** control. The **Site overview** lists the
+   32-machine roster and which mock frame currently drives each machine's state;
+   **“↻ refresh recognition”** re-runs the fusion (in the D-0016 container this is where a
+   real re-capture + re-classify would run).
 2. Find a machine the agent got wrong (e.g. a `free` washer shown as `In use`). Click
    **mark wrong**, pick the correct state, optionally tick **“applies to this machine in
    every view (durable)”**, add a note, submit.

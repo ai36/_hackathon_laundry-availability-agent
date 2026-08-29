@@ -19,8 +19,22 @@
   }
 }
 
+/*
+ * Root font size drives every rem-based size (Tailwind text-*, spacing, max-w-*). 200% =
+ * double the default 16px. Everything downstream stays proportional; keep new markup on
+ * the rem scale (text-xs … text-2xl), never px literals, so it scales with this.
+ */
+html {
+  font-size: 200%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Long id lists / notes must wrap, never widen the page. */
+main {
+  overflow-wrap: anywhere;
 }

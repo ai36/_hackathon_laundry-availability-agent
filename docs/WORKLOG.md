@@ -12,6 +12,26 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Portal: 2× font, split tenant / integrator pages
+
+- **Owner feedback:** text too small; integrator settings should be their own page; the
+  D-0015 CRUD (cameras, machines, prompts, reference screenshots) needs building.
+- **Font ×2.** `html { font-size: 200% }` in `globals.css` (drives every rem-based Tailwind
+  size). All px-literal `text-[10/11px]` converted to `text-xs`. Container `max-w-4xl` →
+  `max-w-6xl`; card grid `grid-cols-1 sm:2 lg:3 xl:4`; `overflow-wrap: anywhere` on `main` +
+  `break-words` on every id list / note so nothing widens the page.
+- **Page split.** `/` = `RoomView` (tenant: state only, "integrator →" link).
+  `/integrator` = `IntegratorView` (`force-dynamic`: per-card confidence + source +
+  mark-wrong, "↻ refresh recognition", Site overview = roster + mock-frame→machine map).
+  Shared `MachineCard` + `STATE_STYLE` extracted to `src/components/machine-card.tsx`.
+  `src/components/room-status.tsx` deleted; `?role=` toggle gone (route is the role now).
+- Routes: `○ /`, `ƒ /integrator`, `ƒ /api/corrections`, `ƒ /api/room`.
+- **Still to build (this feedback):** machines CRUD (id / type / prompt fragment / reference
+  screenshots), cameras CRUD (id / machine-id list / stub image / annotated screenshot),
+  `data/site-config.json` schema. Screenshots to refresh after that.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**;
+  `npm test` — **41/41**; visually checked both pages in Chrome (font 2×, no overflow).
+
 ### 2026-08-28 — Portal: full roster, refresh button, integrator settings panel
 
 - **Fix:** `buildRoomStatus` now iterates the whole `data/machines.json` roster (32) instead
