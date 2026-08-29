@@ -10,6 +10,7 @@ import type { Laundry3Config } from "@/config";
 
 type Cfg = Laundry3Config;
 type Payload = { config?: Cfg; defaults?: Cfg; overridden?: string[]; locked?: string[] };
+type Leaf = string | number | boolean;
 
 const GROUPS: { key: keyof Cfg; title: string }[] = [
   { key: "site", title: "Site" },
@@ -23,8 +24,29 @@ const GROUPS: { key: keyof Cfg; title: string }[] = [
 ];
 
 const VISION_EFFORT = ["none", "low", "medium", "high"];
+const VISION_MODELS = ["claude-haiku-4-5", "claude-sonnet-5", "claude-opus-5", "claude-fable-5"];
+const PX_PRESETS = [1024, 1280, 1440, 1600, 1920, 2560, 3840];
+const UTC_OFFSETS = Array.from({ length: 27 }, (_, i) => i - 12); // -12 .. +14
 
-type Leaf = string | number | boolean;
+/** Current whole-hour UTC offset of an IANA zone, or null if it can't be read. */
+function ianaOffsetHours(tz: string): number | null {
+  try {
+    const name =
+      new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "shortOffset" })
+        .formatToParts(new Date())
+        .find((p) => p.type === "timeZoneName")?.value ?? "";
+    if (name === "GMT" || name === "UTC") return 0;
+    const m = /GMT([+-]\d{1,2})/.exec(name);
+    return m ? Number(m[1]) : null;
+  } catch {
+    return null;
+  }
+}
+
+const offsetToIana = (h: number) =>
+  h === 0 ? "Etc/UTC" : h > 0 ? `Etc/GMT-${h}` : `Etc/GMT+${-h}`;
+const fmtOffset = (h: number) =>
+  `UTC${h < 0 ? "−" : "+"}${String(Math.abs(h)).padStart(2, "0")}:00`;
 
 function leaves(obj: unknown, prefix = ""): [string, Leaf][] {
   if (obj && typeof obj === "object" && !Array.isArray(obj)) {
@@ -55,24 +77,114 @@ function setPath<T>(obj: T, path: string, value: Leaf): T {
 }
 
 /** Coerce an edited value back to the type of the same leaf in `defaults`. */
-function coerce(v: Leaf, ref: Leaf): Leaf {
-  if (typeof ref === "number") return v === "" ? NaN : Number(v);
-  if (typeof ref === "boolean") return Boolean(v);
+function coerce(v: Leaf, refType: Leaf): Leaf {
+  if (typeof refType === "number") return v === "" ? NaN : Number(v);
+  if (typeof refType === "boolean") return Boolean(v);
   return String(v);
 }
 
+function Field({
+  path,
+  value,
+  refValue,
+  dirty,
+  onEdit,
+}: {
+  path: string;
+  value: Leaf;
+  refValue: Leaf;
+  dirty: boolean;
+  onEdit: (path: string, v: Leaf) => void;
+}) {
+  const amber = dirty ? "border-secondary-container" : "";
+
+  if (typeof refValue === "boolean") {
+    return (
+      <Switch label={path} checked={Boolean(value)} onCheckedChange={(v) => onEdit(path, v)} />
+    );
+  }
+
+  if (path === "site.timezone") {
+    const cur = ianaOffsetHours(String(value));
+    return (
+      <Select
+        value={cur === null ? "" : String(cur)}
+        onChange={(e) => onEdit(path, offsetToIana(Number(e.target.value)))}
+        className={`w-32 ${amber}`}
+      >
+        {cur === null && <option value="">{String(value)}</option>}
+        {UTC_OFFSETS.map((h) => (
+          <option key={h} value={h}>
+            {fmtOffset(h)}
+          </option>
+        ))}
+      </Select>
+    );
+  }
+
+  if (path === "agent.visionModel" || path === "agent.visionEffort") {
+    const opts =
+      path === "agent.visionEffort"
+        ? VISION_EFFORT
+        : [...new Set([String(value), ...VISION_MODELS])];
+    return (
+      <Select
+        value={String(value)}
+        onChange={(e) => onEdit(path, e.target.value)}
+        className={`w-44 ${amber}`}
+      >
+        {opts.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </Select>
+    );
+  }
+
+  if (path === "frames.maxStillPx" || path === "frames.maxVideoPx") {
+    const opts = [...new Set([Number(value), ...PX_PRESETS])].sort((a, b) => a - b);
+    return (
+      <Select
+        value={String(value)}
+        onChange={(e) => onEdit(path, Number(e.target.value))}
+        className={`w-28 ${amber}`}
+      >
+        {opts.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </Select>
+    );
+  }
+
+  return (
+    <TextInput
+      type={typeof refValue === "number" ? "number" : "text"}
+      inputMode={typeof refValue === "number" ? "decimal" : undefined}
+      step="any"
+      value={String(value)}
+      onChange={(e) => onEdit(path, e.target.value)}
+      spellCheck={false}
+      autoComplete="off"
+      className={`w-40 text-right font-mono ${amber}`}
+    />
+  );
+}
+
 /**
- * Editable view of the deployment config. `save` persists the non-`paths` fields to
- * `data/config-overrides.json` (git-ignored, portal-runtime only — the offline eval is not
- * affected). A dirty field is highlighted amber; a `•` marks values that differ from the
- * built-in default.
+ * Editable view of the deployment config. `save` persists the non-`paths` / non-machine-count
+ * fields to `data/config-overrides.json` (git-ignored, portal-runtime only — the offline
+ * eval is not affected). A dirty field is highlighted amber; a `•` marks values that differ
+ * from the built-in default.
  */
 export function ConfigView() {
   const [loaded, setLoaded] = useState<Cfg | null>(null);
   const [draft, setDraft] = useState<Cfg | null>(null);
   const [defaults, setDefaults] = useState<Cfg | null>(null);
   const [overridden, setOverridden] = useState<Set<string>>(new Set());
-  const [locked, setLocked] = useState<string[]>(["paths."]);
+  const [locked, setLocked] = useState<string[]>(["paths.", "site.machines."]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -110,13 +222,11 @@ export function ConfigView() {
     if (!draft || !defaults) return;
     setBusy(true);
     setErr(null);
-    // Rebuild a patch with every non-locked leaf coerced to its default's type.
     let patch: Cfg = structuredClone(draft);
     for (const [p, v] of leaves(draft)) {
       if (isLocked(p)) continue;
       patch = setPath(patch, p, coerce(v, getPath(defaults, p)));
     }
-    // Drop the locked group so `paths` always comes from source.
     for (const [p] of leaves(patch)) {
       if (isLocked(p)) patch = setPath(patch, p, getPath(defaults, p));
     }
@@ -149,9 +259,9 @@ export function ConfigView() {
         runtime — the offline eval always uses <span className="font-mono">laundry3.config.ts</span>
         . A <span className="text-primary-container">•</span> marks a value overridden from the
         built-in default; an amber field is an unsaved edit.{" "}
-        <span className="font-mono">paths.*</span> is read-only;{" "}
-        <span className="font-mono">site.machines.*</span> is a declared sanity-check, not the live
-        roster (that comes from the cameras above).
+        <span className="font-mono">paths.*</span> and{" "}
+        <span className="font-mono">site.machines.*</span> are read-only — the roster is managed in
+        the Machines section above.
       </p>
 
       {!draft ? (
@@ -168,8 +278,7 @@ export function ConfigView() {
                   {leaves(draft[g.key], String(g.key)).map(([path, value]) => {
                     const short = path.slice(String(g.key).length + 1);
                     const dirty = getPath(draft, path) !== getPath(loaded, path);
-                    const ref = defaults ? getPath(defaults, path) : value;
-                    const locked = isLocked(path);
+                    const refValue = defaults ? getPath(defaults, path) : value;
                     return (
                       <div
                         key={path}
@@ -186,38 +295,15 @@ export function ConfigView() {
                           {short}
                         </dt>
                         <dd className="shrink-0">
-                          {locked ? (
+                          {isLocked(path) ? (
                             <span className="text-outline font-mono text-xs">{String(value)}</span>
-                          ) : typeof ref === "boolean" ? (
-                            <Switch
-                              label={short}
-                              checked={Boolean(value)}
-                              onCheckedChange={(v) => edit(path, v)}
-                            />
-                          ) : path === "agent.visionEffort" ? (
-                            <Select
-                              value={String(value)}
-                              onChange={(e) => edit(path, e.target.value)}
-                              className={`w-28 ${dirty ? "border-secondary-container" : ""}`}
-                            >
-                              {VISION_EFFORT.map((o) => (
-                                <option key={o} value={o}>
-                                  {o}
-                                </option>
-                              ))}
-                            </Select>
                           ) : (
-                            <TextInput
-                              type={typeof ref === "number" ? "number" : "text"}
-                              inputMode={typeof ref === "number" ? "decimal" : undefined}
-                              step="any"
-                              value={String(value)}
-                              onChange={(e) => edit(path, e.target.value)}
-                              spellCheck={false}
-                              autoComplete="off"
-                              className={`w-40 text-right font-mono ${
-                                dirty ? "border-secondary-container" : ""
-                              }`}
+                            <Field
+                              path={path}
+                              value={value}
+                              refValue={refValue}
+                              dirty={dirty}
+                              onEdit={edit}
                             />
                           )}
                         </dd>

@@ -62,7 +62,7 @@ npm start        # serve the production build
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint (flat config)
 npm run format:check # prettier
-npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides (expect: 57/57 pass)
+npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides (expect: 56/56 pass)
 npm run check:data   # dataset privacy gate (also runs as the pre-commit hook)
 ```
 

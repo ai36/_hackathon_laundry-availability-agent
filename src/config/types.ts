@@ -82,8 +82,6 @@ export interface Laundry3Config {
     maxStillPx: number;
     /** Target width (px) for downscaled frames extracted from source **video**. */
     maxVideoPx: number;
-    /** Frames per second sampled from each source video. */
-    videoFps: number;
   };
 
   runtime: {

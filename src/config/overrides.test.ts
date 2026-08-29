@@ -32,11 +32,21 @@ test("writeOverrides rejects an invalid merge and does not write", () => {
   assert.deepEqual(readOverrides(f), {});
 });
 
-test("writeOverrides strips paths.* (server-enforced lock)", () => {
+test("writeOverrides strips locked keys (paths.*, site.machines.*)", () => {
   const f = tmpFile();
-  writeOverrides({ paths: { dataset: "/etc" }, cycles: { defaultWashMinutes: 40 } }, f);
+  writeOverrides(
+    {
+      paths: { dataset: "/etc" },
+      site: { name: "Site A", machines: { washers: 99 } },
+      cycles: { defaultWashMinutes: 40 },
+    },
+    f,
+  );
   const stored = JSON.parse(readFileSync(f, "utf8")) as Record<string, unknown>;
   assert.equal(stored.paths, undefined);
+  const site = stored.site as Record<string, unknown>;
+  assert.equal(site.machines, undefined);
+  assert.equal(site.name, "Site A"); // sibling under a partly-locked group survives
   assert.equal((stored.cycles as Record<string, unknown>).defaultWashMinutes, 40);
 });
 

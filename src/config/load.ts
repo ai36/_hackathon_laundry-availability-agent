@@ -89,7 +89,6 @@ export function validateConfig(c: Laundry3Config): void {
     Number.isInteger(c.frames.maxVideoPx) && c.frames.maxVideoPx >= 64,
     "frames.maxVideoPx must be an integer >= 64",
   );
-  assert(isPositive(c.frames.videoFps), "frames.videoFps must be > 0");
 
   assert(
     isPositive(c.runtime.captureIntervalSeconds),

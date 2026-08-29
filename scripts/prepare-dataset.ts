@@ -49,8 +49,9 @@ const args = new Map(
     return [k, v ?? "true"] as const;
   }),
 );
-// Defaults come from laundry3.config.ts (`frames.*`); CLI flags override per-run.
-const FPS = Number(args.get("fps") ?? config.frames.videoFps);
+// `frames.*` sizes come from laundry3.config.ts; CLI flags override per-run. Video sampling
+// rate is a dataset-prep detail, not a deployment knob — default 1 fps, `--fps=N` to change.
+const FPS = Number(args.get("fps") ?? 1);
 const MAX_STILL = Number(args.get("max-still") ?? config.frames.maxStillPx);
 const MAX_VIDEO = Number(args.get("max-video") ?? config.frames.maxVideoPx);
 const FORCE = args.has("force");

@@ -64,14 +64,14 @@ single source of truth: the dataset pipeline downscales stills to it, a per-came
 mask (`data/raw/masks/<source>.png`) is authored at it, and the runtime feeds the agent
 frames at it — mask and camera frame must share one resolution. It caps **width** (the
 source frames are landscape); height follows by aspect ratio. Only scales down.
-`scripts/prepare-dataset.ts` uses these as defaults; `--fps` / `--max-still` / `--max-video`
-override per run.
+`scripts/prepare-dataset.ts` uses `frames.maxStillPx` / `frames.maxVideoPx` as the
+`--max-still` / `--max-video` defaults. Video sampling rate is a dataset-prep detail, not a
+deployment knob: `--fps` defaults to `1` in the script, independent of the config.
 
 | Key | Type | Default | Meaning |
 | --- | --- | --- | --- |
 | `frames.maxStillPx` | int ≥ 64 | `1600` | Target width for downscaled still frames. |
 | `frames.maxVideoPx` | int ≥ 64 | `1280` | Target width for frames extracted from source video. |
-| `frames.videoFps` | number > 0 | `1` | Frames per second sampled from each source video. |
 
 ### `runtime`
 

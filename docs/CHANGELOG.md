@@ -103,6 +103,16 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-29 — configuration: preset controls, machine-count locked, `videoFps` dropped
+
+- `site.machines.*` read-only (`LOCKED_PREFIXES` += `"site.machines."`; `stripLocked` fixed
+  for nested keys). `site.timezone` → `UTC±HH:00` offset select (`Etc/GMT` mapping).
+  `agent.visionModel` and `frames.maxStill/VideoPx` → preset `<Select>`s. `frames.videoFps`
+  removed from the config schema (dataset-prep detail; `prepare-dataset.ts` defaults `--fps`
+  to 1).
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **56/56**
+  (−1: `videoFps` validator test removed); `check:data` — **pass**. Screenshot regenerated.
+
 ### 2026-08-29 — settings: editable "Configuration" section
 
 - New `src/config/overrides.ts` (`resolvePortalConfig` / `writeOverrides` /

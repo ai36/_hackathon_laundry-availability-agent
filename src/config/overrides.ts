@@ -21,8 +21,12 @@ import type { DeepPartial, Laundry3Config } from "./types";
 
 export const OVERRIDES_FILE = join(process.cwd(), "data", "config-overrides.json");
 
-/** Paths that stay read-only in the portal — structural, and changing them can break the app. */
-export const LOCKED_PREFIXES = ["paths."];
+/**
+ * Read-only in the portal (indicative display only). `paths.*` is structural; the machine
+ * roster is managed in the Machines editor, so `site.machines.*` here is just a sanity-check
+ * count. The `PATCH` route strips these before persisting.
+ */
+export const LOCKED_PREFIXES = ["paths.", "site.machines."];
 
 export function readOverrides(file = OVERRIDES_FILE): DeepPartial<Laundry3Config> {
   if (!existsSync(file)) return {};
@@ -41,12 +45,16 @@ export function resolvePortalConfig(): Laundry3Config {
   return loadConfig(deepMerge(userConfig as DeepPartial<Laundry3Config>, readOverrides()));
 }
 
-/** Drop any top-level group named by a `LOCKED_PREFIXES` entry (e.g. `paths.` → `paths`). */
+/** Drop every `LOCKED_PREFIXES` key from `patch` (e.g. `paths.`, `site.machines.`). */
 function stripLocked(patch: DeepPartial<Laundry3Config>): DeepPartial<Laundry3Config> {
-  const out = { ...(patch as Record<string, unknown>) };
+  const out = structuredClone(patch) as Record<string, unknown>;
   for (const prefix of LOCKED_PREFIXES) {
-    const head = prefix.replace(/\.$/, "").split(".")[0];
-    delete out[head];
+    const keys = prefix.replace(/\.$/, "").split(".");
+    let cur: Record<string, unknown> | undefined = out;
+    for (let i = 0; i < keys.length - 1 && cur; i++) {
+      cur = cur[keys[i]] as Record<string, unknown> | undefined;
+    }
+    if (cur) delete cur[keys[keys.length - 1]];
   }
   return out as DeepPartial<Laundry3Config>;
 }

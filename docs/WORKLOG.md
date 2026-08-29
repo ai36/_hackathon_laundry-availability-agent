@@ -12,6 +12,30 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Configuration: preset controls, machine-count locked, `frames.videoFps` dropped
+
+- Owner refinements to the editable Configuration section:
+  - **`site.machines.washers/dryers`** are now **read-only** (indicative) — added
+    `"site.machines."` to `LOCKED_PREFIXES`; the roster is managed in the Machines section.
+    `stripLocked()` in `overrides.ts` fixed to remove nested locked keys without dropping
+    the whole `site` group (a sibling like `site.name` survives).
+  - **`site.timezone`** → a `UTC±HH:00` offset `<Select>` (−12…+14). Maps to `Etc/UTC` /
+    `Etc/GMT∓N` (valid IANA, passes the validator). An unrecognised current zone
+    (e.g. `America/Los_Angeles`) shows its live whole-hour offset and keeps the raw value
+    as an extra option until changed.
+  - **`agent.visionModel`** → `<Select>` of `claude-haiku-4-5` / `-sonnet-5` / `-opus-5` /
+    `-fable-5` (∪ the current value).
+  - **`frames.maxStillPx` / `maxVideoPx`** → `<Select>` of `1024 / 1280 / 1440 / 1600 /
+    1920 / 2560 / 3840` (∪ the current value).
+  - **`frames.videoFps` removed** from the config entirely (`types.ts`, `defaults.ts`,
+    `load.ts` validator, `load.test.ts`) — it is a dataset-prep detail, not a deployment
+    knob. `scripts/prepare-dataset.ts` now defaults `--fps` to `1` locally.
+  - `config-view.tsx` field rendering extracted into a `Field` sub-component.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` —
+  **56/56** (−1: dropped the `videoFps` validator test); `check:data` — **pass**. Chrome:
+  the Configuration section shows the offset picker, model / px dropdowns, read-only machine
+  counts, and no `videoFps`. `docs/assets/portal-settings.jpg` regenerated.
+
 ### 2026-08-29 — Settings: make the Configuration section editable
 
 - Owner: let the integrator change deployment settings in the UI — editable fields, `save`

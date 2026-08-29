@@ -71,10 +71,6 @@ test("rejects a non-integer or tiny frame width", () => {
   assert.throws(() => loadConfig({ frames: { maxVideoPx: 32 } }), ConfigError);
 });
 
-test("rejects a non-positive video fps", () => {
-  assert.throws(() => loadConfig({ frames: { videoFps: 0 } }), ConfigError);
-});
-
 test("accepts a valid vision effort and rejects an unknown one", () => {
   assert.equal(loadConfig({ agent: { visionEffort: "medium" } }).agent.visionEffort, "medium");
   assert.throws(() => loadConfig({ agent: { visionEffort: "max" as "high" } }), ConfigError);

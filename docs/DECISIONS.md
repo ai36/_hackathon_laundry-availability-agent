@@ -397,6 +397,13 @@ grouped, an input per field (`paths.*` read-only), a `•` on values that differ
   `laundry3.config.ts`. Only portal consumers opt in: `GET /api/config` and
   `src/app/integrator/page.tsx` (`refreshSeconds`). `to restore: rm data/config-overrides.json`.
 
+**Amendment (2026-08-29) — config surface = deployment knobs only.** `frames.videoFps`
+(the video frame-sampling rate) was removed from the schema — it is a one-off dataset-prep
+detail, not something a site operator tunes, and it cluttered the editable Settings UI.
+`scripts/prepare-dataset.ts` now defaults `--fps` to `1` on its own. Rule going forward:
+if a value only matters to `scripts/` dataset prep, it is a script default, not a config
+field.
+
 ---
 
 ## D-0009 — Dataset pipeline and eval/agent code layout
