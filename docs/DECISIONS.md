@@ -81,6 +81,32 @@ change — the collapsible `Section` now always mounts its body (behind `hidden`
 conditionally rendering it, because `aria-controls` needs a live target. Verification as
 above, 51/51.
 
+**Amendment (2026-08-28) — control target 40 px; collapsible-list pattern.** Owner
+feedback on the previous pass:
+
+- Interactive target bumped from ~36 px to **40 px** — `Button` base `min-h-9`→`min-h-10`;
+  a new `ICON_BUTTON` export (`"h-10 w-10 shrink-0 px-0"`) for icon-only buttons (40×40),
+  used by the editor delete buttons; the delete `Trash2` glyph 14→24 px; inline
+  text-adjacent glyphs 14→16; `Section` chevron 16→18 and its toggle `min-h-10`. This
+  supersedes the "AA + headroom (~36px)" line in the previous amendment.
+- **Collapsible list pattern:** the `Section` disclosure *mechanism* (a `<button>` heading
+  with a rotating chevron + `aria-expanded` / `aria-controls`, body mounted behind
+  `hidden`) is now the standard for any long list. `MachineGrid` grew a `collapsible` prop
+  on the same mechanism (its chevron stays smaller — the grid heading is a `text-xs`
+  label, not the `text-base` `Section` title), and its heading always carries the item
+  count (`Washers (16)`). Applied to the Washers / Dryers grids on `/tenant` and
+  `/integrator`, and — on `/integrator/settings` — the roster is split into collapsible
+  `Washers` / `Dryers` sections plus the existing `Cameras` and a now-collapsible
+  `Site overview` (four sections, closed by default).
+- **Editor row layout:** each machine / camera editor card is three stacked blocks —
+  fields → text field → a dedicated `save` + delete action row — instead of a wrapping
+  `ml-auto` group that produced an orphaned right-aligned second line on narrow screens.
+- **Camera id convention:** placeholders and panel copy use `C-01`, `C-02`… to mirror
+  `W-`/`D-` machine ids; not enforced (`SITE_ID_RE` unchanged).
+
+No logic / API / data-model change. `typecheck` / `lint` / `build` / `format:check` pass;
+`npm test` 51/51; `check:data` pass.
+
 ---
 
 ## D-0002 — MobX store architecture

@@ -103,6 +103,28 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-28 — portal: collapsible lists everywhere, tenant summary, editor rows, icons
+
+- `MachineGrid` gains a `collapsible` prop + always shows the item count in the heading
+  (`Washers (16)`); disclosure `<button>` with `aria-expanded`/`aria-controls`, grid stays
+  mounted behind `hidden`. Enabled on `/integrator` and `/tenant`.
+- Tenant status card (`room-view.tsx`) leads with `Washers free N / 16` + `Dryers free
+  N / 16` (mint when > 0, muted at 0); `in use · out of order · unknown` demoted to a
+  single small line; `Available now:` id list kept.
+- Settings: "Machines (32)" split into collapsible `Washers (16)` + `Dryers (16)`
+  (`RosterSection`, type-fixed add row); "Site overview" made collapsible. Four collapsible
+  sections, all closed by default.
+- Editor cards restructured — fields → text field → a dedicated `save` + delete action row
+  (was `ml-auto` that wrapped to an orphaned second line on narrow screens). `Button` base
+  `min-h-9`→`min-h-10` (40 px); new `ICON_BUTTON` export (40×40); delete glyph 14→24 px;
+  inline glyphs 14→16; `Section` chevron 16→18, toggle `min-h-10`. Supersedes the prior
+  "~36px" target bar — D-0001 amendment.
+- Camera-id placeholders `cam-1`→`C-01` + a convention note (matches `W-`/`D-`); not
+  enforced (`SITE_ID_RE` unchanged).
+- Presentational only. `typecheck` / `lint` / `build` / `format:check` — **pass**;
+  `npm test` — **51/51**; `check:data` — **pass**. Chrome: collapse toggles verified, no
+  page overflow. `docs/assets/portal-{top,machines,settings}.jpg` regenerated.
+
 ### 2026-08-28 — portal: visual-rhythm + WCAG 2.2 pass (`web-design-guidelines` skill)
 
 - Ran the connected `web-design-guidelines` skill (Vercel Web Interface Guidelines) over

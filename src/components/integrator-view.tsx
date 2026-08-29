@@ -29,7 +29,7 @@ export const IntegratorView = observer(function IntegratorView() {
       }
       nav={
         <LinkButton href="/integrator/settings" variant="outline">
-          <SlidersHorizontal size={14} aria-hidden="true" /> settings
+          <SlidersHorizontal size={16} aria-hidden="true" /> settings
         </LinkButton>
       }
       footer={
@@ -71,8 +71,8 @@ export const IntegratorView = observer(function IntegratorView() {
         </p>
       </div>
 
-      <MachineGrid title="Washers" list={machines.washers} integrator />
-      <MachineGrid title="Dryers" list={machines.dryers} integrator />
+      <MachineGrid title="Washers" list={machines.washers} integrator collapsible />
+      <MachineGrid title="Dryers" list={machines.dryers} integrator collapsible />
     </PageShell>
   );
 });

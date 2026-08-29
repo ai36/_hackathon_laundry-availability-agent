@@ -30,10 +30,10 @@ export function Section({
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-controls={bodyId}
-          className="flex min-h-9 w-full items-center gap-2 text-left text-base font-semibold"
+          className="flex min-h-10 w-full items-center gap-2 text-left text-base font-semibold"
         >
           <ChevronRight
-            size={16}
+            size={18}
             aria-hidden="true"
             className={`text-on-surface-variant shrink-0 transition-transform ${open ? "rotate-90" : ""}`}
           />

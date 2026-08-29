@@ -12,6 +12,49 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Portal: collapsible lists everywhere, tenant summary, editor rows, icons
+
+- Owner, across several messages: save/delete wrapped onto an orphaned right-aligned second
+  line in the editor rows; icons should be ≥24 px; camera ids should follow `C-NN`; the
+  Washers / Dryers lists on **all three** pages should be collapsible with a count in the
+  heading; the tenant top should lead with **free washers / free dryers** and demote the
+  rest; and the settings page should use the same collapsible pattern for **Washers /
+  Dryers / Cameras**.
+- **Collapsible machine lists** (`machine-grid.tsx`): `MachineGrid` gains a `collapsible`
+  prop and always renders the count in the heading (`Washers (16)`). Collapsible → the
+  heading is a `<button>` with `aria-expanded` / `aria-controls` + rotating chevron; the
+  grid stays mounted (`hidden` class) so `aria-controls` has a live target. Enabled on
+  `/integrator` and `/tenant`; open by default. `MachineGrid` is now a Client Component
+  (both callers already are).
+- **Tenant top** (`room-view.tsx`): the status card now leads with two large figures —
+  `Washers free N / 16`, `Dryers free N / 16` (mint when N > 0, muted when 0) — with the
+  `in use · out of order · unknown` breakdown demoted to one small line beneath, then the
+  `Available now:` id list. The old equal-weight 4-dot row is gone.
+- **Settings** (`machines-editor.tsx`, `integrator-settings.tsx`): the single "Machines
+  (32)" section is split into collapsible **Washers (16)** and **Dryers (16)** sections
+  (`RosterSection`), each with a type-fixed add row (no type picker). Existing rows keep
+  their type `<Select>` so a machine can be re-classified. "Site overview" is now
+  collapsible too. Settings page = four collapsible sections, all closed by default.
+- **Editor row layout** (`machines-editor.tsx`, `cameras-editor.tsx`): each card is three
+  explicit stacked blocks — fields → text field → a dedicated action row (`save` + delete
+  together, left-aligned). No `ml-auto`, so nothing wraps to a floating second line at any
+  width. Verified: `save` 56×40, delete 40×40, same baseline, no page overflow.
+- **Icons / control size:** base `Button` `min-h-9`→`min-h-10` (40 px); new `ICON_BUTTON`
+  export (`h-10 w-10 px-0`, 40×40) for icon-only buttons; the delete `Trash2` glyph
+  14→**24 px**; inline text-adjacent glyphs (`X`, `ArrowLeft`, `SlidersHorizontal`,
+  `RefreshCw`, `Plus`, `Upload`) 14→16; `Section` chevron 16→18, toggle `min-h-10`.
+  Supersedes the "AA + headroom (~36px)" bar from the prior entry — see D-0001 amendment.
+- **`C-NN` convention:** camera-id placeholders `cam-1`→`C-01`; the Cameras panel intro
+  states the convention. Not enforced (`SITE_ID_RE` unchanged) — guidance only.
+- Presentational only; no business-logic / API / data-model change. `typecheck` / `lint` /
+  `build` / `format:check` — **pass**; `npm test` — **51/51**; `check:data` — **pass**.
+  Chrome: collapse toggles work (`aria-expanded` flips, grid gets `hidden`), no page
+  overflow. `docs/assets/portal-{top,machines,settings}.jpg` regenerated.
+- **Compliance** (`hackathon-compliance`): **PASS (APPROVED)** — no eligibility blockers,
+  no blocking risks; the D-0001 amendment closes the "docs vs code" risk carried from the
+  prior review. One reviewer note (chevron size wording) folded into the amendment. Review:
+  `docs/trajectories/compliance/2026-08-28-portal-collapsible-lists.md`.
+
 ### 2026-08-28 — Portal: visual-rhythm + WCAG pass (ran `web-design-guidelines`)
 
 - Owner asked whether frontend skills are in use and flagged uneven spacing in like

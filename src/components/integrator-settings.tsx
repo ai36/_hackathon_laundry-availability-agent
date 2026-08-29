@@ -25,14 +25,14 @@ export const IntegratorSettings = observer(function IntegratorSettings() {
       title="System settings"
       nav={
         <LinkButton href="/integrator" variant="outline">
-          <ArrowLeft size={14} aria-hidden="true" /> integrator
+          <ArrowLeft size={16} aria-hidden="true" /> integrator
         </LinkButton>
       }
     >
       <MachinesEditor />
       <CamerasEditor />
 
-      <Section title="Site overview">
+      <Section title="Site overview" collapsible>
         <div className="flex flex-col gap-3 text-sm">
           <div>
             <div className="text-on-surface-variant font-semibold">

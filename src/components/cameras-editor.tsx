@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus, Trash2, Upload } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button, ICON_BUTTON } from "@/components/ui/button";
 import { Label, TextInput } from "@/components/ui/field";
 import { Section } from "@/components/ui/section";
 import type { Camera } from "@/eval/site-config";
@@ -79,7 +79,7 @@ function ImageField({
         onClick={() => ref.current?.click()}
         className="self-start"
       >
-        <Upload size={14} aria-hidden="true" />{" "}
+        <Upload size={16} aria-hidden="true" />{" "}
         {busy ? "uploading…" : current ? "replace" : "upload"}
       </Button>
       {err && (
@@ -115,35 +115,17 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
 
   return (
     <div className="border-outline-variant bg-surface-container flex flex-col gap-3 rounded border p-3">
-      <div className="flex flex-wrap items-end gap-2">
-        <label className="flex min-w-0 flex-col gap-1">
-          <Label>camera id</Label>
-          <TextInput
-            value={id}
-            onChange={(e) => setId(e.target.value)}
-            autoComplete="off"
-            spellCheck={false}
-            className="w-28 font-mono"
-          />
-        </label>
-        <div className="ml-auto flex gap-2">
-          <Button variant="default" disabled={busy || !dirty} onClick={() => patch({})}>
-            save
-          </Button>
-          <Button
-            variant="danger"
-            disabled={busy}
-            onClick={() => {
-              if (confirm(`Remove camera ${cam.id}?`))
-                void run(() => call("DELETE", { id: cam.id }));
-            }}
-            aria-label={`delete ${cam.id}`}
-            className="w-9 px-0"
-          >
-            <Trash2 size={14} aria-hidden="true" />
-          </Button>
-        </div>
-      </div>
+      <label className="flex min-w-0 flex-col gap-1">
+        <Label>camera id</Label>
+        <TextInput
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+          placeholder="C-01…"
+          autoComplete="off"
+          spellCheck={false}
+          className="w-28 font-mono"
+        />
+      </label>
       <label className="flex flex-col gap-1">
         <Label>machine ids this camera sees (free text)</Label>
         <TextInput
@@ -171,11 +153,27 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
           onPath={(p) => patch({ annotatedShot: p })}
         />
       </div>
-      {err && (
-        <span role="alert" className="text-error text-xs break-words">
-          {err}
-        </span>
-      )}
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant="default" disabled={busy || !dirty} onClick={() => patch({})}>
+          save
+        </Button>
+        <Button
+          variant="danger"
+          disabled={busy}
+          onClick={() => {
+            if (confirm(`Remove camera ${cam.id}?`)) void run(() => call("DELETE", { id: cam.id }));
+          }}
+          aria-label={`delete ${cam.id}`}
+          className={ICON_BUTTON}
+        >
+          <Trash2 size={24} aria-hidden="true" />
+        </Button>
+        {err && (
+          <span role="alert" className="text-error text-xs break-words">
+            {err}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -209,8 +207,10 @@ export function CamerasEditor() {
   return (
     <Section title={`Cameras (${list.length})`} collapsible>
       <p className="text-on-surface-variant mb-4 text-xs">
-        Each camera: an id, the machine ids it observes (free text), and — optionally — a{" "}
-        <em>stub image</em> for its feed and an <em>annotated shot</em>. Writes{" "}
+        Each camera: an id (convention <span className="font-mono">C-01</span>,{" "}
+        <span className="font-mono">C-02</span>… to match <span className="font-mono">W-</span>/
+        <span className="font-mono">D-</span> machines), the machine ids it observes (free text),
+        and — optionally — a <em>stub image</em> for its feed and an <em>annotated shot</em>. Writes{" "}
         <span className="font-mono">data/site-config.json</span> +{" "}
         <span className="font-mono">data/site-config/&lt;id&gt;/</span>. Not yet read by the eval
         runtime (D-0015/D-0016).
@@ -223,13 +223,13 @@ export function CamerasEditor() {
           {list.map((cam) => (
             <CameraRow key={cam.id} cam={cam} onList={setList} />
           ))}
-          <div className="border-outline-variant flex flex-wrap items-end gap-2 rounded border border-dashed p-3">
+          <div className="border-outline-variant flex flex-wrap items-end gap-3 rounded border border-dashed p-3">
             <label className="flex flex-col gap-1">
               <Label>new camera id</Label>
               <TextInput
                 value={newId}
                 onChange={(e) => setNewId(e.target.value)}
-                placeholder="cam-1…"
+                placeholder="C-01…"
                 autoComplete="off"
                 spellCheck={false}
                 className="w-28 font-mono"
@@ -247,7 +247,7 @@ export function CamerasEditor() {
               />
             </label>
             <Button variant="accent" disabled={!newId.trim()} onClick={add}>
-              <Plus size={14} aria-hidden="true" /> add camera
+              <Plus size={16} aria-hidden="true" /> add camera
             </Button>
             {addErr && (
               <span role="alert" className="text-error w-full text-xs break-words">

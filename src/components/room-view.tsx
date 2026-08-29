@@ -5,13 +5,9 @@ import { observer } from "mobx-react-lite";
 import { MachineGrid } from "@/components/machine-grid";
 import { PageShell } from "@/components/ui/page-shell";
 import { useStore } from "@/stores";
+import type { MachineView } from "@/portal/room-status";
 
-const DOTS = [
-  { key: "free", label: "free", dot: "dot-free" },
-  { key: "occupied", label: "in use", dot: "dot-occupied" },
-  { key: "out_of_order", label: "out of order", dot: "dot-out_of_order" },
-  { key: "unknown", label: "unknown", dot: "dot-unknown" },
-] as const;
+const freeCount = (list: MachineView[]) => list.filter((m) => m.state === "free").length;
 
 /** Tenant portal: current per-machine availability, nothing else. */
 export const RoomView = observer(function RoomView() {
@@ -24,15 +20,49 @@ export const RoomView = observer(function RoomView() {
       footer="Snapshot of current machine availability. Confirm on arrival."
     >
       <div className="border-outline-variant bg-surface-container-high rounded-lg border p-4">
-        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm tabular-nums">
-          {DOTS.map((d) => (
-            <span key={d.key} className="flex items-center gap-2">
-              <span className={`h-2.5 w-2.5 rounded-full ${d.dot}`} aria-hidden="true" />
-              <span className="font-semibold">{c[d.key]}</span>
-              <span className="text-on-surface-variant">{d.label}</span>
-            </span>
+        {/* What a tenant actually wants first: how many of each kind are free right now. */}
+        <div className="flex flex-wrap gap-x-10 gap-y-4">
+          {(
+            [
+              {
+                label: "Washers free",
+                free: freeCount(machines.washers),
+                total: machines.washers.length,
+              },
+              {
+                label: "Dryers free",
+                free: freeCount(machines.dryers),
+                total: machines.dryers.length,
+              },
+            ] as const
+          ).map((k) => (
+            <div key={k.label}>
+              <div className="text-on-surface-variant text-xs font-semibold tracking-[0.1em] uppercase">
+                {k.label}
+              </div>
+              <div className="mt-1 flex items-baseline gap-1.5">
+                <span
+                  className={`text-[32px] leading-none font-bold tabular-nums ${
+                    k.free > 0 ? "text-primary-container" : "text-on-surface-variant"
+                  }`}
+                >
+                  {k.free}
+                </span>
+                <span className="text-on-surface-variant text-sm tabular-nums">/ {k.total}</span>
+              </div>
+            </div>
           ))}
         </div>
+
+        {/* Secondary — the rest of the breakdown. */}
+        <p className="text-on-surface-variant mt-4 flex flex-wrap gap-x-3 gap-y-1 text-sm tabular-nums">
+          <span>{c.occupied} in use</span>
+          <span aria-hidden="true">·</span>
+          <span>{c.out_of_order} out of order</span>
+          <span aria-hidden="true">·</span>
+          <span>{c.unknown} unknown</span>
+        </p>
+
         {machines.freeIds.length > 0 && (
           <p className="border-outline-variant bg-surface text-primary mt-4 rounded border p-3 font-mono text-sm break-words">
             Available now: {machines.freeIds.join(", ")}
@@ -40,8 +70,8 @@ export const RoomView = observer(function RoomView() {
         )}
       </div>
 
-      <MachineGrid title="Washers" list={machines.washers} />
-      <MachineGrid title="Dryers" list={machines.dryers} />
+      <MachineGrid title="Washers" list={machines.washers} collapsible />
+      <MachineGrid title="Dryers" list={machines.dryers} collapsible />
     </PageShell>
   );
 });

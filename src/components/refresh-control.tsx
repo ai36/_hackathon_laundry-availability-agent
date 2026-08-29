@@ -89,7 +89,7 @@ export const RefreshControl = observer(function RefreshControl() {
         </legend>
         <Button variant="outline" onClick={run} disabled={busy}>
           <RefreshCw
-            size={14}
+            size={16}
             aria-hidden="true"
             className={busy ? "motion-safe:animate-spin" : ""}
           />

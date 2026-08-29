@@ -17,12 +17,15 @@ const VARIANT: Record<Variant, string> = {
 };
 
 /**
- * Shared control classes. `min-h-9` (36px) keeps every button clear of the WCAG 2.5.8
- * target-size minimum with headroom; icon-only callers add `w-9 px-0` to stay square.
+ * Shared control classes. `min-h-10` (40px) clears the WCAG 2.5.8 target-size minimum with
+ * headroom for touch. Icon-only callers use `ICON_BUTTON` for a 40×40 square.
  */
 export function buttonClasses(variant: Variant = "outline", className = ""): string {
-  return `inline-flex min-h-9 items-center justify-center gap-2 rounded px-3 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-40 ${VARIANT[variant]} ${className}`;
+  return `inline-flex min-h-10 items-center justify-center gap-2 rounded px-3 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-40 ${VARIANT[variant]} ${className}`;
 }
+
+/** Icon-only button: 40×40 square, no text padding. Put a `size={24}` glyph inside. */
+export const ICON_BUTTON = "h-10 w-10 shrink-0 px-0";
 
 export function Button({
   variant = "outline",

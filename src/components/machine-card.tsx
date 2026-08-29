@@ -88,7 +88,7 @@ function MarkWrong({ m }: { m: MachineView }) {
   if (!open) {
     return (
       <Button variant="outline" onClick={() => setOpen(true)} className="mt-2 self-start">
-        <X size={14} aria-hidden="true" /> mark wrong
+        <X size={16} aria-hidden="true" /> mark wrong
       </Button>
     );
   }
