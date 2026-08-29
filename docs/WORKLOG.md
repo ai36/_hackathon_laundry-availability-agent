@@ -12,6 +12,26 @@ Entry format:
 
 ## Log
 
+### 2026-08-28 — Portal: full roster, refresh button, integrator settings panel
+
+- **Fix:** `buildRoomStatus` now iterates the whole `data/machines.json` roster (32) instead
+  of only machines seen in the report. `D-11…D-16` (16 dryers exist; the mock photos cover
+  10) now show as `unknown` / `seenIn: 0` / `source "—"`. A `machine`-scope correction still
+  applies to an uncovered machine; the "mark wrong" POST files those under `_roster` and
+  forces `scope: machine`. +1 test (41 total).
+- **"↻ refresh recognition"** button in the integrator header → `GET /api/room`
+  (`src/app/api/room/route.ts`, Node runtime) re-reads the report + re-fuses corrections and
+  swaps the store's machine list. In the D-0016 container this route is the re-capture +
+  re-classify hook; in P0 it's a cheap re-fusion.
+- **"Integrator settings"** collapsible panel: roster stats (16 W / 16 D, N covered,
+  not-covered list), the mock-camera → machine map (frame → machines whose state it sets),
+  and an explicit "camera/mask/reference/prompt editing is D-0015, not in this build" note.
+- Build: `○ /`, `ƒ /api/corrections`, `ƒ /api/room`. Screenshot added
+  (`docs/assets/portal-integrator-settings.jpg`); README walkthrough updated.
+- Verification: `typecheck` / `lint` / `build` / `format:check` — **pass**;
+  `npm test` — **41/41**; `check:data` — **pass**; `/api/room` returns 32 machines
+  (16 dryers, D-11–D-16 uncovered), counts sum to 32.
+
 ### 2026-08-28 — Portal: integrator role + clickable correction loop (D-0015/D-0016 P0)
 
 - **D-0016 P0 acceptance criterion met:** a judge with no API key and no hardware can walk

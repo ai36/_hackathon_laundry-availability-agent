@@ -103,6 +103,16 @@ the metric — not the demo — tell you whether the agent is better.
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-28 — portal: full roster + refresh + integrator settings panel
+
+- `buildRoomStatus` iterates the whole 32-machine roster; `D-11…D-16` (not in the mock
+  photos) show as `unknown` / `seenIn 0`. +1 test (41 total).
+- `GET /api/room` (`src/app/api/room/route.ts`) + a "↻ refresh recognition" button re-fuse
+  the room without an API call (the D-0016 re-capture hook). "Integrator settings" panel:
+  roster stats + mock-camera → machine map + the D-0015 not-built note.
+- `typecheck` / `lint` / `build` / `format:check` — **pass**; `npm test` — **41/41**;
+  `check:data` — **pass**. Build routes: `○ /`, `ƒ /api/corrections`, `ƒ /api/room`.
+
 ### 2026-08-28 — portal: integrator role + clickable correction loop
 
 - `buildRoomStatus` overlays D-0014 corrections (default report → `eval-baseline-2026-08-28.json`

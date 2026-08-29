@@ -36,10 +36,11 @@ function MarkWrong({ m }: { m: MachineView }) {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          frameId: m.source,
+          // a machine no mock camera covers has no source frame — file it under "_roster"
+          frameId: m.seenIn === 0 ? "_roster" : m.source,
           machineId: m.machineId,
           correctState,
-          scope: durable ? "machine" : "observation",
+          scope: durable || m.seenIn === 0 ? "machine" : "observation",
           note: note.trim() || undefined,
         }),
       });
@@ -157,12 +158,37 @@ export const RoomStatus = observer(function RoomStatus() {
     return () => window.removeEventListener("popstate", read);
   }, [machines]);
 
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshErr, setRefreshErr] = useState<string | null>(null);
+
   function toggleRole(e: MouseEvent) {
     e.preventDefault();
     const next = integrator ? "tenant" : "integrator";
     const url = next === "integrator" ? "/?role=integrator" : "/";
     window.history.pushState(null, "", url);
     machines.setRole(next);
+  }
+
+  async function refresh() {
+    setRefreshing(true);
+    setRefreshErr(null);
+    try {
+      const res = await fetch("/api/room", { cache: "no-store" });
+      const data = (await res.json()) as { ok?: boolean; error?: string; room?: unknown };
+      if (!res.ok || !data.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+      machines.applyRoom(data.room as Parameters<typeof machines.applyRoom>[0]);
+    } catch (e) {
+      setRefreshErr(e instanceof Error ? e.message : "failed");
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
+  const observed = machines.machines.filter((m) => m.seenIn > 0);
+  const unobserved = machines.machines.filter((m) => m.seenIn === 0).map((m) => m.machineId);
+  const cameras = new Map<string, string[]>();
+  for (const m of observed) {
+    cameras.set(m.source, [...(cameras.get(m.source) ?? []), m.machineId]);
   }
 
   return (
@@ -187,14 +213,72 @@ export const RoomStatus = observer(function RoomStatus() {
           </p>
         )}
         {integrator && (
-          <p className="mt-2 rounded bg-sky-500/10 px-3 py-2 text-xs text-sky-700 dark:text-sky-300">
-            Integrator view — {machines.correctedCount} correction
-            {machines.correctedCount === 1 ? "" : "s"} applied. Use “mark wrong” on any card to
-            override the agent; a <em>durable</em> correction carries to every view and every future
-            capture of that machine (D-0014).
-          </p>
+          <div className="mt-2 rounded bg-sky-500/10 px-3 py-2 text-xs text-sky-700 dark:text-sky-300">
+            <div className="flex items-center justify-between gap-2">
+              <span>
+                Integrator view — {machines.correctedCount} correction
+                {machines.correctedCount === 1 ? "" : "s"} applied. Use “mark wrong” on any card to
+                override the agent; a <em>durable</em> correction carries to every view and every
+                future capture of that machine (D-0014).
+              </span>
+              <button
+                type="button"
+                onClick={refresh}
+                disabled={refreshing}
+                className="shrink-0 rounded border border-sky-500/40 px-2 py-1 text-xs whitespace-nowrap hover:bg-sky-500/10 disabled:opacity-50"
+              >
+                {refreshing ? "refreshing…" : "↻ refresh recognition"}
+              </button>
+            </div>
+            {refreshErr && <p className="mt-1 text-red-500">refresh failed: {refreshErr}</p>}
+          </div>
         )}
       </header>
+
+      {integrator && (
+        <details className="mb-6 rounded-lg border border-zinc-200/60 p-3 text-xs dark:border-zinc-800">
+          <summary className="cursor-pointer font-semibold text-zinc-600 dark:text-zinc-300">
+            Integrator settings
+          </summary>
+          <div className="mt-3 flex flex-col gap-3">
+            <div>
+              <div className="font-semibold text-zinc-500">Roster ({machines.machines.length})</div>
+              <div className="text-zinc-500">
+                {machines.washers.length} washers · {machines.dryers.length} dryers ·{" "}
+                {observed.length} covered by a mock camera
+                {unobserved.length > 0 && (
+                  <>
+                    {" "}
+                    · <span className="text-zinc-400">not covered:</span>{" "}
+                    <span className="font-mono">{unobserved.join(", ")}</span>
+                  </>
+                )}
+              </div>
+            </div>
+            <div>
+              <div className="font-semibold text-zinc-500">
+                Mock cameras ({cameras.size}) — frame → machines whose state it currently sets
+              </div>
+              <ul className="mt-1 flex flex-col gap-0.5">
+                {[...cameras.entries()].sort().map(([frame, ids]) => (
+                  <li key={frame} className="text-zinc-500">
+                    <span className="font-mono">{frame}</span> → {ids.sort().join(", ")}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <p className="text-zinc-400">
+              Editing cameras (machine-id list, annotated screenshot, mask), per-machine
+              reference-state screenshots and a per-machine prompt fragment are specified in
+              <span className="font-mono"> docs/DECISIONS.md</span> D-0015 and are not in this
+              build. For now: “mark wrong” on a card, or{" "}
+              <span className="font-mono">npm run correct</span>, writes{" "}
+              <span className="font-mono">data/corrections/</span>; edit the roster in{" "}
+              <span className="font-mono">data/machines.json</span>.
+            </p>
+          </div>
+        </details>
+      )}
 
       <section className="mb-6">
         <h2 className="mb-2 text-xs font-semibold tracking-widest text-zinc-500 uppercase">

@@ -78,6 +78,36 @@ test("machines are sorted by id and typed from the roster", () => {
   assert.equal(room.machines.find((m) => m.machineId === "D-01")!.type, "dryer");
 });
 
+test("a roster machine no camera sees still gets a card (unknown, seenIn 0)", () => {
+  const dir = mkdtempSync(join(tmpdir(), "laundry3-room-"));
+  const report = join(dir, "report.json");
+  const roster = join(dir, "machines.json");
+  const corr = join(dir, "corrections");
+  mkdirSync(corr);
+  writeFileSync(
+    roster,
+    JSON.stringify({
+      machines: [
+        { machineId: "W-01", type: "washer" },
+        { machineId: "D-16", type: "dryer" }, // present in roster, absent from the report
+      ],
+    }),
+  );
+  writeFileSync(
+    report,
+    JSON.stringify({
+      model: "m",
+      predictions: { f: { machines: [{ machineId: "W-01", state: "free", confidence: 0.8 }] } },
+    }),
+  );
+  const room = buildRoomStatus(report, roster, corr);
+  const d16 = room.machines.find((m) => m.machineId === "D-16")!;
+  assert.equal(d16.state, "unknown");
+  assert.equal(d16.seenIn, 0);
+  assert.equal(d16.source, "—");
+  assert.equal(room.machines.length, 2);
+});
+
 test("a machine-scope correction overrides the fused state and is flagged", () => {
   const { report, roster, corr } = fixture();
   writeFileSync(

@@ -41,9 +41,10 @@ type Roster = { machines: { machineId: string; type: MachineType }[] };
 const ACTIONABLE: MachineState[] = ["free", "occupied", "out_of_order"];
 
 /**
- * Build the room view from a committed eval report — no API calls. For each machine in the
- * roster, pick the most confident *actionable* observation across all frames; fall back to
- * the most confident `unknown` if that's all there is. Then overlay integrator corrections
+ * Build the room view from a committed eval report — no API calls. Every machine in the
+ * **roster** gets a card; for those a camera sees, pick the most confident *actionable*
+ * observation across all frames (falling back to the most confident `unknown`); a machine
+ * no camera covers stays `unknown` with `seenIn: 0`. Then overlay integrator corrections
  * (D-0014): a `machine`-scope correction wins outright; an `observation`-scope one wins when
  * it targets the frame the shown state came from.
  */
@@ -54,7 +55,6 @@ export function buildRoomStatus(
 ): RoomStatus {
   const report = JSON.parse(readFileSync(reportPath, "utf8")) as Report;
   const roster = JSON.parse(readFileSync(rosterPath, "utf8")) as Roster;
-  const typeOf = new Map(roster.machines.map((m) => [m.machineId, m.type]));
   const corrections = loadCorrections(correctionsDir);
 
   const obs = new Map<string, { frameId: string; state: MachineState; confidence: number }[]>();
@@ -66,32 +66,35 @@ export function buildRoomStatus(
     }
   }
 
-  const machines: MachineView[] = [];
-  for (const [machineId, list] of obs) {
+  // One card per roster machine — including ones no mock camera happens to cover.
+  const machines: MachineView[] = roster.machines.map(({ machineId, type }) => {
+    const list = obs.get(machineId) ?? [];
     const pick =
       [...list]
         .filter((o) => ACTIONABLE.includes(o.state))
         .sort((a, b) => b.confidence - a.confidence)[0] ??
       [...list].sort((a, b) => b.confidence - a.confidence)[0];
 
-    const view: MachineView = {
-      machineId,
-      type: typeOf.get(machineId) ?? (machineId.startsWith("W-") ? "washer" : "dryer"),
-      state: pick.state,
-      confidence: pick.confidence,
-      source: pick.frameId,
-      seenIn: list.length,
-    };
+    const view: MachineView = pick
+      ? {
+          machineId,
+          type,
+          state: pick.state,
+          confidence: pick.confidence,
+          source: pick.frameId,
+          seenIn: list.length,
+        }
+      : { machineId, type, state: "unknown", confidence: 0, source: "—", seenIn: 0 };
 
-    const c = correctionFor(corrections, pick.frameId, machineId);
+    const c = correctionFor(corrections, view.source, machineId);
     if (c) {
       view.state = c.correctState;
       view.confidence = 1;
       view.corrected = true;
       view.correction = { scope: c.scope, note: c.note };
     }
-    machines.push(view);
-  }
+    return view;
+  });
   machines.sort((a, b) => a.machineId.localeCompare(b.machineId));
 
   const counts: Record<MachineState, number> = {

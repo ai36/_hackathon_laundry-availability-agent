@@ -595,8 +595,12 @@ the override only).
 - **Date:** 2026-08-28
 - **Status:** Partial. **Built:** portal roles (`?role=integrator`), the per-machine
   "mark wrong" → `POST /api/corrections` write loop, `buildRoomStatus` overlaying corrections
-  (D-0016 P0 — judge-walkable, key-free). **Not built:** camera/machine CRUD, mask upload,
-  reference-state screenshots, per-machine prompt fragment, `site-config.json` schema, the
+  and now iterating the **full roster** (a machine no camera covers shows `unknown` /
+  `seenIn: 0`), an "Integrator settings" panel (roster stats + mock-camera → machine map +
+  this spec's not-built list), and a **"refresh recognition"** button (`GET /api/room`
+  re-fuses; in the D-0016 container this is the re-capture + re-classify hook). D-0016 P0 —
+  judge-walkable, key-free. **Not built:** camera/machine CRUD, mask upload, reference-state
+  screenshots, per-machine prompt fragment editor, `site-config.json` schema, the
   correction→prompt feedback synthesis (D-0014 amendment). Spec below stands for those.
 
 **Context.** D-0009 / D-0010 name a `data/site-config.json` produced during onboarding

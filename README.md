@@ -69,6 +69,10 @@ live feed are P2, not wired.
 
 ![laundry3 portal — tenant view: state only, "confirm on arrival"](docs/assets/portal-top.jpg)
 ![laundry3 portal — integrator view: agent confidence, source frame, "mark wrong" on every card, W-04 corrected out-of-order](docs/assets/portal-machines.jpg)
+![laundry3 portal — integrator settings: 32-machine roster, mock camera → machine map, D-11–D-16 not covered](docs/assets/portal-integrator-settings.jpg)
+
+Every card is one machine from `data/machines.json` (**16 washers + 16 dryers**); the mock
+photos only cover 26 of them, so `D-11…D-16` show as `unknown` / "not covered".
 
 **Integrator walkthrough (no API key, no hardware).** The judge can walk the whole
 correction loop on the frozen dataset:
@@ -78,7 +82,10 @@ npm run dev            # http://localhost:3000
 ```
 
 1. Open `http://localhost:3000/?role=integrator` — every card now shows the agent's
-   confidence, the frame it came from, and a **“✕ mark wrong”** control.
+   confidence, the frame it came from, and a **“✕ mark wrong”** control. **“Integrator
+   settings”** expands the 32-machine roster + which mock frame currently drives each
+   machine's state; **“↻ refresh recognition”** re-runs the fusion (in the D-0016 container
+   this is where a real re-capture + re-classify would run).
 2. Find a machine the agent got wrong (e.g. a `free` washer shown as `In use`). Click
    **mark wrong**, pick the correct state, optionally tick **“applies to this machine in
    every view (durable)”**, add a note, submit.
