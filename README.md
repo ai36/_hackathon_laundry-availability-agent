@@ -132,9 +132,8 @@ npm run dev            # http://localhost:3000
    the fusion (the D-0016 container's re-capture + re-classify hook). **`/integrator/settings`**
    has the **Machines** editor (add / remove / rename, set type, set a per-machine
    `promptFragment` the calibrated eval mode uses — writes `data/machines.json`), the
-   **Cameras** editor (id + free-text machine-id list + optional stub / annotated image
-   upload + region map — writes
-   `data/site-config.json`), and a site overview.
+   **Cameras** editor (id + free-text machine-id list + optional stub image + region map
+   upload — writes `data/site-config.json`), and a site overview.
 2. Find a machine the agent got wrong (e.g. a `free` washer shown as `In use`). Click
    **mark wrong**, pick the correct state, optionally tick **“applies to this machine in
    every view (durable)”**, add a note, submit.

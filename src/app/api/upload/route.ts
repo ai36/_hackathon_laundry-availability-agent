@@ -3,7 +3,7 @@
  *
  *   POST /api/upload   multipart/form-data
  *     file      : the image (jpeg / png / webp, ≤ 4 MB)
- *     kind      : "camera-stub" | "camera-annotated" | "camera-mask" | "machine-reference"
+ *     kind      : "camera-stub" | "camera-mask" | "machine-reference"
  *     ownerId   : camera id or machine id ([A-Za-z0-9_-]+)
  *     state     : required for "machine-reference" (free|occupied|out_of_order|unknown)
  *   -> { ok, path }   a repo-relative path under data/site-config/<ownerId>/
@@ -28,7 +28,10 @@ import { SITE_ID_RE } from "@/eval/site-config";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const KINDS = ["camera-stub", "camera-annotated", "camera-mask", "machine-reference"] as const;
+// "camera-annotated" was removed from the portal: the annotated shot fed only the
+// `--mode=calibrated` dead-end, so it is no longer an editable camera input. The committed
+// `img_*.annotated.jpg` files stay in the repo for that reproduction.
+const KINDS = ["camera-stub", "camera-mask", "machine-reference"] as const;
 const STATES = ["free", "occupied", "out_of_order", "unknown"];
 const EXT: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -72,14 +75,7 @@ export async function POST(req: Request) {
     const ext = sniff(buf); // the extension comes from the bytes, not the client's mime
     if (!ext) throw new Error("file content is not a valid jpeg, png, or webp");
 
-    const base =
-      kind === "camera-stub"
-        ? "stub"
-        : kind === "camera-annotated"
-          ? "annotated"
-          : kind === "camera-mask"
-            ? "mask"
-            : `ref-${state}`;
+    const base = kind === "camera-stub" ? "stub" : kind === "camera-mask" ? "mask" : `ref-${state}`;
     const relDir = join("data", "site-config", ownerId);
     mkdirSync(join(process.cwd(), relDir), { recursive: true });
     const rel = join(relDir, `${base}.${ext}`).replace(/\\/g, "/");

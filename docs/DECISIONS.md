@@ -787,7 +787,9 @@ payload, same write path — a deliberate confirmation step before a state overr
     the D-0016 `StaticImageFrameSource`) + **annotated shot** (spatial key) uploaded via
     `POST /api/upload` (jpeg/png/webp ≤ 4 MB → `data/site-config/<id>/`). Writes
     `data/site-config.json`. All ids restricted to `[A-Za-z0-9_-]+`; `data/site-config/`
-    (uploaded images) is git-ignored, `data/site-config.json` is committed.
+    (uploaded images) is git-ignored, `data/site-config.json` is committed. _(The annotated
+    shot was removed from the portal 2026-08-29 and `mask` became a colour region map — see
+    the amendments below.)_
   - D-0016 P0 — judge walks the correction loop key-free.
   **Not built:** per-machine reference-state screenshots (the upload route supports the
   `machine-reference` kind, no UI yet); the site-config is **not read by the eval / agent
@@ -862,12 +864,14 @@ must also apply corrections so the portal reflects the corrected state.
 
 **Amendment (2026-08-28) — cameras seeded, mask wired, image previews, `type` dropped.**
 
-- **`Camera.mask?`** is now in the schema (`src/eval/site-config.ts`), the upload route
+- **`Camera.mask?`** is in the schema (`src/eval/site-config.ts`), the upload route
   (`camera-mask` kind → `data/site-config/<id>/mask.<ext>`), and the `/api/cameras`
-  POST/PATCH body (a string sets it, `null`/`""` clears, an absent key keeps it). It is
-  stored and shown; as of the 2026-08-29 amendment below it is also passed to `/api/refresh`
-  as a reference image + prompt instruction. Compositing it onto the feed (a `sharp`-style
-  pixel op) is still not done and intentionally deferred.
+  POST/PATCH body. It is stored, shown, and — as of the 2026-08-29 amendments below — is a
+  **colour-coded region map** consumed by `--mode=roi`.
+- **`Camera.annotatedShot?` was removed from the portal (2026-08-29).** It only fed the
+  `--mode=calibrated` dead-end, so the Cameras-editor field, the `camera-annotated` upload
+  kind, and the `/api/cameras` body key are gone; an existing value on a camera is left
+  untouched. The `img_*.annotated.jpg` files stay committed for that reproduction.
 - **`data/site-config.json` ships 5 seeded cameras** (`C-01…C-05`), each `stubImage` a
   committed eval frame with that frame's machine-id list. Rationale: there is no physical
   camera, but the whole point of `StaticImageFrameSource` is that a photo *is* the feed —
@@ -950,9 +954,11 @@ map (not a transparent "analysis mask"), the live route was sending a wrong-cont
 with a dead-end prompt. `POST /api/refresh` now runs **one `baselinePrompt` whole-frame call
 per camera** again — matching the shipped "baseline + corrections" config it fuses into.
 `cameraClassifyPrompt` stays, but only the eval's `--mode=calibrated` uses it now; the
-`annotatedShot` / region map on each camera are calibration inputs for `--mode=roi` /
-`--mode=calibrated`, editable and previewable in the Cameras editor, not fed on the live
-path. (The `buildRoomStatus` default report was also repointed from the moved
+the region map is editable in the Cameras editor and feeds `--mode=roi`; `annotatedShot` fed
+only the `--mode=calibrated` dead-end, so it was **removed from the portal** (2026-08-29 —
+the `ImageField`, the `camera-annotated` upload kind, and the `/api/cameras` body key are
+gone; an existing value is preserved untouched). Its committed `img_*.annotated.jpg` files
+stay in the repo for that reproduction. (The `buildRoomStatus` default report was also repointed from the moved
 `eval-baseline-2026-08-28.json` to `eval-baseline-2026-08-29.json` — the portal 500'd
 without it.)
 

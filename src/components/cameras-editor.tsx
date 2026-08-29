@@ -170,20 +170,13 @@ function CameraRow({ cam, onList }: { cam: Camera; onList: (l: Camera[]) => void
           className="w-full font-mono"
         />
       </label>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <ImageField
           label="stub image — stands in as this camera's feed"
           kind="camera-stub"
           ownerId={cam.id}
           current={cam.stubImage}
           onChange={(p) => patch({ stubImage: p })}
-        />
-        <ImageField
-          label="annotated shot — machine ids drawn on the view (calibration reference)"
-          kind="camera-annotated"
-          ownerId={cam.id}
-          current={cam.annotatedShot}
-          onChange={(p) => patch({ annotatedShot: p })}
         />
         <ImageField
           label="region map — each machine's panel painted one colour (see maskLegend)"
@@ -249,14 +242,11 @@ export function CamerasEditor() {
         Each camera: an id (convention <span className="font-mono">C-01</span>,{" "}
         <span className="font-mono">C-02</span>… to match <span className="font-mono">W-</span>/
         <span className="font-mono">D-</span> machines), the machine ids it observes (free text),
-        and — optionally — a <em>stub image</em> for its feed, an <em>annotated shot</em>, and a{" "}
-        <em>region map</em> (each machine&apos;s panel painted one colour; the{" "}
-        <span className="font-mono">maskLegend</span> in{" "}
-        <span className="font-mono">site-config.json</span> maps colour → id). The stub image is
-        what <span className="font-mono">refresh</span> analyses (one whole-frame call per camera).
-        The annotated shot + region map are calibration inputs the offline eval uses (
-        <span className="font-mono">--mode=roi</span> /{" "}
-        <span className="font-mono">calibrated</span>).
+        and — optionally — a <em>stub image</em> for its feed and a <em>region map</em> (each
+        machine&apos;s panel painted one colour; the <span className="font-mono">maskLegend</span>{" "}
+        in <span className="font-mono">site-config.json</span> maps colour → id). The stub image is
+        what <span className="font-mono">refresh</span> analyses (one whole-frame call per camera);
+        the region map feeds the offline <span className="font-mono">--mode=roi</span> eval.
       </p>
       {!loaded ? (
         <p className="text-on-surface-variant text-xs">loading…</p>

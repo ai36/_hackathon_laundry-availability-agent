@@ -12,6 +12,25 @@ Entry format:
 
 ## Log
 
+### 2026-08-29 — Remove the annotated-shot upload from the portal (kept as files for the dead-end)
+
+- `annotatedShot` fed only `--mode=calibrated` (the documented −13.7 pp dead-end); the live
+  path and `--mode=roi` don't touch it. Having it as an editable camera input in the portal
+  implied it changes recognition — it doesn't.
+- Removed: the `annotated shot` `ImageField` from the Cameras editor (`cameras-editor.tsx`,
+  now stub image + region map only); the `camera-annotated` kind from `/api/upload`
+  (`KINDS` + base-name map); the `annotatedShot` key from the `/api/cameras` body type +
+  POST/PATCH — PATCH now always preserves `cur.annotatedShot` untouched, never sets it.
+- **Kept:** `Camera.annotatedShot?` in the schema, the values in `data/site-config.json`, and
+  the committed `img_*.annotated.jpg` files — `--mode=calibrated --replay` reads
+  `existsSync(camera.annotatedShot)`, so they stay load-bearing for that reproduction.
+- Docs: README (Cameras-editor line), `docs/DECISIONS.md` D-0015 (the "cameras seeded"
+  amendment + the reversion amendment), `docs/REPRODUCTION.md` (`/api/refresh` note).
+- Verified: `typecheck` / `lint` / `format:check` / `npm test` 82-82 / `check:data` / `build`
+  pass. `npm start`: `/integrator/settings` 200; `POST /api/upload kind=camera-annotated` →
+  400 "kind must be one of camera-stub, camera-mask, machine-reference".
+- **Compliance:** `hackathon-compliance` → **PASS WITH RISKS** (`docs/trajectories/compliance/2026-08-29-remove-annotated-upload.md`). No blockers — the calibrated dead-end stays reproducible (schema field, seed values, `.annotated.jpg` files, `--mode=calibrated` untouched). One doc-trail risk handled: added a "removed from the portal 2026-08-29" pointer on the D-0015 primary Cameras-CRUD bullet.
+
 ### 2026-08-29 — Fix: portal 500'd after the recalibration; `/api/refresh` realigned to baseline
 
 - **Break:** `buildRoomStatus` (`src/portal/room-status.ts`) hard-coded its default report to

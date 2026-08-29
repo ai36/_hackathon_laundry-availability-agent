@@ -2,12 +2,13 @@
  * Camera CRUD (D-0015 integrator console).
  *
  *   GET    /api/cameras                                                     -> { ok, cameras }
- *   POST   /api/cameras  { id, machineIdsText, stubImage?, annotatedShot?, mask? }
- *   PATCH  /api/cameras  { id, targetId?, machineIdsText?, stubImage?, annotatedShot?, mask? }
+ *   POST   /api/cameras  { id, machineIdsText, stubImage?, mask? }
+ *   PATCH  /api/cameras  { id, targetId?, machineIdsText?, stubImage?, mask? }
  *   DELETE /api/cameras  { id }
  *
  * For an image field on PATCH: a string sets it, `null` / `""` clears it, `undefined` (key
- * absent) leaves it unchanged.
+ * absent) leaves it unchanged. `annotatedShot` is no longer settable here (it fed only the
+ * `--mode=calibrated` dead-end); an existing value on a camera is preserved untouched.
  *
  * Writes data/site-config.json (a fixed path). Node runtime; works under `npm run dev` /
  * any self-hosted Node/Docker host, not a read-only serverless FS.
@@ -37,7 +38,6 @@ type Body = {
   machineIdsText?: string;
   machineIds?: string[];
   stubImage?: string | null;
-  annotatedShot?: string | null;
   mask?: string | null;
 };
 
@@ -71,7 +71,6 @@ export async function POST(req: Request) {
         id: b.id!,
         machineIds: ids(b),
         stubImage: b.stubImage || undefined,
-        annotatedShot: b.annotatedShot || undefined,
         mask: b.mask || undefined,
       }),
     );
@@ -99,8 +98,7 @@ export async function PATCH(req: Request) {
         machineIds:
           b.machineIdsText === undefined && b.machineIds === undefined ? cur.machineIds : ids(b),
         stubImage: b.stubImage === undefined ? cur.stubImage : b.stubImage || undefined,
-        annotatedShot:
-          b.annotatedShot === undefined ? cur.annotatedShot : b.annotatedShot || undefined,
+        annotatedShot: cur.annotatedShot, // preserved, not settable via the portal
         mask: b.mask === undefined ? cur.mask : b.mask || undefined,
       }),
     );

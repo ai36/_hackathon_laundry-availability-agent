@@ -55,9 +55,10 @@ npm start        # serve the production build
 > stub = the committed eval frames), so **with a key** a manual click runs ~5 vision calls
 > (one whole-frame `baselinePrompt` call per camera) and fuses the live reads below
 > corrections. The auto toggle is off by default and stops after **20 cycles**. Results cache
-> to `data/cache/live/` (git-ignored). The annotated shot / region map on each camera are
-> calibration inputs for the offline eval (`--mode=roi` / `--mode=calibrated`); the live
-> route uses the plain baseline call, matching the shipped "baseline + corrections" config.
+> to `data/cache/live/` (git-ignored). The region map on each camera feeds the offline
+> `--mode=roi` eval; the `img_*.annotated.jpg` files feed the `--mode=calibrated` dead-end
+> only (no longer a portal input). The live route uses the plain baseline call, matching the
+> shipped "baseline + corrections" config.
 
 ## Checks
 
