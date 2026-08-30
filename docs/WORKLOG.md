@@ -12,6 +12,30 @@ Entry format:
 
 ## Log
 
+### 2026-08-30 — Catch-up compliance review of `docs/SUBMISSION-FORM.md` + risk fixes
+
+- Commit `39a9dfa` (SUBMISSION-FORM.md — the text pasted verbatim into the submission
+  portal) was committed and pushed to `origin/dev` **without** the `hackathon-compliance`
+  pass CLAUDE.md rule 2 requires. Ran it now as a catch-up, before the final submission.
+- **Verdict: PASS WITH RISKS, no blockers**
+  (`docs/trajectories/compliance/2026-08-30-submission-form.md`). Every number in the
+  results table, the +18.2 / +22.7 pp deltas, n = 22, and the 96 test count were
+  re-reconciled against `CHANGELOG` / `EVALUATION` / `REPRODUCTION` / `SUBMISSION` — all
+  match. No secrets in the diff. Video honestly framed as not-yet-recorded.
+- Risks fixed (doc-only, no code / data / number change):
+  - **Stale archive SHA** — `SUBMISSION-FORM.md` §4 said to upload the zip built at HEAD
+    `9231bb7`, but that commit predates `SUBMISSION-FORM.md` itself, so the uploaded source
+    would not match the submitted repo. Rewrote §4 to build from **post-merge `main` HEAD**
+    with `-o laundry3-$(git rev-parse --short HEAD).zip`; dropped the unverified
+    "~2.9 MB / 350 files" (actual `git ls-files` at HEAD = 292 tracked).
+  - **Compliance-review count** 35 → 36 in `SUBMISSION-FORM.md` (×2), `SUBMISSION.md`,
+    `trajectories/README.md` (this review is the 36th record).
+  - **Checklist wording** — "the four `--replay` lines print 45.5 / 63.6 / 68.2" → "the
+    three `npm run eval` lines" (`npm run synthesize` prints no percentage).
+- The earlier "~2.9 MB, 350 files" line in the 2026-08-30 "Submission-form prep" entry
+  below is left as-was — true to what was believed when written; this entry is the
+  correction.
+
 ### 2026-08-30 — Submission-form prep
 
 - The submission portal ("Create submission") has four required fields: Title, Description

@@ -55,7 +55,7 @@ panel and hard-error screens — as a running cycle.
 - **`grillme` skill** — a Socratic interview that turned the one-line brief into the scoped
   problem, metric, and dataset plan.
 - **`hackathon-compliance` subagent** — an independent reviewer run on every change against
-  the hackathon rules (35 recorded reviews under `docs/trajectories/compliance/`); it caught
+  the hackathon rules (36 recorded reviews under `docs/trajectories/compliance/`); it caught
   a reproducibility blocker and several over-claims.
 
 ### Results — `claude-haiku-4-5`, 5 committed frames (one per camera), 22 determinate observations
@@ -132,7 +132,7 @@ Full clean-environment guide: **`docs/REPRODUCTION.md`**. Deliverables map: **`d
 
 Complete project. `README.md` (start here), `docs/CHANGELOG.md` (Improvement Changelog),
 `docs/REPRODUCTION.md`, `docs/EVALUATION.md`, `docs/DECISIONS.md`, `docs/trajectories/`
-(agent trajectories + 35 compliance reviews), `docs/VIDEO-SCRIPT.md`. `data/cache/` and
+(agent trajectories + 36 compliance reviews), `docs/VIDEO-SCRIPT.md`. `data/cache/` and
 `data/public/frames/` are included so `--replay` works offline. `node_modules/` is not —
 `npm ci` rebuilds it. Nothing that existed before the competition except the `create-next-app`
 scaffold; every change is a dated entry in `docs/WORKLOG.md`.
@@ -151,19 +151,17 @@ already aligned to the final code state (feedback loop built, measured, portal-w
 
 ## 4. Source Code  → upload into "Source Code" (max 50 MB)
 
-Upload the archive built from the committed tree at HEAD `9231bb7`:
-
-```
-laundry3-9231bb7.zip   (~2.9 MB, 350 files)
-```
-
-It was produced with `git archive --format=zip --prefix=laundry3/ -o laundry3-<sha>.zip HEAD`
-— exactly the tracked files, no `node_modules`, no `.git`, no untracked scratch. To rebuild
-after the `dev → main` merge:
+Build the archive from the **post-merge `main` HEAD** — it must contain this
+`docs/SUBMISSION-FORM.md` and every later commit, so do it **after** `dev → main`:
 
 ```bash
+git checkout main
 git archive --format=zip --prefix=laundry3/ -o laundry3-$(git rev-parse --short HEAD).zip HEAD
 ```
+
+`git archive` includes exactly the tracked files (~292 at HEAD) — no `node_modules`, no
+`.git`, no untracked scratch. `data/cache/` and `data/public/frames/` are tracked, so
+`--replay` works from the zip offline. Expect roughly 3 MB, well under the 50 MB limit.
 
 ---
 
@@ -171,7 +169,7 @@ git archive --format=zip --prefix=laundry3/ -o laundry3-$(git rev-parse --short 
 
 - [ ] `git checkout main && git merge --ff-only dev && git push origin main`
 - [ ] rebuild `laundry3-<sha>.zip` from `main` HEAD
-- [ ] on a clean checkout of the zip: `npm ci` then the four `--replay` lines above print
-      45.5 / 63.6 / 68.2 (and `npm test` → 96/96)
+- [ ] on a clean checkout of the zip: `npm ci` then the three `npm run eval` lines above
+      print 45.5 / 63.6 / 68.2 (and `npm test` → 96/96)
 - [ ] record the video from `docs/VIDEO-SCRIPT.md`, upload unlisted, copy the URL
 - [ ] paste Title, Description, Video URL; attach the zip; **Submit** (not "Save as Draft")
