@@ -311,6 +311,7 @@ docs/               Hackathon deliverables (see the table below)
 | `docs/PROBLEM.md` | Problem, user, bottleneck, scope, definition of "good", privacy plan |
 | `docs/CHANGELOG.md` | **Improvement Changelog** — baseline → calibration dead-end → integrator corrections, with evidence |
 | `docs/EVALUATION.md` | Metric, cases, rubric, known limitations, recorded results |
+| `docs/LIMITATIONS.md` | **Compromises & conventions** — what is stubbed for the hackathon, why it is acceptable, and the production TODO for each |
 | `docs/REPRODUCTION.md` | Clean-environment setup, exact commands, expected output, runtime & cost |
 | `docs/DECISIONS.md` | Decision log (D-0001 … D-0016) |
 | `docs/CONFIGURATION.md` | Every deployment-config setting: type, default, meaning |

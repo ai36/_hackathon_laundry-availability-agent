@@ -12,6 +12,38 @@ Entry format:
 
 ## Log
 
+### 2026-08-30 — Added `docs/LIMITATIONS.md` — compromises & conventions
+
+- Owner call: the hackathon simplifications (no live camera / no camera-source setting —
+  "a feed" is a committed still; ROI is a hand-painted colour region map, not detection;
+  offline eval reads only committed inputs, never the git-ignored portal runtime layers;
+  no Docker / runtime loop / snapshot publisher; reservations simulated in-repo; write
+  routes unauthenticated; no per-frame runtime review) were documented but scattered across
+  PROBLEM.md, EVALUATION.md, and D-0014/D-0015/D-0016. Consolidated into one judge-facing doc.
+- **`docs/LIMITATIONS.md`** — five grouped tables (Camera input / Evaluation set / Config &
+  architecture / Portal actions / Data), each row: *convention (hackathon) → why it is
+  acceptable for the submission → production TODO → D-00xx ref*. Framing: nothing here is a
+  defect in what was built, it is the boundary of what was built; every convention is chosen
+  to keep the D-0016 acceptance bar true (judge with no hardware / no key walks the whole
+  path).
+- README documentation table gains a `docs/LIMITATIONS.md` row; `docs/SUBMISSION.md` gains a
+  one-line pointer after the "read honestly" paragraph. Compliance-review count 36 → 37
+  (SUBMISSION-FORM ×2, SUBMISSION, trajectories/README).
+- Doc-only. No code / data / measured-number change.
+- Compliance: `hackathon-compliance` → **CHANGES REQUIRED**, no eligibility blockers
+  (`docs/trajectories/compliance/2026-08-30-limitations-doc.md`). All fixes applied before
+  commit: (1) the "eval ignores portal config" row was **factually wrong** — the offline
+  eval *does* read the committed `data/site-config.json` for per-camera scoping (all modes)
+  and `mask`/`maskLegend` (roi); reworded to "reads only committed inputs, never the
+  git-ignored runtime layers `config-overrides.json` / `reservations.json`"; (2) dropped
+  "glare, low light" from the listed hard cases (they are "Not yet built" in EVALUATION.md)
+  → the cases actually in the 5 frames; (3) person-in-frame restated as a rule for a
+  not-yet-built case, not present-tense fact; (4) split the two negative results — calibrated
+  replays from a committed cache, the verification pass is retired / 9-frame / historical
+  report only; (5) minor: added `PATCH /api/config` + `POST /api/reservations` to the
+  "unauthenticated write routes" list, marked `StaticImageFrameSource` "(planned)". Numbers
+  (45.5 / 63.6 / 68.2, n=22, −13.7 / −4.4 pp) independently reconciled — consistent.
+
 ### 2026-08-30 — Catch-up compliance review of `docs/SUBMISSION-FORM.md` + risk fixes
 
 - Commit `39a9dfa` (SUBMISSION-FORM.md — the text pasted verbatim into the submission

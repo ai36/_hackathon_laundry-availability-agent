@@ -55,7 +55,7 @@ panel and hard-error screens — as a running cycle.
 - **`grillme` skill** — a Socratic interview that turned the one-line brief into the scoped
   problem, metric, and dataset plan.
 - **`hackathon-compliance` subagent** — an independent reviewer run on every change against
-  the hackathon rules (36 recorded reviews under `docs/trajectories/compliance/`); it caught
+  the hackathon rules (37 recorded reviews under `docs/trajectories/compliance/`); it caught
   a reproducibility blocker and several over-claims.
 
 ### Results — `claude-haiku-4-5`, 5 committed frames (one per camera), 22 determinate observations
@@ -132,7 +132,7 @@ Full clean-environment guide: **`docs/REPRODUCTION.md`**. Deliverables map: **`d
 
 Complete project. `README.md` (start here), `docs/CHANGELOG.md` (Improvement Changelog),
 `docs/REPRODUCTION.md`, `docs/EVALUATION.md`, `docs/DECISIONS.md`, `docs/trajectories/`
-(agent trajectories + 36 compliance reviews), `docs/VIDEO-SCRIPT.md`. `data/cache/` and
+(agent trajectories + 37 compliance reviews), `docs/VIDEO-SCRIPT.md`. `data/cache/` and
 `data/public/frames/` are included so `--replay` works offline. `node_modules/` is not —
 `npm ci` rebuilds it. Nothing that existed before the competition except the `create-next-app`
 scaffold; every change is a dated entry in `docs/WORKLOG.md`.

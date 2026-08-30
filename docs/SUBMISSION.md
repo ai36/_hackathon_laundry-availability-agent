@@ -30,6 +30,10 @@ only 2 are genuine cross-machine spillover. A production number needs a temporal
 capture set (`docs/CHANGELOG.md` "Iteration 3", `docs/DECISIONS.md` D-0014 "Status
 (2026-08-30)").
 
+Every hackathon simplification — no live camera, hand-painted ROI, 5 frozen frames, no
+container, simulated reservations — is listed with its production TODO in
+**`docs/LIMITATIONS.md`**.
+
 ## The four deliverables
 
 | # | Deliverable | Where |
@@ -50,7 +54,7 @@ capture set (`docs/CHANGELOG.md` "Iteration 3", `docs/DECISIONS.md` D-0014 "Stat
 | Integrator corrections — **the override, +22.7 pp** | D-0014; `src/eval/corrections.ts` | `docs/trajectories/2026-08-29-integrator-corrections.md` | `--mode=baseline --replay --corrections` |
 | Correction → prompt synthesis — **automated, clears baseline on this set** (see caveats above) | D-0014; `src/eval/prompt-synthesis.ts` | `docs/trajectories/2026-08-30-feedback-loop.md` | `npm run synthesize --replay` + `--mode=roi --replay --fragments` |
 | `grillme` skill (problem scoping) | `.claude/skills/grillme` | result: `docs/PROBLEM.md`; decision: `docs/DECISIONS.md` D-0005 | n/a |
-| `hackathon-compliance` subagent (independent reviewer) | `.claude/agents/hackathon-compliance.md` | `docs/trajectories/compliance/*.md` (36 runs) | n/a |
+| `hackathon-compliance` subagent (independent reviewer) | `.claude/agents/hackathon-compliance.md` | `docs/trajectories/compliance/*.md` (37 runs) | n/a |
 
 ## Ground-rules compliance
 
