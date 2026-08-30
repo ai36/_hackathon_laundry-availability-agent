@@ -307,6 +307,7 @@ docs/               Hackathon deliverables (see the table below)
 | File | What it holds |
 | --- | --- |
 | `docs/SUBMISSION.md` | **Start here** — the 4 hackathon deliverables → where each lives, and the 1-minute reproduction |
+| `docs/SUBMISSION-FORM.md` | Ready-to-paste Title + Description for the submission form; what to put in the Video URL / Source Code fields; pre-submit checklist |
 | `docs/PROBLEM.md` | Problem, user, bottleneck, scope, definition of "good", privacy plan |
 | `docs/CHANGELOG.md` | **Improvement Changelog** — baseline → calibration dead-end → integrator corrections, with evidence |
 | `docs/EVALUATION.md` | Metric, cases, rubric, known limitations, recorded results |

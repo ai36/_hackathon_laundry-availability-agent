@@ -12,6 +12,20 @@ Entry format:
 
 ## Log
 
+### 2026-08-30 — Submission-form prep
+
+- The submission portal ("Create submission") has four required fields: Title, Description
+  (rich text), Video URL, Source Code (≤ 50 MB upload). Added **`docs/SUBMISSION-FORM.md`**
+  with ready-to-paste Title + Description (problem, user, baseline, agents, results table
+  with the honest caveats, changelog summary, hot take, key-free reproduction commands, zip
+  contents), plus what to put in the Video URL / Source Code fields and a pre-submit
+  checklist.
+- Source-code archive built from the committed tree:
+  `git archive --format=zip --prefix=laundry3/ -o laundry3-<sha>.zip HEAD` — ~2.9 MB, 350
+  files, includes `data/cache/` + `data/public/frames/` (so `--replay` works offline),
+  excludes `node_modules` / `.git`. Rebuild from `main` HEAD after the `dev → main` merge.
+- No code / data / number change.
+
 ### 2026-08-30 — Full pre-submission compliance pass (collegial) + fixes A–J
 
 - Two-party review: an independent Claude Code pass + an independent `hackathon-compliance`
