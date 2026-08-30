@@ -41,7 +41,8 @@ npm start        # serve the production build
 ```
 
 > The portal writes to the repo: `data/corrections/` (mark-wrong), `data/machines.json`
-> (Machines editor), `data/site-config.json` + `data/site-config/` (Cameras editor; the
+> (Machines editor, and `npm run synthesize` writes `promptFragment`s here),
+> `data/site-config.json` + `data/site-config/` (Cameras editor; the
 > image dir is git-ignored), `data/config-overrides.json` (Settings → Configuration), and
 > `data/reservations.json` (Live status holds). The last two are git-ignored and
 > portal-runtime only — the offline eval always uses `laundry3.config.ts` and never reads
@@ -66,7 +67,7 @@ npm start        # serve the production build
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint (flat config)
 npm run format:check # prettier
-npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations, calibration-config guard, requestHash, camera-classify, calibrated + ROI eval (expect: 82/82 pass)
+npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations, calibration-config guard, requestHash, camera-classify, calibrated + ROI eval, prompt-synthesis (expect: 89/89 pass)
 npm run check:data   # dataset privacy gate (also runs as the pre-commit hook)
 ```
 
@@ -163,13 +164,42 @@ inference. `data/cache/roi/`, `claude-haiku-4-5`, 2026-08-29:
 | 40.9% | 9.1% | 86.4% | 0/5 | ~$0.022 (`--live`) / $0 (`--replay`) |
 
 The frozen config scores **40.9% on all 3 samples** (`docs/artifacts/eval-roi-samples-2026-08-29.md`)
-— a small consistent shortfall vs the baseline's 45.5%. Helps `free` precision and the
-front-on camera (C-01 3/4); haiku can't read the small worn 7-segment displays in the wide
-angled shots (C-02 1/7). `--mode=roi … --corrections` → 63.6%. Kept as an iteration — see
-`docs/CHANGELOG.md`. `--mode=roi` needs `sharp` (an explicit `devDependency`; `npm ci`
-installs it).
+— a small consistent shortfall vs the baseline's 45.5%. On its own it is not a win; it is the
+surface the feedback loop below attaches per-machine rules to. `--mode=roi` needs `sharp` (an
+explicit `devDependency`; `npm ci` installs it).
 
-## Baseline + integrator corrections (D-0014) — recommended
+## Feedback loop — correction → `promptFragment` (D-0014, Iteration 3) — the automated win
+
+```bash
+npm run synthesize -- --replay                                   # reproduce the 3 synthesised rules — NO key, NO cost
+npm run synthesize -- --live                                     # regenerate: paid (~3 calls); writes data/machines.json + data/cache/synthesis/
+npm run eval -- --mode=roi --split=evaluation --replay --fragments             # reproduce the recorded run
+npm run eval -- --mode=roi --split=evaluation --replay --fragments --corrections  # loop + override → 72.7%
+npm run eval -- --mode=roi --split=evaluation --live   --fragments             # re-sample: paid (~16 calls)
+```
+
+`npm run synthesize` turns each of the 3 integrator corrections + the classifier's own wrong
+rationale into a per-machine **reading-rule** in `data/machines.json` (`fragmentSource:
+"synthesis"`). `--replay` rewrites `data/machines.json` with the same bytes it already
+contains (idempotent) — the file shows as touched but unchanged; `git checkout -- data/`
+restores it. `--mode=roi --fragments` appends each rule to that machine's ROI call —
+separate cache (`data/cache/roi-fragments/`) and report, so the plain `--mode=roi` artifacts
+are byte-identical. `claude-haiku-4-5`, `docs/artifacts/eval-roi-fragments-2026-08-30.json`:
+
+| accuracy | harmful-error | coverage | `out_of_order` | cost |
+| --- | --- | --- | --- | --- |
+| **63.6%** | 4.5%¹ | 81.8% | 3/5 | ~$0.023 (`--live`) / $0 (`--replay`) |
+
+¹ noisy — 3 live samples: accuracy 63.6 / 59.1 / 63.6 %, harmful 4.5 / 18.2 / 4.5 %,
+`out_of_order` 3/5 all three (`docs/artifacts/eval-roi-fragments-samples-2026-08-30.md`).
+
+**+18.2 pp over baseline, +22.7 over plain ROI — the first automated config to beat the
+baseline.** 4 of its 5 fixes over plain ROI are held-out (same-machine transfer to an unseen
+frame + cross-machine spillover in a shared crop). Limits: n=22, one committed sample, all 3
+corrections are `out_of_order`; a full number needs a temporal / held-out capture set. See
+`docs/CHANGELOG.md` Iteration 3 and `docs/trajectories/2026-08-30-feedback-loop.md`.
+
+## Baseline + integrator corrections (D-0014) — the override on its own
 
 ```bash
 npm run eval -- --mode=baseline --split=evaluation --replay --corrections   # NO key, NO cost

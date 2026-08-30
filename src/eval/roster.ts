@@ -20,6 +20,12 @@ export interface RosterMachine {
   type: MachineType;
   /** Free-text hint appended to the agent's prompt for this machine (D-0015). */
   promptFragment?: string;
+  /**
+   * Where `promptFragment` came from (D-0014 feedback loop): `integrator` = hand-written,
+   * `synthesis` = generated from a correction by `npm run synthesize`, `merged` = a synthesis
+   * pass revised a pre-existing fragment. Provenance only; not read by the agent.
+   */
+  fragmentSource?: "integrator" | "synthesis" | "merged";
   /** Per-state example images (paths under data/site-config/), few-shot context (D-0015). */
   referenceShots?: ReferenceShot[];
 }
@@ -80,18 +86,23 @@ export function upsertMachine(
       machineId: patch.machineId,
       type: patch.type ?? "washer",
       promptFragment: patch.promptFragment?.trim() || undefined,
+      fragmentSource: patch.fragmentSource,
       referenceShots: patch.referenceShots,
     });
   } else {
     const cur = machines[idx];
+    const nextFragment =
+      patch.promptFragment === undefined
+        ? cur.promptFragment
+        : patch.promptFragment.trim() || undefined;
     machines[idx] = {
       ...cur,
       machineId: patch.machineId,
       type: patch.type ?? cur.type,
-      promptFragment:
-        patch.promptFragment === undefined
-          ? cur.promptFragment
-          : patch.promptFragment.trim() || undefined,
+      promptFragment: nextFragment,
+      fragmentSource:
+        patch.fragmentSource ??
+        (nextFragment === cur.promptFragment ? cur.fragmentSource : undefined),
       referenceShots: patch.referenceShots ?? cur.referenceShots,
     };
   }

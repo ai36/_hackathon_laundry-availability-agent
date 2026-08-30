@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\"machines\":[{\"machineId\":\"W-04\",\"state\":\"out_of_order\",\"confidence\":0.95,\"rationale\":\"Control panel display is dark/not illuminated while the machine shows visible wear and operational signs of disrepair. The display lacks the illumination visible on neighboring machines, indicating powered-down or non-functional state.\"}]}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 372,
+  "outputTokens": 84,
+  "costUsd": 0.000792
+}

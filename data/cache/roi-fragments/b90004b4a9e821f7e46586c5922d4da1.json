@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"W-15\",\n      \"state\": \"free\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Control panel is lit and visible with a clear display. Lid/door appears open or in neutral position. No active countdown timer visible on display, no error codes shown, no taped-off signs. Machine appears empty and available.\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 534,
+  "outputTokens": 111,
+  "costUsd": 0.001089
+}

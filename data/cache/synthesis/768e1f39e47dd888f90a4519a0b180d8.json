@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\"fragment\": \"If a washing machine has tape across its door or control panel, or displays no illuminated display screen while others do, classify as out_of_order. Tape and powered-down states indicate maintenance or unavailability.\"}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1866,
+  "outputTokens": 59,
+  "costUsd": 0.002161
+}

@@ -39,7 +39,7 @@ function coerceConfidence(v: unknown): number {
 }
 
 /** First balanced `{...}` block that parses as JSON, else null. */
-function extractJsonObject(text: string): unknown {
+export function extractJsonObject(text: string): unknown {
   const start = text.indexOf("{");
   if (start === -1) return null;
   for (let end = text.lastIndexOf("}"); end > start; end = text.lastIndexOf("}", end - 1)) {

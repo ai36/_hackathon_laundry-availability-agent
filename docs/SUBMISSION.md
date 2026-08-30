@@ -9,19 +9,21 @@ result. Everything is key-free and offline unless a step says `--live`.
 npm ci
 git config core.hooksPath .githooks
 npm run eval -- --mode=baseline --split=evaluation --replay                # 45.5%  — the fair baseline
-npm run eval -- --mode=baseline --split=evaluation --replay --corrections  # 68.2%  — the improvement (+22.7 pp)
+npm run eval -- --mode=roi      --split=evaluation --replay --fragments    # 63.6%  — the feedback loop (+18.2 pp, automated)
+npm run eval -- --mode=baseline --split=evaluation --replay --corrections  # 68.2%  — the override on its own (+22.7 pp)
 ```
 
-No `ANTHROPIC_API_KEY` needed. Both runs re-score from the committed cache in `data/cache/`
-and print accuracy, harmful-error rate, coverage, `out_of_order` recall, and a confusion
-matrix. Full walkthrough incl. a `--live` re-sample: **`docs/REPRODUCTION.md`**.
+No `ANTHROPIC_API_KEY` needed. Each run re-scores from the committed cache in `data/cache/`
+and prints accuracy, harmful-error rate, coverage, `out_of_order` recall, and a confusion
+matrix. The feedback-loop rules come from `npm run synthesize -- --replay` (also key-free).
+Full walkthrough incl. a `--live` re-sample: **`docs/REPRODUCTION.md`**.
 
 ## The four deliverables
 
 | # | Deliverable | Where |
 | --- | --- | --- |
 | 1 | **Solution code + Improvement Changelog** | whole repo; `README.md` (user, bottleneck, value, results, failure mode, hot take); **`docs/CHANGELOG.md`** is the labelled Improvement Changelog, one row per experiment tied to a report in `docs/artifacts/` |
-| 2 | **Reproduction guide** | **`docs/REPRODUCTION.md`** — clean-environment setup, exact commands for baseline / calibrated / ROI / corrections, expected output, versions, runtime, cost |
+| 2 | **Reproduction guide** | **`docs/REPRODUCTION.md`** — clean-environment setup, exact commands for baseline / calibrated / ROI / feedback loop / corrections, expected output, versions, runtime, cost |
 | 3 | **Solution video (~5 min)** | script & shot list at **`docs/VIDEO-SCRIPT.md`**; the recording is submitted separately per the hackathon form |
 | 4 | **Agent trajectories** | **`docs/trajectories/`** — see the table below |
 
@@ -31,11 +33,12 @@ matrix. Full walkthrough incl. a `--live` re-sample: **`docs/REPRODUCTION.md`**.
 | --- | --- | --- | --- |
 | Baseline (`runBaseline`) | `src/agent/baseline.ts` | `docs/trajectories/baseline/2026-08-29-recalibrated.md` | `--mode=baseline --replay` |
 | Calibrated agent (`runCalibrated`) — **dead-end, −13.7 pp** | `src/agent/calibrated.ts` | same file (part 2) | `--mode=calibrated --replay` |
-| ROI agent (`runRoi`) — **iteration, −4.6 pp** | `src/agent/roi.ts` | `docs/trajectories/baseline/2026-08-29-roi.md` | `--mode=roi --replay` |
+| ROI agent (`runRoi`) — **iteration, −4.6 pp on its own** | `src/agent/roi.ts` | `docs/trajectories/baseline/2026-08-29-roi.md` | `--mode=roi --replay` |
 | Verification pass (`runAgent`) — **removed, −4.4 pp** | `src/agent/pipeline.ts` | `docs/trajectories/runtime/2026-08-29-verification-pass-retired.md` | from pre-2026-08-29 git history; predictions in `docs/artifacts/historical/` |
-| Integrator corrections — **the improvement, +22.7 pp** | D-0014; `src/eval/corrections.ts` | `docs/trajectories/2026-08-29-integrator-corrections.md` | `--mode=baseline --replay --corrections` |
+| Integrator corrections — **the override, +22.7 pp** | D-0014; `src/eval/corrections.ts` | `docs/trajectories/2026-08-29-integrator-corrections.md` | `--mode=baseline --replay --corrections` |
+| Correction → prompt synthesis — **the automated win, +18.2 pp** | D-0014; `src/eval/prompt-synthesis.ts` | `docs/trajectories/2026-08-30-feedback-loop.md` | `npm run synthesize --replay` + `--mode=roi --replay --fragments` |
 | `grillme` skill (problem scoping) | `.claude/skills/grillme` | result: `docs/PROBLEM.md`; decision: `docs/DECISIONS.md` D-0005 | n/a |
-| `hackathon-compliance` subagent (independent reviewer) | `.claude/agents/hackathon-compliance.md` | `docs/trajectories/compliance/*.md` (32 runs) | n/a |
+| `hackathon-compliance` subagent (independent reviewer) | `.claude/agents/hackathon-compliance.md` | `docs/trajectories/compliance/*.md` (33 runs) | n/a |
 
 ## Ground-rules compliance
 
@@ -54,8 +57,9 @@ matrix. Full walkthrough incl. a `--live` re-sample: **`docs/REPRODUCTION.md`**.
 All work is on the **`dev`** branch. The maintainer integrates `dev → main` manually before
 submission; if the submission link points at a branch, it points at `dev`.
 
-## Verification status (2026-08-29)
+## Verification status (2026-08-30)
 
-`typecheck` · `lint` · `format:check` · `build` · `check:data` — pass. `npm test` — 82/82.
-`--replay` of `baseline` / `calibrated` / `roi` / `baseline --corrections` reproduces
-45.5 / 31.8 / 40.9 / 68.2 % exactly.
+`typecheck` · `lint` · `format:check` · `build` · `check:data` — pass. `npm test` — 89/89.
+`--replay` reproduces `baseline` 45.5 %, `calibrated` 31.8 %, `roi` 40.9 %, **`roi
+--fragments` 63.6 %**, `baseline --corrections` 68.2 %, `roi --fragments --corrections`
+72.7 % exactly. `npm run synthesize --replay` reproduces the 3 synthesised rules.

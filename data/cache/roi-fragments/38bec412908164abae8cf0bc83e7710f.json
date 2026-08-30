@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-01\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Left readout (with up-arrow) shows an active countdown display with animated segments visible on the blue screen, indicating an active cycle in progress.\"\n    },\n    {\n      \"machineId\": \"D-02\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Right readout (with down-arrow) shows an active countdown display with animated segments visible on the blue screen, indicating an active cycle in progress.\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1219,
+  "outputTokens": 166,
+  "costUsd": 0.002049
+}

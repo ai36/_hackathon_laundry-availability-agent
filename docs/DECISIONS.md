@@ -217,7 +217,7 @@ entries carry the same rules across sessions.
   is `free`/`occupied`/`out_of_order`/`unknown`, not a binary, and the metric now includes
   harmful-error rate and coverage.
 
-**Context.** Solo build, hard deadline **2026-08-30 12:00 UTC-7**. The product is a
+**Context.** Solo build, hard deadline **2026-08-31 11:00 America/Los_Angeles (PDT)**. The product is a
 laundry-room machine-availability agent; the full vision (calibration + runtime CV +
 temporal memory + timers + reservations + portal) is far more than fits the deadline.
 
@@ -752,22 +752,36 @@ global classify prompt is never edited from corrections. The override (step 0) s
 guaranteed fix; the prompt update is the durable learning that, over time, makes the override
 unnecessary.
 
-**Status (2026-08-29) — designed, NOT built; the first post-hackathon iteration.** What ships
-is the override only: a correction permanently replaces the model's output for that cell, the
-model keeps making the same mistake, and the correction keeps hiding it. That is an
-acceptable *demo* answer (one durable fact per broken unit, applied everywhere for free — see
-the D-0014 consequences) but not a product answer at scale: nobody hand-corrects a model
-forever. Building the loop properly means (a) the synthesis trigger in `/api/corrections`,
-(b) wiring the resulting `promptFragment` into the recognition path — `runRoi` and the live
-`/api/refresh` baseline call do **not** consume fragments today, only `--mode=calibrated`
-does — and (c) a way to measure it. (c) is the real blocker: the value of the loop is
-*future, unseen captures classified right without a human*, and the 5 committed frames have
-no temporal / held-out split to show that. Every calibration attempt this session
-(annotated-shot + mask as vision inputs; per-machine ROI crops; individually-correct prompt
-rules) landed inside the n = 22 single-sample noise band; the feedback loop has the same
-validation gap and was out of scope for the hackathon window. **If the product develops, the
-correction → `promptFragment` synthesis loop (steps 1–3 above) + fragment injection into the
-classify path is the intended next step, measured on a temporal capture split.**
+**Status (2026-08-30) — BUILT (Iteration 3); measured on the transfer signal the frozen set
+allows.** Steps 1–3 ship:
+
+- **Synthesis** — `src/eval/prompt-synthesis.ts` + `npm run synthesize`. For each corrected
+  cell where the baseline was wrong, one vision call takes the model's own wrong rationale +
+  the correction + the source frame and returns a short per-machine **reading-rule** (a
+  visual cue — "a solid error display is not an active cycle; cycles show an animated
+  countdown" — not a bare state assertion, unless the note says the unit is permanently out
+  of service). Stored as that machine's `promptFragment` in `data/machines.json` with
+  `fragmentSource: "synthesis" | "merged"`. Cached (`data/cache/synthesis/`), so
+  `--replay` reproduces it key-free.
+- **Consumption** — `runRoi` takes a `fragments` map; `npm run eval -- --mode=roi
+  --fragments` builds it from the roster and appends each rule to that machine's ROI call.
+  Separate cache + report, so the plain `--mode=roi` artifacts stay byte-identical. The fair
+  baseline (`baselinePrompt` / `--mode=baseline`) never sees fragments.
+- **Measurement** — the 3 `out_of_order` corrections → 3 fragments → `--mode=roi --fragments`
+  scores **63.6 %** (baseline 45.5 %, plain ROI 40.9 %; mean of 3 samples ~62 %, `out_of_order`
+  recall 0/5 → 3/5). 5 cells fixed vs plain ROI, 0 broken; **4 of 5 are held-out** — 2
+  same-machine transfer to an unseen frame, 2 cross-machine spillover where a rule for one
+  machine helped an un-corrected neighbour in the shared crop. Only 1 fix is in-sample;
+  excluding it, 13/22 = 59.1 %, still +13.6 pp over baseline. `--fragments --corrections`
+  → 72.7 %. Full write-up: `docs/artifacts/eval-roi-fragments-samples-2026-08-30.md`,
+  `docs/CHANGELOG.md` Iteration 3.
+
+**Still open:** (a) the synthesis trigger is a CLI (`npm run synthesize`), not yet wired into
+`POST /api/corrections`; (b) the live `/api/refresh` path still uses the plain baseline call,
+not fragments; (c) **the real remaining step** — a temporal / held-out capture set (re-shoot
+the 5 angles at a different time) so the fragments are measured only on frames from *after*
+the corrections. The current transfer signal (n small, all 3 corrections `out_of_order`) is
+the best the 5 frozen frames allow.
 
 **Amendment (2026-08-29) — mark-wrong panel commits on explicit `save`.** The portal's
 "mark wrong" control was reworked from instant-submit (clicking a state button POSTed the
@@ -808,10 +822,10 @@ payload, same write path — a deliberate confirmation step before a state overr
     the amendments below.)_
   - D-0016 P0 — judge walks the correction loop key-free.
   **Not built:** per-machine reference-state screenshots (the upload route supports the
-  `machine-reference` kind, no UI yet); the **correction → `promptFragment` synthesis
-  feedback loop** — designed in D-0014, deferred to the first post-hackathon iteration (see
-  D-0014 "Status (2026-08-29)"); `promptFragment` injection into `--mode=roi` / the live
-  `/api/refresh` call (only `--mode=calibrated` consumes fragments today).
+  `machine-reference` kind, no UI yet); wiring the synthesis trigger into `POST /api/corrections`
+  (it is a CLI, `npm run synthesize`) and `promptFragment` injection into the live
+  `/api/refresh` call. _(The **correction → `promptFragment` synthesis feedback loop** itself
+  is now BUILT and measured for `--mode=roi` — Iteration 3, see D-0014 "Status (2026-08-30)".)_
 
 **Context.** D-0009 / D-0010 name a `data/site-config.json` produced during onboarding
 (per-machine ROIs, reference crops, few-shot exemplars, thresholds). D-0014 adds a correction

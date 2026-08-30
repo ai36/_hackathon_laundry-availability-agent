@@ -1,0 +1,266 @@
+{
+  "mode": "roi-fragments",
+  "split": "evaluation",
+  "model": "claude-haiku-4-5",
+  "corrections": 5,
+  "frames": [
+    "img_1819",
+    "img_1821",
+    "img_1822",
+    "img_1823",
+    "img_8633"
+  ],
+  "labelledFrames": 5,
+  "scores": {
+    "nDeterminate": 22,
+    "nIndeterminable": 2,
+    "accuracy": 0.7272727272727273,
+    "harmfulErrorRate": 0.045454545454545456,
+    "coverage": 0.8636363636363636,
+    "accuracyOnCovered": 0.8421052631578947,
+    "confusion": {
+      "free": {
+        "free": 7,
+        "occupied": 2,
+        "unknown": 1,
+        "out_of_order": 0
+      },
+      "occupied": {
+        "free": 1,
+        "occupied": 4,
+        "unknown": 2,
+        "out_of_order": 0
+      },
+      "unknown": {
+        "free": 0,
+        "occupied": 0,
+        "unknown": 0,
+        "out_of_order": 0
+      },
+      "out_of_order": {
+        "free": 0,
+        "occupied": 0,
+        "unknown": 0,
+        "out_of_order": 5
+      }
+    },
+    "missingPredictions": 0
+  },
+  "totals": {
+    "visionCalls": 16,
+    "inputTokens": 12113,
+    "outputTokens": 2015,
+    "costUsd": 0.022188
+  },
+  "predictions": {
+    "img_1819": {
+      "frameId": "img_1819",
+      "machines": [
+        {
+          "machineId": "W-01",
+          "state": "free",
+          "confidence": 0.95,
+          "rationale": "Control panel is dark/off, door is closed with no visible laundry or water, drum appears empty, no error indicators visible, and machine shows no signs of running or active cycle."
+        },
+        {
+          "machineId": "W-02",
+          "state": "free",
+          "confidence": 0.85,
+          "rationale": "Control panel is lit and readable with no error codes visible. Door appears closed but drum appears empty with no visible laundry. No countdown timer displayed on screen."
+        },
+        {
+          "machineId": "W-03",
+          "state": "free",
+          "confidence": 0.95,
+          "rationale": "Control panel displays a blue screen with what appears to be a price or idle state indicator. The door/lid is closed and there is no visible countdown timer, error message, or out-of-service indication. The machine appears empty and ready for use."
+        },
+        {
+          "machineId": "W-04",
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): taped off, powered down across all frames"
+        }
+      ],
+      "meta": {
+        "mode": "roi",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 4,
+        "inputTokens": 1429,
+        "outputTokens": 370,
+        "costUsd": 0.003279
+      }
+    },
+    "img_1821": {
+      "frameId": "img_1821",
+      "machines": [
+        {
+          "machineId": "D-01",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Left readout (with up-arrow) shows an active countdown display with animated segments visible on the blue screen, indicating an active cycle in progress."
+        },
+        {
+          "machineId": "D-02",
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): hard error code on display, not a running cycle"
+        },
+        {
+          "machineId": "D-03",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Left readout shows '025' with up-arrow, indicating a countdown timer in progress"
+        },
+        {
+          "machineId": "D-04",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Right readout shows '025' with down-arrow, indicating a countdown timer in progress"
+        },
+        {
+          "machineId": "D-05",
+          "state": "unknown",
+          "confidence": 0.6,
+          "rationale": "Upper unit's left readout is not clearly legible in this crop; display content cannot be reliably determined"
+        },
+        {
+          "machineId": "D-06",
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): out of service every frame it appears in"
+        },
+        {
+          "machineId": "D-07",
+          "state": "unknown",
+          "confidence": 0.65,
+          "rationale": "Control panel display is too blurry/out of focus to read text or numbers with certainty. Door appears closed but drum visibility is obscured. Indicator lights cannot be clearly discerned due to image quality and angle."
+        }
+      ],
+      "meta": {
+        "mode": "roi",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 4,
+        "inputTokens": 3709,
+        "outputTokens": 582,
+        "costUsd": 0.006619
+      }
+    },
+    "img_1822": {
+      "frameId": "img_1822",
+      "machines": [
+        {
+          "machineId": "D-01",
+          "state": "occupied",
+          "confidence": 0.85,
+          "rationale": "Left readout (with ↑ arrow) shows animated display with green LED indicators lit and blue screen active, consistent with running cycle"
+        },
+        {
+          "machineId": "D-02",
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): hard error code on display, not a running cycle"
+        }
+      ],
+      "meta": {
+        "mode": "roi",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 1,
+        "inputTokens": 1631,
+        "outputTokens": 182,
+        "costUsd": 0.002541
+      }
+    },
+    "img_1823": {
+      "frameId": "img_1823",
+      "machines": [
+        {
+          "machineId": "D-03",
+          "state": "free",
+          "confidence": 0.95,
+          "rationale": "Left readout (with ↑) displays '225', a bare number indicating price, not a countdown timer"
+        },
+        {
+          "machineId": "D-04",
+          "state": "free",
+          "confidence": 0.95,
+          "rationale": "Right readout (with ↓) displays '225', a bare number indicating price, not a countdown timer"
+        },
+        {
+          "machineId": "D-05",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Left readout shows '40' with active display, indicating a running cycle or countdown time remaining"
+        },
+        {
+          "machineId": "D-06",
+          "state": "out_of_order",
+          "confidence": 1,
+          "rationale": "integrator correction (machine): out of service every frame it appears in"
+        },
+        {
+          "machineId": "D-07",
+          "state": "occupied",
+          "confidence": 0.95,
+          "rationale": "Left readout shows '41' with up-arrow, indicating a countdown time remaining"
+        },
+        {
+          "machineId": "D-08",
+          "state": "free",
+          "confidence": 0.9,
+          "rationale": "Right readout appears blank/dark with down-arrow, indicating idle/ready state"
+        },
+        {
+          "machineId": "D-09",
+          "state": "unknown",
+          "confidence": 0.6,
+          "rationale": "Upper unit's left readout is partially visible but too blurry/obscured to definitively read the display content"
+        },
+        {
+          "machineId": "D-10",
+          "state": "occupied",
+          "confidence": 0.8,
+          "rationale": "Right readout shows '225' with what appears to be a colon notation, indicating an active countdown timer rather than a price"
+        }
+      ],
+      "meta": {
+        "mode": "roi",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 4,
+        "inputTokens": 3558,
+        "outputTokens": 603,
+        "costUsd": 0.006573
+      }
+    },
+    "img_8633": {
+      "frameId": "img_8633",
+      "machines": [
+        {
+          "machineId": "W-14",
+          "state": "free",
+          "confidence": 0.85,
+          "rationale": "Control panel displays '39' (likely price/cycle number, not countdown timer). Lid is closed and drum appears empty. No error indicators or countdown time visible. Machine appears ready for use."
+        },
+        {
+          "machineId": "W-15",
+          "state": "free",
+          "confidence": 0.85,
+          "rationale": "Control panel is lit and visible with a clear display. Lid/door appears open or in neutral position. No active countdown timer visible on display, no error codes shown, no taped-off signs. Machine appears empty and available."
+        },
+        {
+          "machineId": "W-16",
+          "state": "free",
+          "confidence": 0.85,
+          "rationale": "Door/lid appears open and empty, no visible countdown display or error indicators on the control panel, drum is visible and unoccupied"
+        }
+      ],
+      "meta": {
+        "mode": "roi",
+        "model": "claude-haiku-4-5",
+        "visionCalls": 3,
+        "inputTokens": 1786,
+        "outputTokens": 278,
+        "costUsd": 0.003176
+      }
+    }
+  }
+}

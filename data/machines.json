@@ -16,7 +16,9 @@
     },
     {
       "machineId": "W-04",
-      "type": "washer"
+      "type": "washer",
+      "promptFragment": "If a washing machine has tape across its door or control panel, or displays no illuminated display screen while others do, classify as out_of_order. Tape and powered-down states indicate maintenance or unavailability.",
+      "fragmentSource": "synthesis"
     },
     {
       "machineId": "W-05",
@@ -72,7 +74,9 @@
     },
     {
       "machineId": "D-02",
-      "type": "dryer"
+      "type": "dryer",
+      "promptFragment": "A solid blue display with error codes (typically showing alphanumeric characters without animation) indicates a hard error, not an active cycle. Active cycles show animated countdown timers with blinking colons or changing numbers.",
+      "fragmentSource": "synthesis"
     },
     {
       "machineId": "D-03",
@@ -88,7 +92,9 @@
     },
     {
       "machineId": "D-06",
-      "type": "dryer"
+      "type": "dryer",
+      "promptFragment": "A lit display alone does not indicate operation. Check for physical 'OUT OF SERVICE' signage, tape, or labels on the machine itself. If present, classify as out_of_order regardless of display state.",
+      "fragmentSource": "synthesis"
     },
     {
       "machineId": "D-07",

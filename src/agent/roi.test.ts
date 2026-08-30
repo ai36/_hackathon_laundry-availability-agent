@@ -60,3 +60,22 @@ test("runRoi yields `unknown` for a machine with no coloured region", async () =
   const pred = await runRoi("img_1819", new MapVision({}), cam, false);
   assert.equal(pred.machines.find((m) => m.machineId === "W-99")?.state, "unknown");
 });
+
+test("runRoi appends a machine's fragment and tags its cache key with +frag", async () => {
+  const vision = new MapVision({});
+  await runRoi("img_1819", vision, C01, false, {
+    "W-02": "the 2.25 is the price, not a countdown",
+  });
+
+  const w01 = vision.seen.find((r) => r.cacheKey.startsWith("roi:img_1819:W-01"))!;
+  const w02 = vision.seen.find((r) => r.cacheKey.startsWith("roi:img_1819:W-02"))!;
+
+  // W-01 has no fragment: key and prompt are untouched (plain-roi cache stays valid).
+  assert.equal(w01.cacheKey, "roi:img_1819:W-01");
+  assert.doesNotMatch(w01.prompt, /Operator reading-rules/);
+
+  // W-02 has one: key is tagged and the rule is in the prompt.
+  assert.equal(w02.cacheKey, "roi:img_1819:W-02+frag");
+  assert.match(w02.prompt, /Operator reading-rules for these machines:/);
+  assert.match(w02.prompt, /W-02: the 2\.25 is the price, not a countdown/);
+});

@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-07\",\n      \"state\": \"unknown\",\n      \"confidence\": 0.65,\n      \"rationale\": \"Control panel display is too blurry/out of focus to read text or numbers with certainty. Door appears closed but drum visibility is obscured. Indicator lights cannot be clearly discerned due to image quality and angle.\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 501,
+  "outputTokens": 110,
+  "costUsd": 0.001051
+}

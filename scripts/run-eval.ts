@@ -28,6 +28,7 @@ import { AnthropicVisionClient, CachedVisionClient, FakeVisionClient } from "@/a
 import type { VisionClient } from "@/agent/types";
 import { cameraForFrame } from "@/eval/calibration";
 import { applyCorrections, loadCorrections } from "@/eval/corrections";
+import { loadRoster } from "@/eval/roster";
 import { loadFrameLabels, loadSplit } from "@/eval/dataset";
 import { formatScores, scoreAll } from "@/eval/score";
 import type { FramePrediction } from "@/eval/types";
@@ -45,13 +46,22 @@ const replay = args.has("replay");
 const fake = args.has("fake");
 const live = args.has("live");
 const withCorrections = args.has("corrections");
+// --fragments: ROI mode appends each machine's roster promptFragment (the D-0014 feedback
+// loop) to its prompt. Separate cache dir + report so the plain --mode=roi artifacts and
+// their byte-for-byte replay are untouched.
+const withFragments = args.has("fragments") && mode === "roi";
+const modeTag = `${mode}${withFragments ? "-fragments" : ""}`;
 const today = new Date().toISOString().slice(0, 10);
 const outPath =
   args.get("out") ??
-  `docs/artifacts/eval-${mode}${withCorrections ? "-corrected" : ""}-${today}.json`;
+  `docs/artifacts/eval-${modeTag}${withCorrections ? "-corrected" : ""}-${today}.json`;
 
 if (mode !== "baseline" && mode !== "agent" && mode !== "calibrated" && mode !== "roi") {
   console.error(`--mode must be "baseline", "agent", "calibrated", or "roi"`);
+  process.exit(1);
+}
+if (args.has("fragments") && mode !== "roi") {
+  console.error("--fragments only applies to --mode=roi");
   process.exit(1);
 }
 if (Number(replay) + Number(fake) + Number(live) !== 1) {
@@ -66,7 +76,7 @@ function buildVisionClient(): VisionClient {
     console.warn("! --fake: FakeVisionClient, no cache, no network — predictions will be empty");
     return new FakeVisionClient();
   }
-  const cacheDir = `${config.paths.cache}/${mode}`;
+  const cacheDir = `${config.paths.cache}/${modeTag}`;
   if (replay) return new CachedVisionClient(null, cacheDir, true);
   console.log(
     `vision: live AnthropicVisionClient (${config.agent.visionModel}) — caching to ${cacheDir}/`,
@@ -84,6 +94,17 @@ async function main(): Promise<void> {
   }
 
   const cameras = loadSiteConfig().cameras;
+  // --fragments: machineId -> promptFragment for every machine that has one (D-0014 loop).
+  const fragments: Record<string, string> = {};
+  if (withFragments) {
+    for (const m of loadRoster().machines) {
+      if (m.promptFragment?.trim()) fragments[m.machineId] = m.promptFragment.trim();
+    }
+    const n = Object.keys(fragments).length;
+    console.log(
+      `fragments: ${n} machine(s) carry a promptFragment${n ? ` (${Object.keys(fragments).join(", ")})` : ""}`,
+    );
+  }
   const predictions = new Map<string, FramePrediction>();
   // Per-frame scoring scope: when a frame belongs to a calibrated camera, every mode is
   // asked about (and scored on) exactly that camera's machines, so baseline vs calibrated
@@ -110,7 +131,7 @@ async function main(): Promise<void> {
       }
       pred =
         mode === "roi"
-          ? await runRoi(frameId, vision, camera, !replay)
+          ? await runRoi(frameId, vision, camera, !replay, withFragments ? fragments : {})
           : await runCalibrated(frameId, vision, camera);
     } else if (mode === "baseline") {
       pred = await runBaseline(frameId, vision, machineIds);
@@ -150,7 +171,7 @@ async function main(): Promise<void> {
   const models = [...new Set([...predictions.values()].map((p) => p.meta?.model).filter(Boolean))];
   const modelLabel = models.length ? models.join(", ") : config.agent.visionModel;
   console.log(
-    `\nmode=${mode} split=${split} frames=${frameIds.length} labelled=${labelled} backend=${backend} model=${modelLabel}`,
+    `\nmode=${modeTag} split=${split} frames=${frameIds.length} labelled=${labelled} backend=${backend} model=${modelLabel}`,
   );
   console.log(formatScores(scores));
   console.log(
@@ -163,7 +184,7 @@ async function main(): Promise<void> {
     JSON.stringify(
       {
         // No timestamp: the committed report must regenerate byte-identically from --replay.
-        mode,
+        mode: modeTag,
         split,
         model: modelLabel,
         ...(withCorrections ? { corrections: correctionsApplied } : {}),

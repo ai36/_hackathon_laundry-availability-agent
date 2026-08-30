@@ -22,9 +22,11 @@ decision it led to. Include experiments that were later removed and what they ta
   "Recalibrated evaluation" section for what changed and why.)_
 - **Baseline:** single Claude vision prompt on the whole frame, told the camera's machine-id
   list; contextual baseline = the manual "walk over and check" process.
-- **Harness:** `npm run eval -- --mode=baseline|agent|calibrated --split=evaluation
-  --live|--replay [--corrections]`. `--replay` re-scores from `data/cache/<mode>/` with no
-  API key — verified to reproduce the committed reports byte-for-byte.
+- **Harness:** `npm run eval -- --mode=baseline|agent|calibrated|roi --split=evaluation
+  --live|--replay [--fragments] [--corrections]`. `--replay` re-scores from
+  `data/cache/<mode>/` with no API key — verified to reproduce the committed reports
+  byte-for-byte. `--fragments` (ROI only) appends the D-0014 synthesised `promptFragment`s;
+  `npm run synthesize` produces them from `data/corrections/`.
 
 ## Progression
 
@@ -39,6 +41,7 @@ decision it led to. Include experiments that were later removed and what they ta
 | Recalibration (2026-08-29) — calibrated agent | **Feed the camera's annotated shot + analysis mask as extra vision inputs**, with a prompt that names them ("IMAGE 2 is a location map — never read state from it; IMAGE 3 is a mask — its clear windows are the panels to read in IMAGE 1"). `npm run eval -- --mode=calibrated`. | accuracy **31.8%** (baseline 45.5% — **−13.7 pp**), harmful-error 0.0%, coverage 100%, `out_of_order` 0/5. `docs/artifacts/eval-calibrated-2026-08-29.json`, cache `data/cache/calibrated/` (5). Also tried on `claude-sonnet-5` (31.8%) and across four prompt phrasings (27–36%); none beat the plain baseline. | **Removed — a documented dead-end.** The model reads state off the flat-colour annotation ("Red washer… control panel visible → occupied"), and the mostly-black mask image drives it to answer `occupied` for every machine (`free` recall 0/10). The 0% harmful rate is an artefact of never saying `free`, not a safety gain. Kept in-tree (`--mode=calibrated`, cache committed) so the negative result reproduces. What calibration *did* leave: per-camera machine scoping, which is neutral. |
 | Recalibration (2026-08-29) — ROI agent | **Per-machine crops.** The integrator paints each machine's body/panel one solid colour in a region-map PNG (`camera.mask`) + a `hex → id` `maskLegend`; `--mode=roi` (`src/agent/roi.ts`) reads it (nearest-colour match), crops the live frame to each machine's region — stacked pairs cropped together on the shared panel — and classifies one machine (or one pair) per call. No positional inference: id follows the painted colour, so camera angle / stack layout do not matter. | accuracy **40.9%** (baseline 45.5% — **−4.6 pp**), harmful-error 9.1%, coverage 86.4%, `out_of_order` 0/5, 16 calls, ~$0.02. `docs/artifacts/eval-roi-2026-08-29.json`, cache `data/cache/roi/`. Frozen config is **stable at 40.9% across 3 samples** (`eval-roi-samples-2026-08-29.md`); +corrections 63.6%. | **Kept as an iteration — the right architecture, a small measured shortfall.** As frozen it is a consistent ~4.6 pp below the baseline: it visibly helps on the front-on camera (C-01, 3–4/4) and on `free` precision (tight crop + a "2.25 is a price, not a countdown" rule), but `claude-haiku-4-5` can't reliably read the small / worn 7-segment displays in the wide angled shots (C-02: 1/7, C-03: 0/2), and `out_of_order` stays 0/5. Earlier prompt variants reached ~50–54% — by guessing more (harmful-error up to 13.6%). The improvement path stays the corrections layer. |
 | Recalibration (2026-08-29) — integrator corrections | **Same 3 `machine`-scope corrections** (`W-04`, `D-02`, `D-06` = "out of service"), re-scored on the new set. `--replay --corrections`. | Baseline + corrections: accuracy **45.5% → 68.2%** (+22.7 pp), `out_of_order` recall **0/5 → 5/5**, harmful-error **9.1% → 4.5%**, coverage 100%, no extra model cost. `docs/artifacts/eval-baseline-corrected-2026-08-29.json`. (Calibrated + corrections: 54.5%; ROI + corrections: 63.6% — corrections dominate either base.) | **Kept — the improvement.** Unchanged conclusion from the old set: the vision model cannot tell a hard-error display from a running cycle, and one durable fact per broken unit clears it in every camera at no model cost. Now also halves the harmful-error rate. Remaining error is `free`→`occupied` over-calls, which are time-varying and out of scope for durable corrections. |
+| Iteration 3 (2026-08-30) — correction → `promptFragment` feedback loop | **Close the loop (D-0014 steps 1–3).** `npm run synthesize` reads each correction + the model's own wrong rationale from the baseline report and asks a model to write a short per-machine **reading rule** (a visual cue, not a state assertion); the rule is stored as that machine's `promptFragment` in `data/machines.json`. `npm run eval -- --mode=roi --fragments` appends each rule to that machine's ROI call. The 3 `out_of_order` corrections → 3 fragments. | **ROI + fragments: accuracy 40.9% → 63.6%** (baseline 45.5% → **+18.2 pp**; mean of 3 samples ~62%, `eval-roi-fragments-samples-2026-08-30.md`), `out_of_order` recall **0/5 → 3/5** (stable across samples), harmful-error 4.5% (noisy: one sample 18.2%), coverage 81.8%, 16 calls, ~$0.023. `docs/artifacts/eval-roi-fragments-2026-08-30.json`, caches `data/cache/{synthesis,roi-fragments}/`. `--fragments --corrections` → **72.7%** / oo 5/5. | **Kept — the first automated step that beats the baseline.** 5 cells fixed vs plain ROI, 0 broken; **4 of the 5 are held-out spatially** — 2 same-machine transfer to an unseen frame (`D-02`@img_1822, `D-06`@img_1823, rules from img_1821), 2 cross-machine spillover (`D-01`, `D-05` have no fragment; a neighbour's rule in the shared stacked-panel prompt fixed them). Only `W-04` is in-sample; excluding it, 13/22 = 59.1%, still +13.6 pp over baseline. **Limits:** all 5 frames are one capture session, so "held-out" is spatial not temporal — a re-shoot at a different time is the real test and the remaining step; n=22, one committed sample (2 author-attested re-runs); all 3 corrections are `out_of_order`, so the rules are broken-machine cues, not a `free`↔`occupied` reading-rule test. |
 
 ## Recalibrated evaluation (2026-08-29)
 
@@ -61,14 +64,28 @@ config held accuracy at 40.9% but moved harmful-error 4.5–13.6% and coverage 8
 score the same 22 determinate observations on the same 5 committed frames; all
 `--replay`-reproducible from `data/cache/` byte-for-byte.
 
-| Metric | Baseline | Calibrated | ROI | **Baseline + corr.** | ROI + corr. |
-| --- | --- | --- | --- | --- | --- |
-| Per-machine accuracy (determinate GT, n=22) | 45.5% | 31.8% | 40.9% | **68.2%** | 63.6% |
-| Harmful-error rate | 9.1% | 0.0% | 9.1% | **4.5%** | 4.5% |
-| Coverage | 100% | 100% | 86.4% | 100% | 90.9% |
-| Accuracy on covered | 45.5% | 31.8% | 47.4% | **68.2%** | 70.0% |
-| `out_of_order` recall | 0/5 | 0/5 | 0/5 | **5/5** | 5/5 |
-| Model cost per frame | ~$0.003 | ~$0.007 | ~$0.004 | ~$0.003 | ~$0.004 |
+| Metric | Baseline | Calibrated | ROI | ROI + **fragments** | **Baseline + corr.** | ROI + frag. + corr. |
+| --- | --- | --- | --- | --- | --- | --- |
+| Per-machine accuracy (determinate GT, n=22) | 45.5% | 31.8% | 40.9% | **63.6%** | **68.2%** | **72.7%** |
+| Harmful-error rate | 9.1% | 0.0% | 9.1% | 4.5%¹ | **4.5%** | 4.5% |
+| Coverage | 100% | 100% | 86.4% | 81.8% | 100% | 86.4% |
+| Accuracy on covered | 45.5% | 31.8% | 47.4% | 77.8% | **68.2%** | 84.2% |
+| `out_of_order` recall | 0/5 | 0/5 | 0/5 | 3/5 | **5/5** | 5/5 |
+| Model cost per frame | ~$0.003 | ~$0.007 | ~$0.004 | ~$0.005 | ~$0.003 | ~$0.005 |
+
+¹ noisy — 3 live samples of the frozen fragments scored harmful-error 4.5 / 18.2 / 4.5 %
+(accuracy 63.6 / 59.1 / 63.6 %, `out_of_order` 3/5 all three). See
+`docs/artifacts/eval-roi-fragments-samples-2026-08-30.md`.
+
+**ROI + fragments** is the **feedback loop** (D-0014, Iteration 3): the 3 integrator
+corrections are synthesised into per-machine `promptFragment` reading-rules, which the ROI
+agent then consumes. **+18.2 pp over baseline, +22.7 over plain ROI** — the first automated
+configuration that beats the baseline. 4 of its 5 fixes over plain ROI are on cells the
+fragments were not derived from (same-machine transfer to a different frame + cross-machine
+spillover in a shared crop) — held-out *spatially*; all 5 frames are one capture session, so
+a temporal re-shoot is the real test and the remaining step. The override (`Baseline +
+corr.`) still scores higher *on the corrected cells themselves* (it is ground truth there)
+but does not generalise; combining both gives 72.7 %.
 
 **Calibrated** (annotated shot + mask as vision inputs) is a **documented dead-end**: −13.7 pp
 vs baseline, the model reads state off the annotation layer, and the mask image collapses it
@@ -119,11 +136,15 @@ the corrections are still the win — so the 2026-08-29 numbers above are the on
 agent steps — a verification pass, and image-based per-camera calibration — show up as
 regressions instead of shipping: `unknown` + `out_of_order` as first-class states,
 `harmful`-error scored separately (D-0006), a fair baseline told the same machine list
-(D-0012), key-free `--replay`. (2) The **integrator-correction store** (D-0014) — the
-mechanism that actually moved the metric the model can't: 3 durable "out of service" facts an
-integrator records once take accuracy 45.5% → 68.2% and `out_of_order` recall 0/5 → 5/5 at no
-extra model cost. The agentic win here is *knowing when to stop asking the model and let a
-human write one authoritative fact.*
+(D-0012), key-free `--replay`. (2) The **correction feedback loop** (D-0014): an integrator
+records 3 durable "out of service" facts, `npm run synthesize` turns each into a per-machine
+reading-rule, and the ROI agent consumes them — accuracy **45.5% → 63.6%** (`--mode=roi
+--fragments`), the first automated configuration to beat the baseline, with 4 of 5 gains on
+held-out cells. The override alone (`--corrections`) is higher on the corrected cells (68.2%,
+it is ground truth there) but does not generalise; the loop turns one human correction into a
+rule the model applies itself on frames it has not seen. The agentic win: *a human overrules
+a specific failure once, and that correction improves how the model reads that machine — and
+its neighbours — from then on.*
 
 **Main failure mode.** The model reads the price panel, not the cycle. `claude-haiku-4-5`
 treats the always-lit `2.25` price display as an active countdown, so it over-calls `free` as
@@ -137,14 +158,46 @@ none beat the plain whole-frame call.
 metric before building the agent, and being willing to log a negative result. A verification
 pass and then a richer calibrated input both *looked* like progress; separate `harmful` /
 coverage / `out_of_order` scoring is what showed each was a regression on the model we'd
-actually ship, instead of a demo we'd celebrate. What moved the metric was not a cleverer
-prompt or a richer input — it was letting an integrator write three authoritative facts the
-model kept getting wrong. Decide what each error costs the user, encode it in the metric,
-then let the metric — not the demo — tell you whether the agent is better.
+actually ship, instead of a demo we'd celebrate. And the agentic design that finally worked
+was not a cleverer one-shot prompt — it was the **loop**: a human overrules a specific
+failure once, that correction is synthesised into a durable reading-rule, and the model then
+applies it on frames it never saw (4 of 5 gains held-out, including cases where a rule for one
+machine fixed an un-corrected neighbour). Decide what each error costs the user, encode it in
+the metric, and let a human correction *teach the model a rule*, not just patch one cell.
 
 ## Verification runs
 
 Record the result of each infra verification here (append, newest first).
+
+### 2026-08-30 — correction → `promptFragment` feedback loop (D-0014 steps 1–3)
+
+- **Synthesis** (`src/eval/prompt-synthesis.ts`, `npm run synthesize`): for each corrected
+  cell where the baseline was wrong, one vision call takes the model's own wrong rationale +
+  the correction + the source frame → a short per-machine reading-rule. Guard `--live |
+  --replay | --fake`; cache `data/cache/synthesis/` (3 files). The 3 `machine`-scope
+  corrections (`W-04`, `D-02`, `D-06`) → 3 fragments written to `data/machines.json` with
+  `fragmentSource: "synthesis"`. `$0.0065` live.
+- **Consumption**: `runRoi` gained a `fragments: Record<id,string>` param; `run-eval` gained
+  `--fragments` (ROI only) — builds the map from the roster, writes a separate cache
+  (`data/cache/roi-fragments/`, 16 files) and report so the plain `--mode=roi` artifacts are
+  byte-identical. `baselinePrompt` / `--mode=baseline` untouched (fair baseline stays clean).
+- **`--live` (haiku, 16 calls, ~$0.023):** ROI + fragments **63.6%** / harmful 4.5% /
+  coverage 81.8% / `out_of_order` **3/5**; `--fragments --corrections` → **72.7%** / oo 5/5.
+  Re-ran the frozen fragments `--live` twice more: 59.1% / 63.6% accuracy, oo 3/5 both,
+  harmful 18.2% / 4.5% (`docs/artifacts/eval-roi-fragments-samples-2026-08-30.md`). Reports
+  `eval-roi-fragments{,-corrected}-2026-08-30.json`; `--replay --fragments` reproduces the
+  committed sample byte-for-byte.
+- **Per-cell** (committed sample vs plain ROI): 5 fixed, 0 broken — 1 in-sample (`W-04`),
+  2 same-machine transfer to an unseen frame (`D-02`@img_1822, `D-06`@img_1823), 2
+  cross-machine spillover (`D-01`, `D-05`, no fragment of their own). Excluding the in-sample
+  cell: 13/22 = 59.1%.
+- `typecheck` / `lint` / `format:check` / `check:data` / `build` — pass; `npm test` — **89/89**
+  (`prompt-synthesis.test.ts` +6, `roi.test.ts` +1). `--replay` of baseline (45.5%), roi
+  (40.9%), baseline+corrections (68.2%) unchanged.
+- **Verdict:** kept — Iteration 3, the first automated configuration above the baseline. The
+  loop is built and measured on the transfer signal the 5 frozen frames allow; a full number
+  needs a temporal / held-out capture set (the remaining step). See `docs/DECISIONS.md`
+  D-0014.
 
 ### 2026-08-29 — ROI mode: per-machine crops from a colour-coded region map
 

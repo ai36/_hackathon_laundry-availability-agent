@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\"fragment\": \"A lit display alone does not indicate operation. Check for physical 'OUT OF SERVICE' signage, tape, or labels on the machine itself. If present, classify as out_of_order regardless of display state.\"}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1861,
+  "outputTokens": 58,
+  "costUsd": 0.002151
+}

@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-05\",\n      \"state\": \"unknown\",\n      \"confidence\": 0.6,\n      \"rationale\": \"Upper unit's left readout is not clearly legible in this crop; display content cannot be reliably determined\"\n    },\n    {\n      \"machineId\": \"D-06\",\n      \"state\": \"unknown\",\n      \"confidence\": 0.5,\n      \"rationale\": \"Right readout shows some illumination but specific display content is not clearly readable; physical inspection for out-of-service signage is not visible in this angle\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1116,
+  "outputTokens": 162,
+  "costUsd": 0.001926
+}

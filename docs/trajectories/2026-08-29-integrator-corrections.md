@@ -65,8 +65,9 @@ The 3 corrections flip **5 cells** across cameras C-01–C-04:
 - What the delta legitimately shows: the `out_of_order` failure is real, is fixed by none of
   prompting / image calibration / ROI cropping, and **one durable fact per broken unit clears
   it in every camera angle and every future capture, for free**.
-- **Honest gap (deferred):** as shipped the override is permanent — the model keeps making
-  the mistake and the correction keeps hiding it. The designed fix is the
-  correction → `promptFragment` synthesis loop (D-0014 "Status (2026-08-29)"), deferred to
-  the first post-hackathon iteration because measuring it needs a temporal / held-out capture
-  split the 5 frozen frames don't have.
+- **Follow-up — the loop is now built (Iteration 3).** On its own the override is a patch:
+  the model keeps making the mistake, the override keeps hiding it. `npm run synthesize`
+  closes the loop — it turns each of these 3 corrections into a per-machine reading-rule the
+  ROI agent consumes (`--mode=roi --fragments` → 63.6 %, the first automated config above the
+  baseline, 4 of 5 gains held-out). See `docs/trajectories/2026-08-30-feedback-loop.md` and
+  D-0014 "Status (2026-08-30)". A full number still needs a temporal / held-out capture set.

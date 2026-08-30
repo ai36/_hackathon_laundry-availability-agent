@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\"machines\":[{\"machineId\":\"W-03\",\"state\":\"free\",\"confidence\":0.95,\"rationale\":\"Control panel displays a blue screen with what appears to be a price or idle state indicator. The door/lid is closed and there is no visible countdown timer, error message, or out-of-service indication. The machine appears empty and ready for use.\"}]}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 357,
+  "outputTokens": 88,
+  "costUsd": 0.000797
+}

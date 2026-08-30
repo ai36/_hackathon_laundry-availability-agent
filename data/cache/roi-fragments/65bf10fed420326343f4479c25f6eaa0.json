@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"W-14\",\n      \"state\": \"free\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Control panel displays '39' (likely price/cycle number, not countdown timer). Lid is closed and drum appears empty. No error indicators or countdown time visible. Machine appears ready for use.\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 895,
+  "outputTokens": 103,
+  "costUsd": 0.00141
+}

@@ -12,6 +12,45 @@ Entry format:
 
 ## Log
 
+### 2026-08-30 — Iteration 3: correction → promptFragment feedback loop (BUILT + measured)
+
+- **Deadline corrected:** submission is **2026-08-31 11:00 America/Los_Angeles** (Portland /
+  PDT), not 08-30 12:00. ~2 extra days. Updated `README.md`, `docs/DECISIONS.md`, memory.
+- **New — synthesis** (`src/eval/prompt-synthesis.ts`, `npm run synthesize`): for each
+  corrected cell where the baseline was wrong, one vision call takes the model's own wrong
+  rationale + the correction + the source frame → a short per-machine reading-rule (visual
+  cue, not a state assertion). Guard `--live | --replay | --fake`; cache
+  `data/cache/synthesis/`. Writes `promptFragment` + `fragmentSource` into `data/machines.json`.
+  The 3 `out_of_order` corrections (W-04, D-02, D-06) → 3 rules ($0.0065 live).
+- **New — consumption**: `runRoi` takes a `fragments` map; `run-eval` gains `--fragments`
+  (ROI only) → separate cache `data/cache/roi-fragments/` + report, so plain `--mode=roi`
+  artifacts stay byte-identical. `baselinePrompt` / `--mode=baseline` untouched (fair baseline).
+  `RosterMachine.fragmentSource` added; `parse.ts` `extractJsonObject` exported.
+- **Measured** (`claude-haiku-4-5`, n=22): ROI + fragments **63.6%** / harmful 4.5% /
+  `out_of_order` 3/5 — **+18.2 pp over baseline (45.5%), +22.7 over plain ROI (40.9%); the
+  first automated config above the baseline.** `--fragments --corrections` → 72.7% / oo 5/5.
+  5 cells fixed vs plain ROI, 0 broken; **4 of 5 held-out** (2 same-machine transfer to an
+  unseen frame, 2 cross-machine spillover). 3 live samples: acc 63.6/59.1/63.6, harmful
+  4.5/18.2/4.5, oo 3/5 all. Reports `eval-roi-fragments{,-corrected}-2026-08-30.json`,
+  samples doc `eval-roi-fragments-samples-2026-08-30.md`. All `--replay`-reproducible.
+- **Limits (documented):** all 3 corrections are `out_of_order` (rules are broken-machine
+  cues, not a `free`↔`occupied` reading-rule test); n=22 single committed sample; harmful
+  noisy; 1 of 5 fixes in-sample. A full number needs a temporal / held-out capture set. Not
+  yet wired: synthesis trigger into `POST /api/corrections`; fragments into `/api/refresh`.
+- Docs: D-0014 "Status" → BUILT; CHANGELOG Iteration-3 row + Verification run + tables;
+  README results table + hot take + "Honest gap"; REPRODUCTION section; SUBMISSION;
+  trajectory `2026-08-30-feedback-loop.md`; `2026-08-29-integrator-corrections.md` follow-up.
+- `typecheck` / `lint` / `format:check` / `build` / `check:data` — pass; `npm test` —
+  **89/89** (+7). `--replay` of baseline/roi/baseline+corr unchanged (45.5/40.9/68.2).
+- Compliance: `hackathon-compliance` subagent — **PASS WITH RISKS**, no blockers
+  (`docs/trajectories/compliance/2026-08-30-feedback-loop.md`). Fixed before push: (1) the
+  "ROI + frag. + corr." coverage cell said 81.8/82 % but the artifact is 86.4 % — corrected
+  in README + CHANGELOG + trajectory (the correction promotes D-06@img_1821 unknown →
+  covered); (2) samples doc now labels samples 2–3 explicitly "not committed, not
+  reproducible, author-attested"; (3) every "held-out" mention now says *spatial, not
+  temporal* (one capture session) adjacent to the claim. Subagent independently re-derived
+  63.6 % / 72.7 % / the 5-fixed-0-broken per-cell table from the committed artifacts.
+
 ### 2026-08-29 — Packaging for judge review (deliverables sweep)
 
 - **README fixes:** Quick-start replaced the retired `--mode=agent --replay` line with

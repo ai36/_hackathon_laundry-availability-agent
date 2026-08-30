@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\"fragment\": \"A solid blue display with error codes (typically showing alphanumeric characters without animation) indicates a hard error, not an active cycle. Active cycles show animated countdown timers with blinking colons or changing numbers.\"}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 1863,
+  "outputTokens": 57,
+  "costUsd": 0.002148
+}

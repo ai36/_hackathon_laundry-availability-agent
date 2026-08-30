@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"D-09\",\n      \"state\": \"unknown\",\n      \"confidence\": 0.6,\n      \"rationale\": \"Upper unit's left readout is partially visible but too blurry/obscured to definitively read the display content\"\n    },\n    {\n      \"machineId\": \"D-10\",\n      \"state\": \"occupied\",\n      \"confidence\": 0.8,\n      \"rationale\": \"Right readout shows '225' with what appears to be a colon notation, indicating an active countdown timer rather than a price\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 590,
+  "outputTokens": 158,
+  "costUsd": 0.00138
+}

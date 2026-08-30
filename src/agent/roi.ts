@@ -37,17 +37,26 @@ const RULES = [
   "A bare number like 2.25 or 225 with no colon is the PRICE, not a countdown — reads as `free`.",
 ];
 
-function soloPrompt(id: string, kind: string): string {
+/** Per-machine operator reading-rules (D-0014 feedback loop), rendered as prompt lines. */
+function fragmentLines(ids: string[], fragments: Record<string, string>): string[] {
+  const notes = ids
+    .filter((id) => fragments[id]?.trim())
+    .map((id) => `  - ${id}: ${fragments[id].trim()}`);
+  return notes.length ? ["Operator reading-rules for these machines:", ...notes] : [];
+}
+
+function soloPrompt(id: string, kind: string, fragments: Record<string, string> = {}): string {
   return [
     `This is a close crop of ONE ${kind} in a shared laundry room — machine ${id}.`,
     "Read its control-panel display, indicator lights, door/lid and drum, then classify it.",
     ...RULES,
+    ...fragmentLines([id], fragments),
     "Reply with JSON only:",
     `{"machines":[{"machineId":"${id}",${STATES},"confidence":0..1,"rationale":"<short>"}]}`,
   ].join("\n");
 }
 
-function stackPrompt(ids: string[], kind: string): string {
+function stackPrompt(ids: string[], kind: string, fragments: Record<string, string> = {}): string {
   // These stacked Speed Queen units are pairs sharing ONE panel with two readouts side by
   // side: LEFT (up-arrow ↑) = upper machine, RIGHT (down-arrow ↓) = lower machine.
   let lines: string[];
@@ -68,6 +77,7 @@ function stackPrompt(ids: string[], kind: string): string {
     'A unit whose readout shows a hard error (e.g. "E rot") is out_of_order even if the other',
     "readout on the same panel looks normal.",
     ...RULES,
+    ...fragmentLines(ids, fragments),
     "Reply with JSON only, one entry per id:",
     `{"machines":[{"machineId":"${ids[0]}",${STATES},"confidence":0..1,"rationale":"<short>"}]}`,
   ].join("\n");
@@ -119,6 +129,12 @@ export async function runRoi(
   camera: Camera,
   /** false on `--replay`: skip the crop entirely (the cache is keyed by bbox, not bytes). */
   writeCrops = true,
+  /**
+   * machineId -> `promptFragment` (D-0014 feedback loop). When a group's machine has one, it
+   * is appended to that call's prompt and `+frag` is folded into the cache key. Empty by
+   * default, so the plain `--mode=roi` cache is byte-identical.
+   */
+  fragments: Record<string, string> = {},
 ): Promise<FramePrediction> {
   const regions = await loadMaskRegions(
     join(process.cwd(), camera.mask ?? ""),
@@ -157,11 +173,12 @@ export async function runRoi(
 
     // `crop` (not `imagePath`) is folded into the cache hash, so --replay reproduces the
     // same request without cropping.
+    const groupFragments = ids.some((id) => fragments[id]) ? "+frag" : "";
     const res = await vision.analyze({
-      cacheKey: `roi:${frameId}:${ids.join(",")}`,
+      cacheKey: `roi:${frameId}:${ids.join(",")}${groupFragments}`,
       imagePath,
       crop: [box.left, box.top, box.width, box.height],
-      prompt: g.stacked ? stackPrompt(ids, kind) : soloPrompt(ids[0], kind),
+      prompt: g.stacked ? stackPrompt(ids, kind, fragments) : soloPrompt(ids[0], kind, fragments),
     });
     calls++;
     inTok += res.inputTokens ?? 0;

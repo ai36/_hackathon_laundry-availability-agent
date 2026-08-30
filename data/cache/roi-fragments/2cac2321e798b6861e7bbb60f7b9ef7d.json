@@ -1,0 +1,7 @@
+{
+  "text": "```json\n{\n  \"machines\": [\n    {\n      \"machineId\": \"W-02\",\n      \"state\": \"free\",\n      \"confidence\": 0.85,\n      \"rationale\": \"Control panel is lit and readable with no error codes visible. Door appears closed but drum appears empty with no visible laundry. No countdown timer displayed on screen.\"\n    }\n  ]\n}\n```",
+  "model": "claude-haiku-4-5",
+  "inputTokens": 343,
+  "outputTokens": 96,
+  "costUsd": 0.000823
+}
