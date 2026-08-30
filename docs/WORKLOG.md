@@ -12,7 +12,16 @@ Entry format:
 
 ## Log
 
-### 2026-08-30 — SUBMISSION-FORM: short Description variant for a 10 000-char field
+### 2026-08-30 — SUBMISSION-FORM: `dev → main` wording realigned to what actually happened
+
+- `origin/main` was created with `git push origin dev:refs/heads/main` (not a `git merge`),
+  and GitHub's default branch was switched to `main` via the web UI. `main` now tracks `dev`
+  and fast-forwards — there is no divergence and no PR to merge.
+- `docs/SUBMISSION-FORM.md` updated to match: the intro, §4 (Source Code), and the pre-submit
+  checklist no longer say "merge `dev → main` / `git merge --ff-only dev`" — they now say
+  "bring `main` level with `dev` (`git push origin dev:main`)" and "build the archive from
+  `main` HEAD". Tracked-file count note ~292 → ~290.
+- Doc-only. No code / data / measured-number / claim change.
 
 - HackerEarth caps the project Description at 10 000 characters. The full section-2
   Description is ≈ 7 340 chars (already within the limit), but added a trimmed

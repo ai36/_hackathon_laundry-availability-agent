@@ -4,8 +4,8 @@ The "Create submission" form has four required fields: **Title**, **Description*
 **Video URL**, **Source Code**. Copy the two blocks below; the last two sections tell you
 what to put in the file / URL fields. Deadline: **2026-08-31 11:00 America/Los_Angeles**.
 
-Before you submit: merge `dev → main` (`git checkout main && git merge --ff-only dev && git push`),
-record the video, then fill the form.
+Before you submit: bring `main` level with `dev` (`git push origin dev:main` — `main` tracks
+`dev` and fast-forwards, there is no divergence), record the video, then fill the form.
 
 ---
 
@@ -224,15 +224,16 @@ already aligned to the final code state (feedback loop built, measured, portal-w
 
 ## 4. Source Code  → upload into "Source Code" (max 50 MB)
 
-Build the archive from the **post-merge `main` HEAD** — it must contain this
-`docs/SUBMISSION-FORM.md` and every later commit, so do it **after** `dev → main`:
+Build the archive from **`main` HEAD**. `main` already exists and tracks `dev` (it was
+created with `git push origin dev:refs/heads/main`, not a merge); if you have committed to
+`dev` since, fast-forward it first with `git push origin dev:main`.
 
 ```bash
-git checkout main
+git checkout main && git pull --ff-only
 git archive --format=zip --prefix=laundry3/ -o laundry3-$(git rev-parse --short HEAD).zip HEAD
 ```
 
-`git archive` includes exactly the tracked files (~292 at HEAD) — no `node_modules`, no
+`git archive` includes exactly the tracked files (~300 at HEAD) — no `node_modules`, no
 `.git`, no untracked scratch. `data/cache/` and `data/public/frames/` are tracked, so
 `--replay` works from the zip offline. Expect roughly 3 MB, well under the 50 MB limit.
 
@@ -240,8 +241,8 @@ git archive --format=zip --prefix=laundry3/ -o laundry3-$(git rev-parse --short 
 
 ## Pre-submit checklist
 
-- [ ] `git checkout main && git merge --ff-only dev && git push origin main`
-- [ ] rebuild `laundry3-<sha>.zip` from `main` HEAD
+- [ ] `main` is level with `dev`: `git push origin dev:main` (fast-forward, no PR needed)
+- [ ] build `laundry3-<sha>.zip` from `main` HEAD
 - [ ] on a clean checkout of the zip: `npm ci` then the three `npm run eval` lines above
       print 45.5 / 63.6 / 68.2 (and `npm test` → 96/96)
 - [ ] record the video from `docs/VIDEO-SCRIPT.md`, upload unlisted, copy the URL
