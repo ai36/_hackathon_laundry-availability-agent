@@ -12,6 +12,24 @@ Entry format:
 
 ## Log
 
+### 2026-08-30 — SUBMISSION-FORM: short Description variant for a 10 000-char field
+
+- HackerEarth caps the project Description at 10 000 characters. The full section-2
+  Description is ≈ 7 340 chars (already within the limit), but added a trimmed
+  **`## 2-ALT`** variant at **≈ 6 540 chars** for a tight field — same claims, same numbers
+  (45.5 / 31.8 / 40.9 / 63.6 / 68.2 / 72.7, harmful, coverage, oo recall, −4.4 / −13.7 /
+  −4.6 / +22.7 / +18.2 pp), the honest-caveat paragraph condensed, "How agents are used" and
+  "What's in the zip" tightened. `docs/LIMITATIONS.md` added to the zip-contents list.
+- Char counts stated in the section header so the owner can see the margin.
+- Doc-only. No code / data / measured-number change.
+- Compliance: `hackathon-compliance` → **PASS WITH RISKS**, no blockers
+  (`docs/trajectories/compliance/2026-08-30-short-description.md`). All 2-ALT numbers and the
+  honest-caveat paragraph audited consistent with section 2 / CHANGELOG / REPRODUCTION. One
+  risk fixed durably: the compliance-review count (corrected 4× this session, 33→35→36→37,
+  reality now 38) was **removed** everywhere it appeared — `SUBMISSION-FORM.md` ×4,
+  `SUBMISSION.md`, `trajectories/README.md` → "one recorded review per meaningful change".
+  Also added `docs/LIMITATIONS.md` to the section-2 zip-contents list for parity with 2-ALT.
+
 ### 2026-08-30 — VIDEO-SCRIPT: 3:30–4:30 correction-loop narration in the owner's voice
 
 - The owner is recording the video and rewrote the "Closed correction loop" narration in

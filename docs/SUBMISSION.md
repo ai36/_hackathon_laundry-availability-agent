@@ -54,7 +54,7 @@ container, simulated reservations — is listed with its production TODO in
 | Integrator corrections — **the override, +22.7 pp** | D-0014; `src/eval/corrections.ts` | `docs/trajectories/2026-08-29-integrator-corrections.md` | `--mode=baseline --replay --corrections` |
 | Correction → prompt synthesis — **automated, clears baseline on this set** (see caveats above) | D-0014; `src/eval/prompt-synthesis.ts` | `docs/trajectories/2026-08-30-feedback-loop.md` | `npm run synthesize --replay` + `--mode=roi --replay --fragments` |
 | `grillme` skill (problem scoping) | `.claude/skills/grillme` | result: `docs/PROBLEM.md`; decision: `docs/DECISIONS.md` D-0005 | n/a |
-| `hackathon-compliance` subagent (independent reviewer) | `.claude/agents/hackathon-compliance.md` | `docs/trajectories/compliance/*.md` (37 runs) | n/a |
+| `hackathon-compliance` subagent (independent reviewer) | `.claude/agents/hackathon-compliance.md` | `docs/trajectories/compliance/*.md` (one per meaningful change) | n/a |
 
 ## Ground-rules compliance
 
