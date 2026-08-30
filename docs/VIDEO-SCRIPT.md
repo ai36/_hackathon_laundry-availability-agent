@@ -1,150 +1,121 @@
 # Solution video — script & shot list
 
-Solo submission — first person throughout ("I", not "we"). Target length **~5:00**. Covers
-the six things the brief asks for: problem + baseline, one realistic end-to-end execution,
-the final comparison, a changelog walkthrough, the change that contributed most, and one
-experiment that was removed.
+Solo submission, first person. Target **~5:00**. Covers the six things the brief asks for:
+problem + baseline, one end-to-end run, the comparison, a changelog walkthrough, the change
+that contributed most, and one removed experiment.
 
-Record at 1920×1080. Everything shown is key-free and offline — `npm run dev` +
-`npm run eval -- … --replay`. Have a terminal and a browser at `http://localhost:3000` ready.
-Times are cumulative.
+Record at 1920×1080. Narration is **Russian** (read it, then overlay an English track via
+ElevenLabs). Everything shown is key-free / offline — `npm run dev`, `npm run eval -- …
+--replay`. Times are cumulative.
 
 ---
 
-## 0:00 – 0:45 · The user and the bottleneck
+## 0:00 – 0:40 · Problem
 
-**On screen:** `README.md` top section, then a frame of the laundry room
+**On screen:** `README.md` top section, then a laundry-room frame
 (`data/public/frames/img_1821.jpg`).
 
-**Narration:**
-> A tenant in an apartment building with a shared laundry room. To do laundry they fill a
-> bag, carry it down, and often find every machine busy — then carry it back and try again
-> later, with no idea when anything frees up. There's no way to check before the trip, and no
-> way to hold a machine for the two minutes it takes to walk over.
->
-> laundry3 reads the laundry-room cameras with an agent and publishes a per-machine
-> **free / occupied / out-of-order / unknown** list, so the tenant only walks over when a
-> machine is actually free.
+**Текст (RU):**
+> Здравствуйте. Сегодня я хочу поговорить с вами о странном — о чужом грязном белье.
+> Представим жильца апарт-комплекса с общей прачечной. Чтобы постирать, ему нужно собрать
+> бельё, донести его до прачечной и только там обнаружить, что все машины заняты. И вот он
+> тащит баул обратно, ждёт и делает ещё одну попытку в надежде, что что-нибудь освободилось.
+> Моё решение, laundry3, анализирует изображения с камер в прачечной и показывает состояние
+> каждой машины: свободна, занята, неисправна или неизвестно. Жилец заранее проверяет
+> доступность и только потом идёт стирать. Можно даже зарезервировать машину на несколько
+> минут, но об этом позже.
 
-## 0:45 – 1:30 · The baseline, and how I measure it
+## 0:40 – 1:20 · Baseline и оценка
 
-**On screen:** `docs/EVALUATION.md` metric section; then run
-`npm run eval -- --mode=baseline --split=evaluation --replay` and let the summary print.
+**On screen:** `docs/EVALUATION.md` metric section; then
+`npm run eval -- --mode=baseline --split=evaluation --replay` — let the summary print.
 
-**Narration:**
-> The baseline is the reasonable simple approach: one Claude vision call on the whole frame,
-> told which machine IDs that camera covers. No cropping, no calibration, no memory.
->
-> I built the metric *before* the agent. The primary metric is per-machine accuracy over 22
-> determinate observations on 5 committed frames — one per camera. Three more things are
-> scored separately: **harmful-error rate** — telling a tenant a machine is free when it
-> isn't; **coverage** — did it give an actionable answer; and **`out_of_order` recall** —
-> did it catch the broken machines. Every run replays from a committed cache with no API key.
->
-> Baseline: **45.5% accuracy, 9.1% harmful, `out_of_order` recall zero out of five.** The
-> model reads every lit panel as a running cycle — including the always-on price display and
-> the hard-error screens.
+**Текст (RU):**
+> В качестве baseline я использовал максимально простой подход. С каждой камеры периодически
+> сохраняется отдельный кадр. Я отправляю его Claude Vision и указываю ID машин в кадре. Без
+> отдельных кропов, калибровки и памяти — поэтому для разработки хватает нескольких кадров с
+> разных ракурсов, а не полноценного видеопотока.
+> Метрику я построил до агента. Основная — точность состояния каждой машины: 22 размеченных
+> наблюдения на пяти кадрах. Отдельно я считаю harmful error rate — когда система говорит,
+> что машина свободна, хотя это не так, — а также coverage и recall неисправных машин. Все
+> прогоны воспроизводятся из кэша без ключа.
+> Baseline: 45,5 процента accuracy, 9,1 процента harmful errors и ноль из пяти неисправных
+> машин. Основная проблема — модель принимает любой светящийся дисплей за работающую машину.
 
-## 1:30 – 3:00 · One execution, end to end
+## 1:20 – 2:20 · End-to-end demo
 
-**On screen:** `npm run dev`, then the browser.
+**On screen:** `npm run dev`, browser — `/tenant`, then `/integrator`.
 
-1. **`/tenant`** — "This is what the tenant sees: free washer and dryer counts, per-machine
-   state, and tapping a free machine opens a confirm dialog to hold it for a few minutes."
-   Tap a free machine → confirm dialog → reserved; show the badge.
-2. **`/integrator`** — "The building's integrator sees the same room, plus the agent's
-   confidence and the source frame for every card, and a **mark-wrong** control."
-   Scroll to a machine that is physically taped off but reads `free` or `In use`.
-3. **Mark wrong** → pick `out of order` → tick **"applies to this machine in every view
-   (durable)"** → note "taped off" → submit. "The card flips immediately and gets an
-   integrator badge. Because it's durable, it carries to every camera that sees this machine
-   and every future capture. This is the correction — one authoritative fact the integrator
-   records once."
-4. **Back in the terminal:**
-   `npm run eval -- --mode=baseline --split=evaluation --replay --corrections`
-   "Re-scoring the same baseline predictions with the three corrections on file."
+**Текст (RU):**
+> Теперь пользовательский сценарий. Это интерфейс жильца: количество свободных стиральных и
+> сушильных машин и состояние каждой. Свободную можно зарезервировать на несколько минут —
+> например, чтобы успеть дойти до прачечной.
+> Теперь интерфейс интегратора. Здесь дополнительно виден confidence модели, исходный кадр и
+> возможность исправить неверный результат. Интегратор выбирает правильное состояние и
+> сохраняет correction. Такая ручная корректировка повышает accuracy, но для полностью
+> автоматического решения это компромисс.
+> После применения corrections accuracy выросла с 45,5 до 68,2 процента. Recall неисправных
+> машин — с нуля из пяти до пяти из пяти. Harmful error rate — с 9,1 до 4,5 процента. Но эти
+> ошибки всё равно нужно было научиться исправлять автоматически.
 
-**Narration over the last result:**
-> **68.2% accuracy. `out_of_order` recall five out of five. Harmful-error halved to 4.5%** —
-> at no extra model cost.
-
-## 3:00 – 3:40 · The comparison — and what it is, and isn't
-
-**On screen:** the table from `docs/CHANGELOG.md` "Recalibrated evaluation".
-
-| Metric | Baseline | + integrator corrections (shipped) |
-| --- | --- | --- |
-| Per-machine accuracy (n=22) | 45.5% | **68.2%** |
-| Harmful-error rate | 9.1% | **4.5%** |
-| `out_of_order` recall | 0 / 5 | **5 / 5** |
-| Model cost per frame | ~$0.003 | ~$0.003 |
-
-**Narration:**
-> Be honest about this delta. A correction is human ground truth applied as an override, so
-> each corrected cell scores 100% by construction. Plus-22.7 points means an integrator
-> overrode 5 of 22 cells. On the 17 cells no correction touches, the model still scores 10
-> out of 17.
->
-> So the override on its own is not the solution — it's a **stopgap**. Nobody wants to
-> hand-correct a model forever. What it *is* is the first, guaranteed step of the design, and
-> the signal that design learns from. More on that in a moment.
-
-## 3:40 – 4:30 · Changelog, and the experiment I removed
+## 2:20 – 3:30 · Эксперименты
 
 **On screen:** `docs/CHANGELOG.md` Progression table.
 
-**Narration:**
-> Before the corrections layer I tried three automated improvements on the model side. None
-> beat the baseline.
->
-> **A verification pass** — classify, then a focused second call on the shaky machines. It
-> cleared the harmful error and filled coverage, but it *over-committed*, flipping
-> correctly-free machines to occupied, so accuracy dropped 4.4 points. **Removed** — kept in
-> the tree as a studied negative result.
->
-> **Calibration by images** — feed the camera's annotated shot and mask as extra vision
-> inputs. **Minus 13.7 points.** A documented dead-end.
->
-> **ROI** — crop the frame to each machine's own colour region and classify one machine per
-> call, no positional guessing. The right architecture, but the model still can't OCR small
-> worn displays in wide angled shots: 40.9%, a consistent shortfall. Kept as an iteration.
->
-> The verification pass is the one to look at: it *looked* like progress. Separate harmful,
-> coverage, and `out_of_order` scoring is the only reason I could see it was a regression.
+**Текст (RU):**
+> Correction — это human ground truth, применяемый как override. Но одновременно это сигнал
+> для дальнейшего улучшения системы. До этого я попробовал три автоматических варианта.
+> Первый — verification pass: после основной классификации модель повторно анализировала
+> машины, в которых была не уверена. Harmful errors уменьшились, но модель начала менять и
+> правильные ответы — accuracy упала на 4,4 процентных пункта. Я убрал этот вариант из
+> рабочего решения, но сохранил как отрицательный результат.
+> Второй — visual calibration: размеченное изображение с расположением машин плюс маски,
+> отсекающие ненужные части кадра. Результат ещё хуже — минус 13,7 процентных пункта.
+> Третий — ROI: интегратор закрашивает область каждой машины своим цветом, я вырезаю её и
+> классифицирую отдельным запросом, без привязки к положению в кадре. Архитектурно верно, но
+> вскрылась другая проблема: маленькие дисплеи, большие углы съёмки, частично повреждённые
+> семисегментные индикаторы. А часть ошибок производитель показывает бегущей строкой, что
+> анализу отдельных кадров не помогает. Результат ROI — 40,9 процента, немного ниже baseline.
 
-## 4:30 – 5:15 · The intended solution, the honest gap, and the hot take
+## 3:30 – 4:30 · Closed correction loop — что реально работает
 
-**On screen:** `docs/DECISIONS.md` D-0014, the "Status (2026-08-29)" note.
+**On screen:** `npm run synthesize -- --replay` output (the 3 reading-rules), then
+`npm run eval -- --mode=roi --split=evaluation --replay --fragments` → 63.6 %.
+Then the portal: mark a machine out-of-order **durable** → response `synthesized: {…}`.
 
-**Narration:**
-> The intended solution is a **closed correction loop**. The integrator's durable correction
-> does two things: it overrides the reading now — the guaranteed fix you just saw — and it
-> triggers synthesis of an **improvable per-machine prompt fragment**: the model is told,
-> for that one machine, how to read its display correctly next time. Over a few corrections
-> the model stops making the mistake and the override is no longer needed. Human input trains
-> an improvable prompt, per machine, without fine-tuning.
->
-> **That loop is designed but not built** — it's in the decision log, D-0014. Building it
-> well needs a temporal, held-out capture split to prove that *future* captures classify
-> right without a human, and the 5 frozen frames don't have one. So it's deferred as the
-> first post-hackathon iteration. What ships today is the override — the +22.7-point stopgap
-> and the training signal the loop would consume.
->
-> **Hot take:** build the metric before the agent, and be willing to log a negative result —
-> two changes that looked like progress were regressions, and only per-error-type scoring
-> showed it. And the real agentic design here isn't a cleverer one-shot prompt. It's the
-> loop: a human overrules a specific failure once, and that correction improves how the model
-> reads that machine from then on.
+**Текст (RU):**
+> В итоге я построил closed correction loop. Durable-correction — та, что помечена как
+> постоянное свойство машины, — делает две вещи. Первая уже работала: сразу исправляет
+> результат. Вторая — из собственного ошибочного обоснования модели синтезирует короткое
+> правило чтения для этой конкретной машины и сохраняет его.
+> Дальше распознавание идёт уже с этим правилом, без override. На пяти кадрах ROI с правилами
+> даёт 63,6 процента — против 40,9 у чистого ROI и 45,5 у baseline. Это первая автоматическая
+> конфигурация, которая обошла baseline. Четыре исправления из пяти — на клетках, из которых
+> правило не выводилось: та же машина на другом кадре и соседи по общему кропу.
+> Цикл подключён к порталу: интегратор помечает машину неисправной как durable — правило
+> генерируется — следующий refresh распознаёт её уже правильно, без участия человека.
+> Чего не хватает для честного продакшн-числа: все три correction — про неисправность, и все
+> пять кадров сняты за один заход. Нужен отдельный набор снимков, сделанных позже, которых
+> система не видела при создании corrections. Это оставшийся шаг.
+
+## 4:30 – 5:00 · Вывод
+
+**Текст (RU):**
+> Самое интересное в agentic design здесь — не попытка написать ещё более сложный one-shot
+> prompt. Это цикл: человек один раз исправляет конкретную ошибку, а система использует это
+> исправление, чтобы лучше распознавать эту машину в будущем.
+> И главный вывод — правильная метрика позволяет увидеть реальный результат даже там, где
+> решение интуитивно выглядит как прогресс. Verification pass и visual calibration выглядели
+> как шаг вперёд, а раздельный подсчёт harmful, coverage и recall показал регресс.
 
 ---
 
 ## Capture checklist
 
 - [ ] `npm run dev` running; `data/corrections/` has exactly the 3 committed entries
-      (`npm run correct -- --list`)
-- [ ] terminal font large enough to read at 1080p
-- [ ] browser at 1920×1080, `/tenant` and `/integrator` pre-loaded
-- [ ] after recording the mark-wrong demo, `git checkout -- data/corrections/` if you added a
-      throwaway correction
-- [ ] all `--replay` commands run with no `ANTHROPIC_API_KEY` set, to prove key-free
-- [ ] first person throughout — "I", not "we"
+      (`npm run correct -- --list`); `data/machines.json` unmodified (`git status`)
+- [ ] terminal font readable at 1080p; browser at 1920×1080, `/tenant` + `/integrator` preloaded
+- [ ] all `--replay` commands run with no `ANTHROPIC_API_KEY` set (prove key-free)
+- [ ] for the 3:30 portal beat, `ANTHROPIC_API_KEY` **is** set so `synthesized: {…}` shows;
+      afterwards `git checkout -- data/ && git clean -fd data/site-config/` to restore
+- [ ] first person, Russian narration; numbers shown on screen as spoken (45,5 / 68,2 / 40,9 / 63,6)
