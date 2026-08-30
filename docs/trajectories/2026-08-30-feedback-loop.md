@@ -1,4 +1,4 @@
-# Correction → `promptFragment` feedback loop — Iteration 3 (the first automated win)
+# Correction → `promptFragment` feedback loop — Iteration 3 (first automated config above baseline on this set)
 
 - **Components:** `synthesizeFragment` (`src/eval/prompt-synthesis.ts`, `npm run synthesize`)
   and `runRoi(..., fragments)` (`src/agent/roi.ts`, `npm run eval -- --mode=roi --fragments`).
@@ -51,19 +51,22 @@
 | cell | plain ROI → + fragments | attribution |
 | --- | --- | --- |
 | `W-04` @ img_1819 | occupied → **out_of_order ✓** | **in-sample** — rule synthesised from this exact frame (circular, like the override) |
-| `D-02` @ img_1822 | occupied → **out_of_order ✓** | **transfer** — rule from img_1821, applied to an unseen frame of the same machine |
-| `D-06` @ img_1823 | free → **out_of_order ✓** | **transfer** — same |
+| `D-02` @ img_1822 | occupied → **out_of_order ✓** | **cue-consistency** — rule from img_1821, applied to a *different* frame of the same broken unit showing the *same* hard-error cue (not open-ended generalisation) |
+| `D-06` @ img_1823 | free → **out_of_order ✓** | **cue-consistency** — same |
 | `D-01` @ img_1822 | out_of_order → **occupied ✓** | **spillover** — `D-01` has no rule; `D-02`'s rule ("a solid error display is not an active cycle") shares its stacked-panel prompt and fixed the false error call |
 | `D-05` @ img_1823 | out_of_order → **occupied ✓** | **spillover** — `D-05` has no rule; helped by `D-06`'s rule in the shared crop prompt |
 
-**4 of 5 fixes are held-out spatially** (a rule from one frame helping a different frame or a
-neighbouring machine — but all 5 frames are one capture session, so not a *temporal* split).
-Excluding the one in-sample cell: 13 / 22 = **59.1 %**, still +13.6 pp over baseline.
+**4 of 5 fixes are on cells the rule was not derived from** — 2 cue-consistency (same broken
+unit, same cue, different frame), 2 genuine cross-machine spillover. All 5 frames are one
+capture session, so this is *spatial*, not a *temporal* split. Excluding the one in-sample
+cell: 13 / 22 = **59.1 %**, still +13.6 pp over baseline.
 
 ## Outcome — kept, Iteration 3
 
-- **The first automated configuration to beat the baseline** (+18.2 pp) — no override on
-  these cells, the model itself reads them right once given the rule.
+- **The first automated configuration to clear the baseline on this set** — all 3 loop
+  samples (63.6 / 59.1 / 63.6 %) beat 45.5 %; on these cells the model itself reads them
+  right once given the rule, no override. The **+18.2 pp** is one committed loop sample vs
+  one baseline sample — the baseline was not re-sampled.
 - The override (`--corrections`) is still higher *on the 5 corrected cells* (it is ground
   truth there, 5/5 vs the loop's 3/5) but does not generalise; the loop generalises but is
   not a guarantee. Together: 72.7 %.

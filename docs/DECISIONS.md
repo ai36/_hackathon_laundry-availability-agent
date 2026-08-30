@@ -768,13 +768,14 @@ allows.** Steps 1–3 ship:
   Separate cache + report, so the plain `--mode=roi` artifacts stay byte-identical. The fair
   baseline (`baselinePrompt` / `--mode=baseline`) never sees fragments.
 - **Measurement** — the 3 `out_of_order` corrections → 3 fragments → `--mode=roi --fragments`
-  scores **63.6 %** (baseline 45.5 %, plain ROI 40.9 %; mean of 3 samples ~62 %, `out_of_order`
-  recall 0/5 → 3/5). 5 cells fixed vs plain ROI, 0 broken; **4 of 5 are held-out** — 2
-  same-machine transfer to an unseen frame, 2 cross-machine spillover where a rule for one
-  machine helped an un-corrected neighbour in the shared crop. Only 1 fix is in-sample;
-  excluding it, 13/22 = 59.1 %, still +13.6 pp over baseline. `--fragments --corrections`
-  → 72.7 %. Full write-up: `docs/artifacts/eval-roi-fragments-samples-2026-08-30.md`,
-  `docs/CHANGELOG.md` Iteration 3.
+  scores **63.6 %**, the first automated config to clear the baseline (45.5 %) on this set:
+  all 3 loop samples (63.6 / 59.1 / 63.6 %) beat it; `out_of_order` recall 0/5 → 3/5. The
+  **+18.2 pp** is one committed loop sample vs one baseline sample (the baseline was not
+  re-sampled). 5 cells fixed vs plain ROI, 0 broken: 1 in-sample, 2 the same broken unit /
+  same cue on a frame the rule was not derived from (cue-consistency, not open-ended
+  generalisation), 2 genuine cross-machine spillover. Excluding the in-sample cell, 13/22 =
+  59.1 %, still +13.6 pp over baseline. `--fragments --corrections` → 72.7 %. Full write-up:
+  `docs/artifacts/eval-roi-fragments-samples-2026-08-30.md`, `docs/CHANGELOG.md` Iteration 3.
 
 **Amendment (2026-08-30) — the loop is now wired end-to-end in the portal.** (a) and (b) are
 done: `POST /api/corrections` runs `synthesizeForCorrection` for a `machine`-scope correction

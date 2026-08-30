@@ -8,15 +8,27 @@ result. Everything is key-free and offline unless a step says `--live`.
 ```bash
 npm ci
 git config core.hooksPath .githooks
+npm run synthesize -- --replay                                            # regenerate the 3 reading-rules (already committed in data/machines.json)
 npm run eval -- --mode=baseline --split=evaluation --replay                # 45.5%  — the fair baseline
-npm run eval -- --mode=roi      --split=evaluation --replay --fragments    # 63.6%  — the feedback loop (+18.2 pp, automated)
-npm run eval -- --mode=baseline --split=evaluation --replay --corrections  # 68.2%  — the override on its own (+22.7 pp)
+npm run eval -- --mode=roi      --split=evaluation --replay --fragments    # 63.6%  — the feedback loop (automated; see caveats below)
+npm run eval -- --mode=baseline --split=evaluation --replay --corrections  # 68.2%  — the override on its own
 ```
 
 No `ANTHROPIC_API_KEY` needed. Each run re-scores from the committed cache in `data/cache/`
 and prints accuracy, harmful-error rate, coverage, `out_of_order` recall, and a confusion
-matrix. The feedback-loop rules come from `npm run synthesize -- --replay` (also key-free).
-Full walkthrough incl. a `--live` re-sample: **`docs/REPRODUCTION.md`**.
+matrix. The 3 reading-rules are already committed in `data/machines.json`; `npm run synthesize
+-- --replay` regenerates them idempotently. Full walkthrough incl. a `--live` re-sample:
+**`docs/REPRODUCTION.md`**.
+
+**Read the feedback-loop result honestly:** 63.6 % is the first automated configuration to
+clear the baseline *on this 5-frame set* — all 3 loop samples (63.6 / 59.1 / 63.6 %) beat
+45.5 %, `out_of_order` recall 0/5 → 3/5. But: n = 22, one committed loop sample (2
+author-attested re-runs); the baseline was not re-sampled, so the "+18.2 pp" is
+single-vs-single; all 3 corrections are `out_of_order`, so the rules are broken-machine cues;
+and of the 5 cells fixed, 1 is in-sample and 2 are cue-consistency on the same broken unit —
+only 2 are genuine cross-machine spillover. A production number needs a temporal / held-out
+capture set (`docs/CHANGELOG.md` "Iteration 3", `docs/DECISIONS.md` D-0014 "Status
+(2026-08-30)").
 
 ## The four deliverables
 
@@ -36,9 +48,9 @@ Full walkthrough incl. a `--live` re-sample: **`docs/REPRODUCTION.md`**.
 | ROI agent (`runRoi`) — **iteration, −4.6 pp on its own** | `src/agent/roi.ts` | `docs/trajectories/baseline/2026-08-29-roi.md` | `--mode=roi --replay` |
 | Verification pass (`runAgent`) — **removed, −4.4 pp** | `src/agent/pipeline.ts` | `docs/trajectories/runtime/2026-08-29-verification-pass-retired.md` | from pre-2026-08-29 git history; predictions in `docs/artifacts/historical/` |
 | Integrator corrections — **the override, +22.7 pp** | D-0014; `src/eval/corrections.ts` | `docs/trajectories/2026-08-29-integrator-corrections.md` | `--mode=baseline --replay --corrections` |
-| Correction → prompt synthesis — **the automated win, +18.2 pp** | D-0014; `src/eval/prompt-synthesis.ts` | `docs/trajectories/2026-08-30-feedback-loop.md` | `npm run synthesize --replay` + `--mode=roi --replay --fragments` |
+| Correction → prompt synthesis — **automated, clears baseline on this set** (see caveats above) | D-0014; `src/eval/prompt-synthesis.ts` | `docs/trajectories/2026-08-30-feedback-loop.md` | `npm run synthesize --replay` + `--mode=roi --replay --fragments` |
 | `grillme` skill (problem scoping) | `.claude/skills/grillme` | result: `docs/PROBLEM.md`; decision: `docs/DECISIONS.md` D-0005 | n/a |
-| `hackathon-compliance` subagent (independent reviewer) | `.claude/agents/hackathon-compliance.md` | `docs/trajectories/compliance/*.md` (33 runs) | n/a |
+| `hackathon-compliance` subagent (independent reviewer) | `.claude/agents/hackathon-compliance.md` | `docs/trajectories/compliance/*.md` (35 runs) | n/a |
 
 ## Ground-rules compliance
 

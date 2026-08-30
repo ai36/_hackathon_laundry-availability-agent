@@ -12,6 +12,50 @@ Entry format:
 
 ## Log
 
+### 2026-08-30 — Full pre-submission compliance pass (collegial) + fixes A–J
+
+- Two-party review: an independent Claude Code pass + an independent `hackathon-compliance`
+  subagent pass, then reconciled into a joint list
+  (`docs/trajectories/compliance/2026-08-30-pre-submission-review.md`). **Verdict: PASS WITH
+  RISKS, no blockers.** Every headline number independently re-derived offline from committed
+  state (45.5 / 40.9 / 63.6 / 68.2 / 72.7, ex-in-sample 59.1); `npm test` 96/96.
+- Fixes applied (doc-only, no code / data / measured-number change):
+  - **A** — stale test count 89 → **96** in `README.md` + `docs/REPRODUCTION.md` (historical
+    verification-run records left as-was — true when written).
+  - **B** — deleted a duplicated sentence at `README.md:71-72`.
+  - **C** — `docs/EVALUATION.md`: added an **Iteration 3** sub-section (feedback loop, same
+    cases/metric, 63.6 %, honest limits) + a Results summary table; disambiguated its own
+    "63.6 %" (ROI + corrections) from the loop's.
+  - **D** — `docs/SUBMISSION.md`: "Read the feedback-loop result honestly" paragraph +
+    cross-refs; compliance count 33 → 35; trajectory-table label softened.
+  - **E** — reworded "first automated configuration to **beat** the baseline" →
+    "**clear the baseline on this set**" everywhere it stands alone; added, next to each
+    +18.2 pp, that it is **one loop sample vs one baseline sample** (baseline not re-sampled;
+    robustness = 3/3 loop runs above baseline); "same-machine transfer to an unseen frame" →
+    "**same broken unit / same cue on a frame the rule was not derived from (cue-consistency)**";
+    fixed a stray "+18.2 pp over plain ROI" in the samples doc (it is over baseline).
+  - **F** — `docs/EVALUATION.md` now states the success bar plainly: a **qualitative
+    direction** set before the runs (accuracy up, harmful-error not up, `out_of_order` recall
+    off zero) — no retrofitted numeric threshold.
+  - **G** — `README` Quick start + `SUBMISSION` one-minute repro note the 3 rules are already
+    committed and `synthesize --replay` regenerates them.
+  - **H** — `docs/REPRODUCTION.md` explains `--replay` writes `eval-<mode>-<run-date>.json`
+    (new untracked file, content byte-identical — compare bodies, not filenames).
+  - **I** — `docs/trajectories/README.md` compliance count → 35.
+  - **J** — the joint review record + this entry.
+- Accepted as-is: the solution video is a script only (honestly framed; maintainer records it
+  before the deadline); harmful-error 4.5 % is the favourable committed sample with the ¹
+  footnote adjacent everywhere; branch handling flagged in `SUBMISSION.md`.
+
+### 2026-08-30 — Doc: VIDEO-SCRIPT rewritten for current codebase state (commit 23adc13)
+
+- Base was the owner's Russian narration draft. Main correction: the "closed correction loop"
+  section no longer says "designed but not implemented" — the loop is built, measured (ROI +
+  fragments 63.6 %), and wired into the portal. Narration is Russian throughout with compact
+  English on-screen cues; timings unchanged (~5:00). Capture checklist requires `data/` clean
+  and key-unset for the `--replay` beats, key set for the one portal beat. Doc-only; no
+  WORKLOG entry was written at the time — recorded here retroactively.
+
 ### 2026-08-30 — Doc: spell out the production method (observation vs durable "mark wrong")
 
 - A portal test run made two `observation`-scope corrections and expected the feedback loop

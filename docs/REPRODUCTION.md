@@ -67,7 +67,7 @@ npm start        # serve the production build
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint (flat config)
 npm run format:check # prettier
-npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations, calibration-config guard, requestHash, camera-classify, calibrated + ROI eval, prompt-synthesis (expect: 89/89 pass)
+npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations, calibration-config guard, requestHash, camera-classify, calibrated + ROI eval, prompt-synthesis, feedback loop (expect: 96/96 pass)
 npm run check:data   # dataset privacy gate (also runs as the pre-commit hook)
 ```
 
@@ -168,7 +168,7 @@ The frozen config scores **40.9% on all 3 samples** (`docs/artifacts/eval-roi-sa
 surface the feedback loop below attaches per-machine rules to. `--mode=roi` needs `sharp` (an
 explicit `devDependency`; `npm ci` installs it).
 
-## Feedback loop — correction → `promptFragment` (D-0014, Iteration 3) — the automated win
+## Feedback loop — correction → `promptFragment` (D-0014, Iteration 3) — clears baseline on this set
 
 **How the 63.6 % was produced** — the exact chain, all key-free from committed state:
 
@@ -209,11 +209,14 @@ independent of any portal action; the portal path is not separately measured.
 ¹ noisy — 3 live samples: accuracy 63.6 / 59.1 / 63.6 %, harmful 4.5 / 18.2 / 4.5 %,
 `out_of_order` 3/5 all three (`docs/artifacts/eval-roi-fragments-samples-2026-08-30.md`).
 
-**+18.2 pp over baseline, +22.7 over plain ROI — the first automated config to beat the
-baseline.** 4 of its 5 fixes over plain ROI are held-out (same-machine transfer to an unseen
-frame + cross-machine spillover in a shared crop). Limits: n=22, one committed sample, all 3
-corrections are `out_of_order`; a full number needs a temporal / held-out capture set. See
-`docs/CHANGELOG.md` Iteration 3 and `docs/trajectories/2026-08-30-feedback-loop.md`.
+**The first automated config to clear the baseline on this set** — all 3 loop samples
+(63.6 / 59.1 / 63.6 %) beat 45.5 %. The **+18.2 pp** is one committed loop sample vs one
+baseline sample (the baseline was not re-sampled). 4 of its 5 fixes over plain ROI are on
+cells the rules were not derived from: 2 the same broken unit / same cue on a different frame
+(cue-consistency), 2 genuine cross-machine spillover in a shared crop. Limits: n=22, one
+committed loop sample, all 3 corrections are `out_of_order`; a full number needs a temporal /
+held-out capture set. See `docs/CHANGELOG.md` Iteration 3 and
+`docs/trajectories/2026-08-30-feedback-loop.md`.
 
 ## Baseline + integrator corrections (D-0014) — the override on its own
 
@@ -234,10 +237,12 @@ service) on the baseline predictions before scoring. Report:
 observations across cameras C-01–C-04. Confusion (gt → pred): free 4/6/0/0, occupied 1/6/0/0,
 out_of_order 0/0/5/0. `--mode=calibrated … --corrections` gives 54.5% from the lower base.
 
-Each mode writes a JSON report to `docs/artifacts/eval-<mode>-<date>.json`. Its `model`
-field is read from the cached responses (so a `--replay` of the recorded runs reports
-`claude-haiku-4-5`), not from config. The report carries no timestamp so it regenerates
-byte-identically.
+Each mode writes a JSON report to `docs/artifacts/eval-<mode>-<date>.json` where `<date>` is
+the **run date** — so a `--replay` today writes a *new, untracked* file (e.g.
+`eval-baseline-2026-08-31.json`), not an in-place update of the committed
+`…-2026-08-29.json`. The **content** is byte-identical (the report carries no timestamp, and
+`model` is read from the cached responses, not config): compare the JSON bodies, not the
+filenames. Delete the new-dated file afterwards if you want a clean tree.
 
 > `agent.visionModel` defaults to `claude-haiku-4-5` and `agent.visionEffort` to `"none"`
 > (haiku rejects the `effort` parameter). A `--live` re-sample runs on haiku; `--replay`

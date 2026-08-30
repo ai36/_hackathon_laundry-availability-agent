@@ -9,8 +9,8 @@ ground rule 9 (every claim tied to evidence).
 | --- | --- | --- |
 | `baseline/` | The single-prompt baseline (the fair-comparison reference), the calibrated-agent dead-end, and the ROI agent. | `2026-08-29-recalibrated.md` (baseline + calibrated), `2026-08-29-roi.md` (ROI agent); `2026-08-28-img_1823.md` (historical) |
 | `runtime/` | The verification-pass agent (`runAgent`) — retired 2026-08-29 as net-negative. | `2026-08-29-verification-pass-retired.md` |
-| _(top level)_ | The integrator-correction loop (Iteration 2 — the override) and the correction → `promptFragment` feedback loop (Iteration 3 — the first automated win). | `2026-08-29-integrator-corrections.md`, `2026-08-30-feedback-loop.md` |
-| `compliance/` | Each `hackathon-compliance` review run — verdict, blockers, risks, and the fixes applied. | 33 files |
+| _(top level)_ | The integrator-correction loop (Iteration 2 — the override) and the correction → `promptFragment` feedback loop (Iteration 3 — first automated config above baseline on this set). | `2026-08-29-integrator-corrections.md`, `2026-08-30-feedback-loop.md` |
+| `compliance/` | Each `hackathon-compliance` review run — verdict, blockers, risks, and the fixes applied. | 35 files |
 | `calibration/` | The calibration agent (per-site ROI config from human-confirmed frames). | — (P1, not built) |
 
 Most trajectories here are reproducible offline: `baseline/2026-08-29-recalibrated.md`,

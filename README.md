@@ -36,7 +36,7 @@ The core P0: given a laundry-room frame, produce a **verified per-machine status
 - **Correction → `promptFragment` feedback loop (D-0014, Iteration 3)** — `npm run synthesize`
   turns each correction + the model's own wrong rationale into a per-machine **reading rule**;
   the ROI agent consumes it (`--mode=roi --fragments`). **The first automated config that
-  beats the baseline** — see below.
+  clears the baseline on this set** — see below.
 
 ### Results — `claude-haiku-4-5`, 5 committed frames (one per calibrated camera), 22 determinate observations
 
@@ -51,15 +51,20 @@ The core P0: given a laundry-room frame, produce a **verified per-machine status
 ¹ noisy — 3 samples of the frozen fragments: harmful 4.5 / 18.2 / 4.5 %, accuracy 63.6 /
 59.1 / 63.6 %, `out_of_order` 3/5 all three (`docs/artifacts/eval-roi-fragments-samples-2026-08-30.md`).
 
-**The feedback loop is the improvement: `ROI + fragments` 63.6 % — +18.2 pp over baseline,
-+22.7 over plain ROI, the first automated configuration above the baseline.** `npm run
-synthesize` reads each of the 3 integrator corrections plus the model's own wrong rationale
-and writes a per-machine reading-rule into `data/machines.json` (e.g. for `D-02`: *"a solid
-error display is not an active cycle; cycles show an animated countdown with a blinking
-colon"*); `--mode=roi --fragments` appends it to that machine's call. Of the 5 cells it fixes
-over plain ROI (0 broken), **4 are held-out spatially** — a rule derived from one frame helps
-a *different* frame (2 cells, same machine) or an *un-corrected neighbour* sharing the crop
-prompt (2 cells). `out_of_order` recall 0/5 → 3/5. Combined with the override: 72.7 %.
+**The feedback loop is the improvement: `ROI + fragments` 63.6 % — the first automated
+configuration to clear the baseline on the 5 frozen frames** (all 3 loop samples — 63.6 /
+59.1 / 63.6 % — beat the baseline's 45.5 %; `out_of_order` recall 0/5 → 3/5). The **+18.2 pp**
+is one committed loop sample vs one baseline sample — the baseline was not re-sampled, so
+read the magnitude as single-vs-single and the robustness as 3/3 loop runs above baseline.
+`npm run synthesize` reads each of the 3 integrator corrections plus the model's own wrong
+rationale and writes a per-machine reading-rule into `data/machines.json` (e.g. for `D-02`:
+*"a solid error display is not an active cycle; cycles show an animated countdown with a
+blinking colon"*); `--mode=roi --fragments` appends it to that machine's call. Of the 5 cells
+it fixes over plain ROI (0 broken): 1 is in-sample, 2 are the **same broken unit showing the
+same cue on a frame the rule was not derived from** (`D-02`, `D-06` — cue-consistency, not
+open-ended generalisation), and 2 are genuine **cross-machine spillover** (`D-01`, `D-05`
+have no fragment; a neighbour's rule in the shared crop prompt fixed them). Combined with the
+override: 72.7 %.
 
 **Read it honestly:** all 5 frames are one capture session, so "held-out" here is spatial,
 not temporal — the real test is a re-shoot at a different time, still the remaining step.
@@ -68,8 +73,7 @@ noisy (one re-run 18.2 %); all 3 corrections are `out_of_order`, so the rules ar
 broken-machine cues, not a `free`↔`occupied` reading-rule test; one of the 5 fixes is
 in-sample (circular) — excluding it, 13/22 = 59.1 %, still +13.6 pp over baseline from
 held-out cells. The override (`Baseline + corr.`) scores higher *on the corrected cells* (it
-is ground truth there) but does not generalise. The override (`Baseline + corr.`)
-scores higher *on the corrected cells* (it is ground truth there) but does not generalise.
+is ground truth there) but does not generalise.
 
 **The dead-end and the shortfall it grew out of:**
 
@@ -241,8 +245,8 @@ corrections. That is the remaining step. See `docs/DECISIONS.md` D-0014 "Status 
   wired into `POST /api/corrections` + `/api/refresh`) — the feedback loop (Iteration 3): a
   model reads each correction + the classifier's own wrong rationale and writes a per-machine
   reading-rule into `data/machines.json`, which the ROI agent (`--mode=roi --fragments`) and
-  the live refresh path then consume. The step that first beat the baseline automatically.
-  Trajectory: `docs/trajectories/2026-08-30-feedback-loop.md`.
+  the live refresh path then consume. The first automated step to clear the baseline on this
+  set. Trajectory: `docs/trajectories/2026-08-30-feedback-loop.md`.
 - **`grillme`** skill — a Socratic interview that turned the one-line brief into the scoped
   problem, metric, and dataset plan. Result: `docs/PROBLEM.md`; scope decision:
   `docs/DECISIONS.md` D-0005.
@@ -269,12 +273,12 @@ Exact versions and rationale: `docs/DECISIONS.md` (D-0001).
 npm ci
 git config core.hooksPath .githooks          # dataset-privacy pre-commit gate
 npm run eval -- --mode=baseline --split=evaluation --replay                # the fair baseline — 45.5%, no API key, no cost
-npm run eval -- --mode=roi      --split=evaluation --replay --fragments    # the feedback loop — 63.6% (synthesised reading-rules)
+npm run eval -- --mode=roi      --split=evaluation --replay --fragments    # the feedback loop — 63.6% (rules already in data/machines.json; `npm run synthesize -- --replay` regenerates them)
 npm run eval -- --mode=baseline --split=evaluation --replay --corrections  # the override on its own — 68.2%
 ```
 
 Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`,
-`npm test` (89), `npm run check:data`. Full clean-environment walkthrough (including a
+`npm test` (96), `npm run check:data`. Full clean-environment walkthrough (including a
 `--live` re-run and the dataset pipeline): **`docs/REPRODUCTION.md`**.
 
 ## Configuring for a real site
