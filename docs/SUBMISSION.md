@@ -59,7 +59,11 @@ submission; if the submission link points at a branch, it points at `dev`.
 
 ## Verification status (2026-08-30)
 
-`typecheck` · `lint` · `format:check` · `build` · `check:data` — pass. `npm test` — 89/89.
+`typecheck` · `lint` · `format:check` · `build` · `check:data` — pass. `npm test` — 96/96.
 `--replay` reproduces `baseline` 45.5 %, `calibrated` 31.8 %, `roi` 40.9 %, **`roi
 --fragments` 63.6 %**, `baseline --corrections` 68.2 %, `roi --fragments --corrections`
-72.7 % exactly. `npm run synthesize --replay` reproduces the 3 synthesised rules.
+72.7 % exactly. `npm run synthesize --replay` reproduces the 3 synthesised rules
+idempotently (no file change). The D-0014 loop is also wired into the portal
+(`POST /api/corrections` synthesises on a durable correction when a key is set;
+`/api/refresh` classifies with the fragments) — the measured number is still the offline
+`--replay` chain only.

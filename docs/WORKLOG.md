@@ -12,6 +12,41 @@ Entry format:
 
 ## Log
 
+### 2026-08-30 — Feedback loop wired into the portal end-to-end (+ synthesize --replay fix)
+
+- **Owner ask:** make the D-0014 loop operable from the integrator portal (it was CLI/eval
+  only), *if it doesn't break hackathon rules*. Verdict: compliant — synthesis is key-gated
+  (judge's key-free path unchanged), the measured 63.6 % still comes only from the offline
+  `--replay` chain, no eval code path changes, no committed number moves.
+- **`POST /api/corrections`** — a `machine`-scope correction runs `synthesizeForCorrection`
+  (new shared helper in `src/eval/prompt-synthesis.ts`) when `ANTHROPIC_API_KEY` is set:
+  synthesises the reading-rule, writes `data/machines.json`, returns `synthesized: {…}`.
+  Failure is non-fatal to the correction write.
+- **`/api/refresh`** — folds every roster `promptFragment` into `baselinePrompt` + the live
+  cache key. `baselinePrompt` gained an optional `fragments` arg; `runBaseline` never passes
+  it → `--mode=baseline` cache byte-identical.
+- **Bug found + fixed:** `npm run synthesize -- --replay` never worked in commit 98ca168 —
+  after the fragments were committed, a re-run built a *merge* prompt (different hash → cache
+  miss). Now `synthesizeForCorrection` merges only into a human-written fragment; a prior
+  synthesis output is regenerated. `synthesize --replay` is idempotent, reproduces
+  `data/machines.json` exactly. The earlier "reproduces via --replay" claim for the synthesis
+  step is now actually true (it wasn't).
+- Verified on the dev server: `POST /api/corrections` (D-02, key present) → returns the D-02
+  fragment `source: "synthesis"`; `/api/refresh` fragment-aware. `typecheck` / `lint` /
+  `format:check` / `build` / `check:data` pass; `npm test` **96/96** (+7). `--replay` of
+  baseline / roi / roi+fragments / +corrections unchanged (45.5 / 40.9 / 63.6 / 72.7).
+- Docs: D-0014 "Status" 2026-08-30 amendment; D-0015 "Not built" list trimmed; CHANGELOG
+  verification run; README portal walkthrough + "How agents are used" + "Honest gap";
+  REPRODUCTION "how 63.6 % was produced" block + portal note.
+- Compliance: `hackathon-compliance` — **PASS WITH RISKS**, no blockers
+  (`docs/trajectories/compliance/2026-08-30-portal-feedback-loop.md`). Fixed before push:
+  (1) README "Honest gap" reworded — portal loop is *operable* not *measured*, 63.6 % is the
+  offline `--replay` chain only; (2) `synthesize --replay` cost line now prints
+  `$0 (recorded live cost was $…)` instead of a misleading `$0.0065 (replay)`; (3) route
+  comment + REPRODUCTION note the learned rule is advisory and revertible
+  (`git checkout -- data/machines.json` / Machines editor). Subagent re-ran `npm test`
+  (96/96) and `synthesize --replay` (data/ clean).
+
 ### 2026-08-30 — Iteration 3: correction → promptFragment feedback loop (BUILT + measured)
 
 - **Deadline corrected:** submission is **2026-08-31 11:00 America/Los_Angeles** (Portland /

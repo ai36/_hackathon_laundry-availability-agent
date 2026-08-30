@@ -169,6 +169,35 @@ the metric, and let a human correction *teach the model a rule*, not just patch 
 
 Record the result of each infra verification here (append, newest first).
 
+### 2026-08-30 — feedback loop wired end-to-end in the portal (+ `synthesize --replay` fix)
+
+- **`POST /api/corrections`**: a `machine`-scope correction now runs `synthesizeForCorrection`
+  (shared helper, `src/eval/prompt-synthesis.ts`) when `ANTHROPIC_API_KEY` is set —
+  synthesises the reading-rule, writes it to `data/machines.json`, returns
+  `synthesized: {machineId, fragment, source}`. Key-free: skipped, response says so. A
+  synthesis failure never fails the correction write.
+- **`/api/refresh`**: loads the roster and folds every `promptFragment` into `baselinePrompt`
+  + the live cache key. Fresh deployment (no fragments) = identical to before. The eval's
+  `runBaseline` / `--mode=baseline` still gets no fragments — the fair A/B is untouched.
+- **`baselinePrompt(machineIds, fragments?)`**: optional 2nd arg; `runBaseline` never passes
+  it, so `--mode=baseline --replay` reproduces 45.5 % byte-for-byte.
+- **Bug fixed:** `npm run synthesize -- --replay` never worked in the first Iteration-3
+  commit — once the fragments were committed to `data/machines.json`, a re-run saw them as
+  "existing" and built a *merge* prompt → different hash → cache miss. `synthesizeForCorrection`
+  now merges only into a **human-written** fragment; a prior `synthesis` / `merged` output is
+  regenerated from scratch. `npm run synthesize -- --replay` is now idempotent and reproduces
+  `data/machines.json` exactly. The earlier commit's "reproduces via `--replay`" claim for the
+  synthesis step was wrong; it is now true.
+- Verified: dev server — `POST /api/corrections` (`D-02`, key present) returns the D-02
+  fragment, `source: "synthesis"` (not "merged" — ignores its own prior output);
+  `POST /api/refresh` runs fragment-aware. `typecheck` / `lint` / `format:check` / `build` /
+  `check:data` pass; `npm test` **96/96** (+7: `synthesizeForCorrection`, `baselinePrompt`).
+  `--replay`: baseline 45.5 %, roi 40.9 %, roi+fragments 63.6 %, +corrections 72.7 % —
+  unchanged. `npm run synthesize -- --replay` → the 3 committed fragments, no file change.
+- **Verdict:** kept. The loop is now operable from the portal exactly as D-0014 describes; the
+  measured number still comes only from the offline `--replay` chain. Remaining step is
+  unchanged — a temporal / held-out capture set.
+
 ### 2026-08-30 — correction → `promptFragment` feedback loop (D-0014 steps 1–3)
 
 - **Synthesis** (`src/eval/prompt-synthesis.ts`, `npm run synthesize`): for each corrected

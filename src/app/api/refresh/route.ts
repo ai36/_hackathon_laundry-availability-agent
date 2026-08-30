@@ -6,13 +6,14 @@
  * One cycle of the runtime loop: for every declared camera, "capture" its current frame
  * (P0: the uploaded stub image — a StaticImageFrameSource, D-0016) and, when
  * `ANTHROPIC_API_KEY` is set, run **one whole-frame vision call per camera** on it for that
- * camera's machine ids. This is the eval's fair baseline (`baselinePrompt`) — the shipped
- * config is "baseline + integrator corrections" (see docs/CHANGELOG.md); the annotated-shot /
- * region-map calibration inputs were measured as a dead-end / a wash and are eval-only
- * (`--mode=calibrated` / `--mode=roi`), not fed on this live path. Live per-machine states
- * are fused into the returned room **below** D-0014 corrections, which stay authoritative.
- * Key-free, the endpoint degrades to a plain re-fusion of the committed report +
- * `data/corrections/` — no model call, no cost.
+ * camera's machine ids, using `baselinePrompt` PLUS any per-machine `promptFragment` reading-
+ * rules synthesised from integrator corrections (the D-0014 feedback loop — `data/machines.
+ * json`). A fresh deployment carries no fragments, so it is exactly the eval's fair baseline;
+ * as corrections accrue it becomes "baseline + learned rules + corrections". The eval's
+ * `--mode=baseline` (`runBaseline`) is a separate path and never sees fragments, so the fair
+ * A/B there is intact. Live per-machine states are fused into the returned room **below**
+ * D-0014 corrections, which stay authoritative. Key-free, the endpoint degrades to a plain
+ * re-fusion of the committed report + `data/corrections/` — no model call, no cost.
  *
  * COST: the live branch calls the Anthropic API once per camera-with-a-feed. It only fires
  * when `ANTHROPIC_API_KEY` is set; the key-free default (the judge's path) makes zero calls.
@@ -31,6 +32,7 @@ import { NextResponse } from "next/server";
 import { baselinePrompt } from "@/agent/baseline";
 import { parseAssessments } from "@/agent/parse";
 import { AnthropicVisionClient, CachedVisionClient } from "@/agent/vision";
+import { loadRoster } from "@/eval/roster";
 import { loadSiteConfig } from "@/eval/site-config";
 import type { MachineState } from "@/eval/types";
 import { buildRoomStatus } from "@/portal/room-status";
@@ -59,15 +61,24 @@ export async function POST() {
   >();
   let live = false;
 
+  // D-0014 feedback loop: per-machine reading-rules synthesised from integrator corrections
+  // (data/machines.json). Folded into the live prompt AND the cache key so a rule change
+  // re-classifies. Empty for a fresh deployment → identical behaviour to the plain baseline.
+  const fragments: Record<string, string> = {};
+  for (const m of loadRoster().machines) {
+    if (m.promptFragment?.trim()) fragments[m.machineId] = m.promptFragment.trim();
+  }
+  const fragTag = Object.keys(fragments).length ? `:frag${Object.keys(fragments).length}` : "";
+
   if (haveKey) {
     const vision = new CachedVisionClient(new AnthropicVisionClient(), "data/cache/live", false);
     for (const c of capture) {
       if (!c.feed || c.machineIds.length === 0) continue;
       try {
         const res = await vision.analyze({
-          cacheKey: `live:${c.camera}:${c.machineIds.join(",")}`,
+          cacheKey: `live:${c.camera}:${c.machineIds.join(",")}${fragTag}`,
           imagePath: join(process.cwd(), c.feed),
-          prompt: baselinePrompt(c.machineIds),
+          prompt: baselinePrompt(c.machineIds, fragments),
         });
         const rows = parseAssessments(res.text).filter((r) => c.machineIds.includes(r.machineId));
         c.classified = rows.length;

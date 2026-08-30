@@ -776,12 +776,23 @@ allows.** Steps 1–3 ship:
   → 72.7 %. Full write-up: `docs/artifacts/eval-roi-fragments-samples-2026-08-30.md`,
   `docs/CHANGELOG.md` Iteration 3.
 
-**Still open:** (a) the synthesis trigger is a CLI (`npm run synthesize`), not yet wired into
-`POST /api/corrections`; (b) the live `/api/refresh` path still uses the plain baseline call,
-not fragments; (c) **the real remaining step** — a temporal / held-out capture set (re-shoot
-the 5 angles at a different time) so the fragments are measured only on frames from *after*
-the corrections. The current transfer signal (n small, all 3 corrections `out_of_order`) is
-the best the 5 frozen frames allow.
+**Amendment (2026-08-30) — the loop is now wired end-to-end in the portal.** (a) and (b) are
+done: `POST /api/corrections` runs `synthesizeForCorrection` for a `machine`-scope correction
+when `ANTHROPIC_API_KEY` is set (key-free → skipped, response says so) and writes the
+`promptFragment`; `/api/refresh` folds every `promptFragment` into `baselinePrompt` and the
+live cache key. So an integrator working only in the portal now gets the *learned rule*, not
+just the override. The eval's `runBaseline` / `--mode=baseline` never receives fragments —
+the fair A/B there is untouched — and the **measured** 63.6 % still comes only from the
+offline `--replay` chain, independent of any portal action. `synthesizeForCorrection` merges
+only into a *human-written* fragment; a prior synthesis output is regenerated from scratch, so
+`npm run synthesize -- --replay` is idempotent and reproduces `data/machines.json` byte-for-byte
+(this was broken in the first Iteration-3 commit — the `--replay` synthesis path was never
+verified there; fixed here).
+
+**Still open:** **the real remaining step** — a temporal / held-out capture set (re-shoot the
+5 angles at a different time) so the fragments are measured only on frames from *after* the
+corrections. The current transfer signal (n small, all 3 corrections `out_of_order`) is the
+best the 5 frozen frames allow.
 
 **Amendment (2026-08-29) — mark-wrong panel commits on explicit `save`.** The portal's
 "mark wrong" control was reworked from instant-submit (clicking a state button POSTed the
@@ -822,10 +833,11 @@ payload, same write path — a deliberate confirmation step before a state overr
     the amendments below.)_
   - D-0016 P0 — judge walks the correction loop key-free.
   **Not built:** per-machine reference-state screenshots (the upload route supports the
-  `machine-reference` kind, no UI yet); wiring the synthesis trigger into `POST /api/corrections`
-  (it is a CLI, `npm run synthesize`) and `promptFragment` injection into the live
-  `/api/refresh` call. _(The **correction → `promptFragment` synthesis feedback loop** itself
-  is now BUILT and measured for `--mode=roi` — Iteration 3, see D-0014 "Status (2026-08-30)".)_
+  `machine-reference` kind, no UI yet). _(The **correction → `promptFragment` synthesis
+  feedback loop** is BUILT and measured for `--mode=roi` — Iteration 3 — and wired
+  end-to-end in the portal on 2026-08-30: `POST /api/corrections` synthesises on a durable
+  correction, `/api/refresh` classifies with the fragments. See D-0014 "Status (2026-08-30)"
+  + its 2026-08-30 amendment.)_
 
 **Context.** D-0009 / D-0010 name a `data/site-config.json` produced during onboarding
 (per-machine ROIs, reference crops, few-shot exemplars, thresholds). D-0014 adds a correction

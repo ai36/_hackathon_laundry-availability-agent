@@ -117,3 +117,90 @@ export async function synthesizeFragment(
     costUsd: res.costUsd,
   };
 }
+
+/** Minimal shape of a committed eval report, for the rationale lookup below. */
+export interface BaselineReport {
+  predictions: Record<
+    string,
+    { machines: { machineId: string; state: MachineState; rationale?: string }[] }
+  >;
+}
+
+/** The baseline model's `(state, rationale)` for one cell from a committed report, or null. */
+export function baselinePredictionFor(
+  report: BaselineReport,
+  frameId: string,
+  machineId: string,
+): { state: MachineState; rationale: string } | null {
+  const m = report.predictions?.[frameId]?.machines?.find((x) => x.machineId === machineId);
+  return m ? { state: m.state, rationale: m.rationale ?? "" } : null;
+}
+
+/**
+ * Run the feedback loop for ONE correction: if the baseline model got that cell wrong,
+ * synthesize a reading-rule for the machine; otherwise return null. Storage is the caller's
+ * job (write the fragment to `data/machines.json`). Shared by `npm run synthesize` and the
+ * portal's `POST /api/corrections`.
+ */
+export async function synthesizeForCorrection(args: {
+  frameId: string;
+  machineId: string;
+  machineType: MachineType;
+  correctState: MachineState;
+  note?: string;
+  currentFragment?: string;
+  report: BaselineReport;
+  vision: VisionClient;
+  imagePath: string;
+}): Promise<{
+  machineId: string;
+  fragment: string;
+  source: "synthesis" | "merged";
+  costUsd?: number;
+  reason?: "already-correct" | "not-in-report" | "model-declined";
+} | null> {
+  const base = baselinePredictionFor(args.report, args.frameId, args.machineId);
+  if (!base)
+    return {
+      machineId: args.machineId,
+      fragment: "",
+      source: "synthesis",
+      reason: "not-in-report",
+    };
+  if (base.state === args.correctState)
+    return {
+      machineId: args.machineId,
+      fragment: "",
+      source: "synthesis",
+      reason: "already-correct",
+    };
+
+  const r = await synthesizeFragment(
+    {
+      machineId: args.machineId,
+      frameId: args.frameId,
+      machineType: args.machineType,
+      wrongState: base.state,
+      wrongRationale: base.rationale,
+      correctState: args.correctState,
+      note: args.note,
+      currentFragment: args.currentFragment,
+    },
+    args.vision,
+    args.imagePath,
+  );
+  if (!r.fragment)
+    return {
+      machineId: args.machineId,
+      fragment: "",
+      source: "synthesis",
+      reason: "model-declined",
+      costUsd: r.costUsd,
+    };
+  return {
+    machineId: args.machineId,
+    fragment: r.fragment,
+    source: args.currentFragment?.trim() ? "merged" : "synthesis",
+    costUsd: r.costUsd,
+  };
+}

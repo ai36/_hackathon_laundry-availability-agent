@@ -165,13 +165,14 @@ npm run dev            # http://localhost:3000
    every view (durable)”**, add a note, submit.
 3. `POST /api/corrections` writes `data/corrections/<frame>.json` and returns the re-fused
    room; the card flips immediately and gets an **integrator** badge. A *durable* correction
-   also carries to every other view of that machine.
-4. Re-score with the same correction store:
-   `npm run eval -- --mode=baseline --split=evaluation --replay --corrections`.
-5. Close the loop: `npm run synthesize -- --replay` turns those corrections into per-machine
-   reading-rules in `data/machines.json`, and
-   `npm run eval -- --mode=roi --split=evaluation --replay --fragments` scores the agent
-   *with the rules but without the override* — 63.6 % (see the results table).
+   also carries to every other view of that machine — and, with a key set, it runs the
+   **feedback loop**: the response carries `synthesized: {…}`, a per-machine reading-rule now
+   in `data/machines.json`. The next **"↻ refresh recognition"** classifies that machine (and
+   its stack neighbours) with the rule (`/api/refresh` folds `promptFragment`s in).
+4. Re-score offline with the same stores:
+   `npm run eval -- --mode=baseline --split=evaluation --replay --corrections` (override, 68.2 %)
+   and `npm run synthesize -- --replay && npm run eval -- --mode=roi --split=evaluation
+   --replay --fragments` (the loop, *rules but no override*, 63.6 % — see the results table).
 
 The tenant view (`/tenant`) shows only the resulting state — no confidence, no controls. Full
 deployment shape (Docker, `FrameSource`, static-image mock): `docs/DECISIONS.md`
@@ -196,14 +197,14 @@ rule itself on frames it never saw (4 of 5 gains held-out, including a rule for 
 fixing an un-corrected neighbour). Let a correction *teach the model a rule*, not just patch
 one cell.
 
-**Honest gap:** the loop is built and measured, but only as far as 5 frozen frames allow —
-n = 22, all 3 corrections are `out_of_order` (so the rules are broken-machine cues, not a
-`free`↔`occupied` reading-rule test), and one of the 5 fixes is in-sample. The real number
-needs a **temporal / held-out capture set** — re-shoot the same 5 angles at a different time
-so the rules are scored only on frames from *after* the corrections. That is the remaining
-step. Also not yet wired: the synthesis trigger into `POST /api/corrections` (it is a CLI),
-and fragments into the live `/api/refresh` path. See `docs/DECISIONS.md` D-0014
-"Status (2026-08-30)".
+**Honest gap:** the loop is built and **operable end-to-end in the portal** (a durable
+correction synthesises a rule; `/api/refresh` classifies with it), but the portal path is not
+separately measured — the **63.6 % is the offline `--replay` chain only**, and only as far as
+5 frozen frames allow: n = 22, all 3 corrections are `out_of_order` (so the rules are
+broken-machine cues, not a `free`↔`occupied` reading-rule test), and one of the 5 fixes is
+in-sample. The real number needs a **temporal / held-out capture set** — re-shoot the same 5
+angles at a different time so the rules are scored only on frames from *after* the
+corrections. That is the remaining step. See `docs/DECISIONS.md` D-0014 "Status (2026-08-30)".
 
 ## How agents are used
 
@@ -214,11 +215,12 @@ and fragments into the live `/api/refresh` path. See `docs/DECISIONS.md` D-0014
 - **Integrator corrections** (`src/eval/corrections.ts`, `npm run correct`) — a human-in-the-
   loop store the agent treats as authoritative. `machine`-scope corrections encode durable
   facts (a broken unit) that carry to every frame (Iteration 2 — the guaranteed fix).
-- **Correction → prompt synthesis** (`src/eval/prompt-synthesis.ts`, `npm run synthesize`) —
-  the feedback loop (Iteration 3): a model reads each correction + the classifier's own wrong
-  rationale and writes a per-machine reading-rule into `data/machines.json`, which the ROI
-  agent then consumes (`--mode=roi --fragments`). This is the step that first beat the
-  baseline automatically. Trajectory: `docs/trajectories/2026-08-30-feedback-loop.md`.
+- **Correction → prompt synthesis** (`src/eval/prompt-synthesis.ts`, `npm run synthesize`;
+  wired into `POST /api/corrections` + `/api/refresh`) — the feedback loop (Iteration 3): a
+  model reads each correction + the classifier's own wrong rationale and writes a per-machine
+  reading-rule into `data/machines.json`, which the ROI agent (`--mode=roi --fragments`) and
+  the live refresh path then consume. The step that first beat the baseline automatically.
+  Trajectory: `docs/trajectories/2026-08-30-feedback-loop.md`.
 - **`grillme`** skill — a Socratic interview that turned the one-line brief into the scoped
   problem, metric, and dataset plan. Result: `docs/PROBLEM.md`; scope decision:
   `docs/DECISIONS.md` D-0005.

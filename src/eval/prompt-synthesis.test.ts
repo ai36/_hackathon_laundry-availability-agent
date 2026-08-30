@@ -4,9 +4,12 @@ import assert from "node:assert/strict";
 import type { VisionClient, VisionRequest, VisionResponse } from "@/agent/types";
 
 import {
+  baselinePredictionFor,
   parseFragment,
   synthesisPrompt,
   synthesizeFragment,
+  synthesizeForCorrection,
+  type BaselineReport,
   type SynthesisInput,
 } from "./prompt-synthesis";
 
@@ -73,4 +76,90 @@ test("synthesizeFragment calls vision with a stable per-cell cache key and retur
   assert.equal(r.machineId, "W-01");
   assert.equal(r.fragment, "the 2.25 is the price; a real countdown blinks a colon");
   assert.equal(r.costUsd, 0.001);
+});
+
+const REPORT: BaselineReport = {
+  predictions: {
+    img_1819: {
+      machines: [
+        { machineId: "W-04", state: "free", rationale: "looks empty" },
+        { machineId: "W-03", state: "occupied", rationale: "display lit" },
+      ],
+    },
+  },
+};
+
+test("baselinePredictionFor finds a cell, or returns null", () => {
+  assert.deepEqual(baselinePredictionFor(REPORT, "img_1819", "W-04"), {
+    state: "free",
+    rationale: "looks empty",
+  });
+  assert.equal(baselinePredictionFor(REPORT, "img_1819", "W-99"), null);
+  assert.equal(baselinePredictionFor(REPORT, "img_9999", "W-04"), null);
+});
+
+test("synthesizeForCorrection: synthesises when the baseline cell was wrong", async () => {
+  const vision = new CannedVision('{"fragment": "tape across the door = out_of_order"}');
+  const out = await synthesizeForCorrection({
+    frameId: "img_1819",
+    machineId: "W-04",
+    machineType: "washer",
+    correctState: "out_of_order",
+    note: "taped off",
+    report: REPORT,
+    vision,
+    imagePath: "x.jpg",
+  });
+  assert.equal(out?.fragment, "tape across the door = out_of_order");
+  assert.equal(out?.source, "synthesis");
+  // the model was told what it got wrong
+  assert.match(vision.seen[0].prompt, /answered "free"/);
+  assert.match(vision.seen[0].prompt, /correct answer is "out_of_order"/);
+});
+
+test("synthesizeForCorrection: no call when the baseline was already right", async () => {
+  const vision = new CannedVision('{"fragment": "should not be used"}');
+  const out = await synthesizeForCorrection({
+    frameId: "img_1819",
+    machineId: "W-03",
+    machineType: "washer",
+    correctState: "occupied",
+    report: REPORT,
+    vision,
+    imagePath: "x.jpg",
+  });
+  assert.equal(out?.reason, "already-correct");
+  assert.equal(out?.fragment, "");
+  assert.equal(vision.seen.length, 0);
+});
+
+test("synthesizeForCorrection: not-in-report cell makes no call", async () => {
+  const vision = new CannedVision('{"fragment": "x"}');
+  const out = await synthesizeForCorrection({
+    frameId: "img_1819",
+    machineId: "W-42",
+    machineType: "washer",
+    correctState: "free",
+    report: REPORT,
+    vision,
+    imagePath: "x.jpg",
+  });
+  assert.equal(out?.reason, "not-in-report");
+  assert.equal(vision.seen.length, 0);
+});
+
+test("synthesizeForCorrection: merges into a human fragment (source=merged)", async () => {
+  const vision = new CannedVision('{"fragment": "revised rule"}');
+  const out = await synthesizeForCorrection({
+    frameId: "img_1819",
+    machineId: "W-04",
+    machineType: "washer",
+    correctState: "out_of_order",
+    currentFragment: "old hand-written rule",
+    report: REPORT,
+    vision,
+    imagePath: "x.jpg",
+  });
+  assert.equal(out?.source, "merged");
+  assert.match(vision.seen[0].prompt, /already has an operator reading-rule/);
 });

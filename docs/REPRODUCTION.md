@@ -41,8 +41,8 @@ npm start        # serve the production build
 ```
 
 > The portal writes to the repo: `data/corrections/` (mark-wrong), `data/machines.json`
-> (Machines editor, and `npm run synthesize` writes `promptFragment`s here),
-> `data/site-config.json` + `data/site-config/` (Cameras editor; the
+> (Machines editor; `npm run synthesize` and — with a key — a durable `POST /api/corrections`
+> write `promptFragment`s here), `data/site-config.json` + `data/site-config/` (Cameras editor; the
 > image dir is git-ignored), `data/config-overrides.json` (Settings → Configuration), and
 > `data/reservations.json` (Live status holds). The last two are git-ignored and
 > portal-runtime only — the offline eval always uses `laundry3.config.ts` and never reads
@@ -170,21 +170,37 @@ explicit `devDependency`; `npm ci` installs it).
 
 ## Feedback loop — correction → `promptFragment` (D-0014, Iteration 3) — the automated win
 
+**How the 63.6 % was produced** — the exact chain, all key-free from committed state:
+
 ```bash
-npm run synthesize -- --replay                                   # reproduce the 3 synthesised rules — NO key, NO cost
-npm run synthesize -- --live                                     # regenerate: paid (~3 calls); writes data/machines.json + data/cache/synthesis/
-npm run eval -- --mode=roi --split=evaluation --replay --fragments             # reproduce the recorded run
+npm run eval -- --mode=baseline --split=evaluation --replay              # 1. the baseline (45.5%) — its report holds the model's per-cell rationale
+npm run correct -- --list                                               # 2. the 3 integrator corrections on file (W-04 / D-02 / D-06)
+npm run synthesize -- --replay                                          # 3. synthesise the 3 reading-rules into data/machines.json (idempotent — same bytes)
+npm run eval -- --mode=roi --split=evaluation --replay --fragments      # 4. classify WITH the rules, WITHOUT the override → 63.6%
 npm run eval -- --mode=roi --split=evaluation --replay --fragments --corrections  # loop + override → 72.7%
-npm run eval -- --mode=roi --split=evaluation --live   --fragments             # re-sample: paid (~16 calls)
 ```
 
-`npm run synthesize` turns each of the 3 integrator corrections + the classifier's own wrong
-rationale into a per-machine **reading-rule** in `data/machines.json` (`fragmentSource:
-"synthesis"`). `--replay` rewrites `data/machines.json` with the same bytes it already
-contains (idempotent) — the file shows as touched but unchanged; `git checkout -- data/`
-restores it. `--mode=roi --fragments` appends each rule to that machine's ROI call —
-separate cache (`data/cache/roi-fragments/`) and report, so the plain `--mode=roi` artifacts
-are byte-identical. `claude-haiku-4-5`, `docs/artifacts/eval-roi-fragments-2026-08-30.json`:
+Paid variants (need `ANTHROPIC_API_KEY`): `npm run synthesize -- --live` (~3 calls),
+`npm run eval -- --mode=roi --live --fragments` (~16 calls).
+
+`npm run synthesize` reads each correction + the model's own wrong rationale (from the step-1
+report) and writes a per-machine **reading-rule** into `data/machines.json` (`fragmentSource:
+"synthesis"`). It is **idempotent** — re-running regenerates a prior synthesis output from
+scratch (it does not merge into it), so `--replay` produces `data/machines.json` byte-for-byte
+as committed. `--mode=roi --fragments` appends each rule to that machine's ROI call — separate
+cache (`data/cache/roi-fragments/`) and report, so the plain `--mode=roi` artifacts are
+byte-identical.
+
+**In the portal** (D-0014 wired 2026-08-30): with a key set, saving a `machine`-scope
+correction on `/integrator` runs step 3 automatically (`POST /api/corrections` → response
+`synthesized: {...}`), and the next **"↻ refresh recognition"** classifies with the rule
+(`/api/refresh` now folds `promptFragment`s into its prompt). Key-free, the portal skips
+synthesis and says so. The learned rule is advisory (integrator corrections stay
+authoritative) and revertible — `git checkout -- data/machines.json` or the Machines editor.
+Either way the **measured** number above comes only from the offline `--replay` chain,
+independent of any portal action; the portal path is not separately measured.
+
+`claude-haiku-4-5`, `docs/artifacts/eval-roi-fragments-2026-08-30.json`:
 
 | accuracy | harmful-error | coverage | `out_of_order` | cost |
 | --- | --- | --- | --- | --- |

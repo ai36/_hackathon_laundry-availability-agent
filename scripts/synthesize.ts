@@ -24,7 +24,7 @@ import { AnthropicVisionClient, CachedVisionClient, FakeVisionClient } from "@/a
 import type { VisionClient } from "@/agent/types";
 import { frameImagePath } from "@/eval/dataset";
 import { loadFrameCorrections } from "@/eval/corrections";
-import { synthesizeFragment, type SynthesisInput } from "@/eval/prompt-synthesis";
+import { synthesizeForCorrection } from "@/eval/prompt-synthesis";
 import { loadRoster, upsertMachine, writeRoster } from "@/eval/roster";
 import type { MachineState } from "@/eval/types";
 
@@ -95,43 +95,43 @@ async function main(): Promise<void> {
       continue;
     }
     for (const c of loadFrameCorrections(frameId, dir)) {
-      const mp = pred.machines.find((m) => m.machineId === c.machineId);
-      if (!mp) {
-        console.warn(`! ${frameId}/${c.machineId}: no baseline prediction — skipping`);
-        continue;
-      }
-      if (mp.state === c.correctState) {
-        console.log(
-          `= ${frameId}/${c.machineId}: baseline already "${mp.state}" — nothing to learn`,
-        );
-        continue;
-      }
       const machine = roster.machines.find((m) => m.machineId === c.machineId);
-      const input: SynthesisInput = {
-        machineId: c.machineId,
+      const type = c.machineId.startsWith("D") ? ("dryer" as const) : ("washer" as const);
+      // Merge into a HUMAN-written rule only. A prior synthesis output is regenerated from
+      // scratch, so re-running is idempotent (same prompt → same cache hash → --replay works).
+      const src = machine?.fragmentSource;
+      const currentFragment =
+        src === "synthesis" || src === "merged" ? undefined : machine?.promptFragment;
+      const out = await synthesizeForCorrection({
         frameId,
-        machineType: c.machineId.startsWith("D") ? "dryer" : "washer",
-        wrongState: mp.state,
-        wrongRationale: mp.rationale ?? "",
+        machineId: c.machineId,
+        machineType: type,
         correctState: c.correctState,
         note: c.note,
-        currentFragment: machine?.promptFragment,
-      };
-      const r = await synthesizeFragment(input, vision, frameImagePath(frameId));
-      cost += r.costUsd ?? 0;
-      if (!r.fragment) {
-        console.log(`~ ${frameId}/${c.machineId}: model returned no rule`);
+        currentFragment,
+        report,
+        vision,
+        imagePath: frameImagePath(frameId),
+      });
+      cost += out?.costUsd ?? 0;
+      if (!out || !out.fragment) {
+        const why =
+          out?.reason === "already-correct"
+            ? `baseline already "${c.correctState}" — nothing to learn`
+            : out?.reason === "not-in-report"
+              ? `not in ${reportPath} — skipping`
+              : "model returned no rule";
+        console.log(`= ${frameId}/${c.machineId}: ${why}`);
         continue;
       }
-      const source = machine?.promptFragment ? "merged" : "synthesis";
-      done.push({ machineId: c.machineId, frameId, fragment: r.fragment, source });
+      done.push({ machineId: c.machineId, frameId, fragment: out.fragment, source: out.source });
       roster = upsertMachine(roster, {
         machineId: c.machineId,
-        type: input.machineType,
-        promptFragment: r.fragment,
-        fragmentSource: source as "synthesis" | "merged",
+        type,
+        promptFragment: out.fragment,
+        fragmentSource: out.source,
       });
-      console.log(`+ ${c.machineId} (${source}, from ${frameId}): ${r.fragment}`);
+      console.log(`+ ${c.machineId} (${out.source}, from ${frameId}): ${out.fragment}`);
     }
   }
 
@@ -139,16 +139,18 @@ async function main(): Promise<void> {
     console.log("\nno fragments synthesized.");
     return;
   }
+  // On --replay / --fake no money was spent; the summed `cost` is the recorded live cost.
+  const costLabel = replay
+    ? "$0 (recorded live cost was $" + cost.toFixed(4) + ")"
+    : fake
+      ? "$0 (fake)"
+      : "$" + cost.toFixed(4);
   if (dryRun) {
-    console.log(`\n--dry-run: ${done.length} fragment(s) NOT written. cost $${cost.toFixed(4)}`);
+    console.log(`\n--dry-run: ${done.length} fragment(s) NOT written. cost ${costLabel}`);
     return;
   }
   writeRoster(roster);
-  console.log(
-    `\nwrote ${done.length} fragment(s) to data/machines.json. cost $${cost.toFixed(4)} (${
-      replay ? "replay" : fake ? "fake" : "live"
-    })`,
-  );
+  console.log(`\nwrote ${done.length} fragment(s) to data/machines.json. cost ${costLabel}`);
 }
 
 main().catch((err) => {
