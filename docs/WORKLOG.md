@@ -12,6 +12,20 @@ Entry format:
 
 ## Log
 
+### 2026-08-30 — Doc: spell out the production method (observation vs durable "mark wrong")
+
+- A portal test run made two `observation`-scope corrections and expected the feedback loop
+  to fire; it didn't (the loop is `machine`-scope only, and correctly so — free/occupied is
+  transient). Added a **"The production method"** subsection to the README portal walkthrough:
+  `observation`-scope = one-time patch for a transient state (no learning); `machine`-scope /
+  durable = lasting fact → runs `synthesizeForCorrection` → a reading-rule in
+  `data/machines.json` that every future `/api/refresh` classifies with. States plainly that
+  the integrator's durable corrections in the portal are what raise accuracy over time, and
+  the offline `--replay` chain is the *measurement* of that mechanism (production number
+  needs a temporal held-out set). Doc-only; no code / data / number change. Removed the
+  stray untracked `data/corrections/img_8633.json` (observation-scope, would shift the
+  `--corrections` eval numbers if committed).
+
 ### 2026-08-30 — Feedback loop wired into the portal end-to-end (+ synthesize --replay fix)
 
 - **Owner ask:** make the D-0014 loop operable from the integrator portal (it was CLI/eval

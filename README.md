@@ -174,6 +174,28 @@ npm run dev            # http://localhost:3000
    and `npm run synthesize -- --replay && npm run eval -- --mode=roi --split=evaluation
    --replay --fragments` (the loop, *rules but no override*, 63.6 % — see the results table).
 
+**The production method — how accuracy improves through the portal, no engineer in the loop.**
+Two kinds of "mark wrong":
+
+- **`observation`-scope** (the default) — a one-time patch for a *transient* state
+  (`free` / `occupied` on this frame). It flips the card and is used as the fused answer; it
+  does **not** teach the model anything, because the state will be different on the next
+  capture. This is the right choice for a free/occupied miss.
+- **`machine`-scope / "durable"** — a *lasting* fact about the physical unit (out of service,
+  a display quirk). It flips the card in every view **and**, with a key configured, runs the
+  **feedback loop**: `synthesizeForCorrection` reads the model's own wrong rationale and
+  writes a one-line **reading-rule** for that machine into `data/machines.json`
+  (`fragmentSource: "synthesis"`). From then on every `/api/refresh` classifies that machine —
+  and its stack neighbours, who share the crop prompt — *with the rule*, so the model stops
+  making the mistake and the override is no longer needed. The rule is advisory (corrections
+  stay authoritative) and editable / revertible in the Machines editor.
+
+So the integrator's day-to-day work (durable corrections in the portal) is exactly what
+raises recognition accuracy over time. The offline `--replay` chain in step 4 is the
+*measurement* of that mechanism on the frozen dataset (45.5 % → 63.6 % from 3 durable
+corrections, 4 of 5 gains on cells the rules weren't derived from); a production number needs
+a temporal / held-out capture set — see `docs/DECISIONS.md` D-0014 "Status (2026-08-30)".
+
 The tenant view (`/tenant`) shows only the resulting state — no confidence, no controls. Full
 deployment shape (Docker, `FrameSource`, static-image mock): `docs/DECISIONS.md`
 D-0014 / D-0015 / D-0016.
