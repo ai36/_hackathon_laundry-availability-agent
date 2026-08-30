@@ -12,6 +12,30 @@ Entry format:
 
 ## Log
 
+### 2026-08-30 — VIDEO-SCRIPT: 3:30–4:30 correction-loop narration in the owner's voice
+
+- The owner is recording the video and rewrote the "Closed correction loop" narration in
+  their own register (short declarative lines, "Первое / Второе", plain phrasing). Replaced
+  the RU text in that section with the owner's wording verbatim for the opening, then kept
+  the compliance-load-bearing content — portal wiring, "4 of 5 held-out", and the honest-gap
+  paragraph (all 3 corrections are `out_of_order`, one capture session, needs a later
+  held-out set) — rephrased plainly in the same style.
+- Numbers unchanged and re-verified this session by `--replay`: ROI + fragments **63.6 %**,
+  plain ROI **40.9 %**, baseline **45.5 %**. "обошла baseline" is scoped by the preceding
+  "На пяти исходных кадрах".
+- On-screen note and the `## 3:30 – 4:30` header timing left as-is (kept in sync with the
+  surrounding cumulative timestamps; the owner's "3:35–4:35" label is a ~5 s drift not worth
+  desyncing the sequence).
+- Doc-only. No code / data / measured-number change.
+- Compliance: `hackathon-compliance` → **PASS WITH RISKS**, no blockers
+  (`docs/trajectories/compliance/2026-08-30-video-script-loop-narration.md`). Two claim-scoping
+  phrases added before push: (1) "То есть **на этом наборе** эта автоматическая конфигурация
+  обошла baseline" (standalone "beat the baseline" is softened to "on this set" everywhere
+  else); (2) restored the owner's own commit-23adc13 qualifier on the held-out line — "…: та
+  же машина на другом кадре и соседи по общему кропу" (bare "4 из 5" over-reads the
+  generalisation vs README/CHANGELOG's 2 cue-consistency + 2 spillover breakdown). Loop-is-built
+  and honest-gap framing confirmed intact.
+
 ### 2026-08-30 — Added `docs/LIMITATIONS.md` — compromises & conventions
 
 - Owner call: the hackathon simplifications (no live camera / no camera-source setting —
