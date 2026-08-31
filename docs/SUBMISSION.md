@@ -7,7 +7,7 @@ result. Everything is key-free and offline unless a step says `--live`.
 
 ```bash
 npm ci
-git config core.hooksPath .githooks
+git config core.hooksPath .githooks   # git checkout only — skip if you unpacked the zip
 npm run synthesize -- --replay                                            # regenerate the 3 reading-rules (already committed in data/machines.json)
 npm run eval -- --mode=baseline --split=evaluation --replay                # 45.5%  — the fair baseline
 npm run eval -- --mode=roi      --split=evaluation --replay --fragments    # 63.6%  — the feedback loop (automated; see caveats below)
@@ -75,7 +75,7 @@ submission; if the submission link points at a branch, it points at `dev`.
 
 ## Verification status (2026-08-30)
 
-`typecheck` · `lint` · `format:check` · `build` · `check:data` — pass. `npm test` — 96/96.
+`typecheck` · `lint` · `format:check` · `build` · `check:data` — pass. `npm test` — 97/97.
 `--replay` reproduces `baseline` 45.5 %, `calibrated` 31.8 %, `roi` 40.9 %, **`roi
 --fragments` 63.6 %**, `baseline --corrections` 68.2 %, `roi --fragments --corrections`
 72.7 % exactly. `npm run synthesize --replay` reproduces the 3 synthesised rules

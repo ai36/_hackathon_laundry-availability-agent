@@ -115,7 +115,7 @@ saw (including a rule for one machine fixing an un-corrected neighbour). Let a c
 
 ```bash
 npm ci
-git config core.hooksPath .githooks
+git config core.hooksPath .githooks   # git checkout only — skip if you unpacked the zip
 npm run eval -- --mode=baseline --split=evaluation --replay                # 45.5 % — the fair baseline
 npm run synthesize -- --replay                                            # regenerate the 3 reading-rules (already committed)
 npm run eval -- --mode=roi      --split=evaluation --replay --fragments    # 63.6 % — the feedback loop
@@ -124,7 +124,7 @@ npm run eval -- --mode=baseline --split=evaluation --replay --corrections  # 68.
 
 Each run re-scores from the committed cache in `data/cache/` and prints accuracy,
 harmful-error rate, coverage, `out_of_order` recall, and a confusion matrix.
-Checks: `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` (96), `npm run
+Checks: `npm run typecheck`, `npm run lint`, `npm run build`, `npm test` (97), `npm run
 check:data`. Portal: `npm run dev` → `/tenant`, `/integrator`, `/integrator/settings`.
 Full clean-environment guide: **`docs/REPRODUCTION.md`**. Deliverables map: **`docs/SUBMISSION.md`**.
 
@@ -197,7 +197,7 @@ Baseline 45.5 % → **verification pass** −4.4 pp (removed, kept as a document
 
 ```bash
 npm ci
-git config core.hooksPath .githooks
+git config core.hooksPath .githooks   # git checkout only — skip if you unpacked the zip
 npm run eval -- --mode=baseline --split=evaluation --replay                # 45.5 % — fair baseline
 npm run synthesize -- --replay                                            # regenerate the 3 reading-rules (already committed)
 npm run eval -- --mode=roi      --split=evaluation --replay --fragments    # 63.6 % — the feedback loop
@@ -244,6 +244,6 @@ git archive --format=zip --prefix=laundry3/ -o laundry3-$(git rev-parse --short 
 - [ ] `main` is level with `dev`: `git push origin dev:main` (fast-forward, no PR needed)
 - [ ] build `laundry3-<sha>.zip` from `main` HEAD
 - [ ] on a clean checkout of the zip: `npm ci` then the three `npm run eval` lines above
-      print 45.5 / 63.6 / 68.2 (and `npm test` → 96/96)
+      print 45.5 / 63.6 / 68.2 (and `npm test` → 97/97)
 - [ ] record the video from `docs/VIDEO-SCRIPT.md`, upload unlisted, copy the URL
 - [ ] paste Title, Description, Video URL; attach the zip; **Submit** (not "Save as Draft")

@@ -271,14 +271,14 @@ Exact versions and rationale: `docs/DECISIONS.md` (D-0001).
 
 ```bash
 npm ci
-git config core.hooksPath .githooks          # dataset-privacy pre-commit gate
+git config core.hooksPath .githooks          # dataset-privacy pre-commit gate (git checkout only — skip if you unpacked the zip)
 npm run eval -- --mode=baseline --split=evaluation --replay                # the fair baseline — 45.5%, no API key, no cost
 npm run eval -- --mode=roi      --split=evaluation --replay --fragments    # the feedback loop — 63.6% (rules already in data/machines.json; `npm run synthesize -- --replay` regenerates them)
 npm run eval -- --mode=baseline --split=evaluation --replay --corrections  # the override on its own — 68.2%
 ```
 
 Checks: `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run build`,
-`npm test` (96), `npm run check:data`. Full clean-environment walkthrough (including a
+`npm test` (97), `npm run check:data`. Full clean-environment walkthrough (including a
 `--live` re-run and the dataset pipeline): **`docs/REPRODUCTION.md`**.
 
 ## Configuring for a real site

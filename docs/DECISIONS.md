@@ -1027,6 +1027,23 @@ iteration whose `--live` run is frozen; a real deployment moves them to `promptF
 blinking-colon cue is a **temporal** signal a single frame cannot see reliably; the real fix
 for it is P1 change-detection over 2+ frames (D-0016), not built.
 
+**Amendment (2026-08-30) — `--mode=calibrated --replay` was silently broken for anyone but
+the author; frozen + made portable.** A judge-simulation from the submission zip found the
+calibrated replay cache-missing while every doc claimed 31.8 % reproduces. Two causes, both
+in `runCalibrated`: (1) it folded roster `promptFragment`s into the prompt, so the 3 rules
+`npm run synthesize` committed on 2026-08-30 changed the request hash out from under the
+2026-08-29 cache — even on the author's machine; (2) `extraImagePaths` were absolutised via
+`process.cwd()` and `requestHash` folds those strings in, so the committed cache could only
+ever hit from the exact recording directory — for any judge it was dead on arrival (the
+2026-08-29 "reproduced byte-for-byte" reviews all ran in that directory). Fix: `runCalibrated`
+is **frozen to the recorded configuration** — it no longer reads roster fragments (none
+existed at recording; fragments are `--mode=roi --fragments`' job) and passes repo-relative
+`extraImagePaths`; the 5 cache files were renamed old-hash → new-hash (pure `git mv`-style
+renames, response bodies untouched — confirmed: both old hashes recomputed to exact committed
+filenames, and the replayed reports match `eval-calibrated{,-corrected}-2026-08-29.json`
+key-for-key). Lesson recorded: a replay hash must contain no environment-dependent string,
+and a frozen experiment must not read live mutable state.
+
 ---
 
 ## D-0016 — Deployment: Docker service, `FrameSource` abstraction, static-image mock

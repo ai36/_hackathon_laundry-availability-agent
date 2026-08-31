@@ -12,6 +12,53 @@ Entry format:
 
 ## Log
 
+### 2026-08-30 — Judge simulation from the zip → fixed a real reproducibility defect (calibrated replay)
+
+- **Final pre-submission check, done as a judge would:** extracted `laundry3-09e8bff.zip`
+  into a clean directory, no `ANTHROPIC_API_KEY`, and ran the in-archive instructions.
+  `npm ci` ok; `npm test` **96/96**; baseline 45.5 / synthesize 3 rules / roi+fragments
+  63.6 / baseline+corrections 68.2 / roi 40.9 / roi+frag+corr 72.7 — all reproduced.
+- **Found: `--mode=calibrated --replay` cache-missed from the zip** (and, separately, from
+  the author's own tree) while README / SUBMISSION / REPRODUCTION / LIMITATIONS all claim
+  31.8 % reproduces. Two causes in `runCalibrated` (`src/agent/calibrated.ts`):
+  1. it folded roster `promptFragment`s into the prompt — the 3 synthesised rules committed
+     2026-08-30 changed the request hash out from under the 2026-08-29 cache;
+  2. `extraImagePaths` were absolutised (`join(process.cwd(), rel)`) and `requestHash`
+     hashes those strings — the committed cache could only ever hit from the exact
+     recording directory. For any judge it was broken since 2026-08-29; the "reproduced
+     byte-for-byte" reviews all ran in the recording directory.
+- **Fix (code):** `runCalibrated` frozen to the recorded configuration — no roster
+  fragments (comment: that is `--mode=roi --fragments`' job), repo-relative
+  `extraImagePaths`. `camera-classify.ts` docstring corrected (it claimed "path-keyed,
+  reproduces regardless" — the exact false belief — and still named `/api/refresh` as a
+  consumer). D-0015 amendment records the lesson: no environment-dependent string in a
+  replay hash; a frozen experiment must not read live mutable state.
+- **Fix (cache):** the 5 `data/cache/calibrated/` files renamed old-hash → new-hash via a
+  one-shot script that recomputed both — all 5 old hashes matched the committed filenames
+  exactly (diagnosis confirmed); git shows 5 pure renames, response bodies untouched.
+- **Verified:** calibrated `--replay` → **31.8 %**, `--corrections` → **54.5 %**; replayed
+  report bodies match `eval-calibrated{,-corrected}-2026-08-29.json` key-for-key. All six
+  replay numbers re-run: 45.5 / 31.8 / 40.9 / 63.6 / 68.2 / 72.7. `typecheck` / `lint` /
+  `format:check` / `build` / `check:data` pass; `npm test` 96/96.
+- **Also from the simulation:** `git config core.hooksPath .githooks` fails on a zip
+  extraction (no `.git`) — added "(git checkout only — skip if you unpacked the zip)" to
+  that line in README, REPRODUCTION, SUBMISSION, SUBMISSION-FORM (×2).
+- No measured number changes; the recorded dead-end result is unchanged, it now actually
+  reproduces where the docs said it did.
+- **Compliance:** `hackathon-compliance` → **PASS WITH RISKS**, no blockers
+  (`docs/trajectories/compliance/2026-08-30-calibrated-replay-fix.md`). Reviewer confirmed:
+  freeze honest (measured run had an empty roster), cache renames pure (identical blob SHAs,
+  R100), and — checked in code — **no other mode hashes environment-dependent strings**
+  (baseline / roi / synthesis pass no `extraImagePaths`; crop coords are numeric; `imagePath`
+  never hashed). Both risks handled before push: (1) the hash was still `existsSync`-
+  conditioned → added a **replay-invariant pin test** (`calibrated.test.ts`): for every eval
+  frame, the rebuilt request's hash must resolve to a committed cache file, paths relative,
+  no "Per-machine notes" — any silent drift is now a loud test failure (chosen over the
+  config-string alternative, which would invert the deliberate live-coherence test); (2) the
+  same pin test guards the freeze on real repo data (C-01 scopes W-04, which has a fragment).
+  `npm test` **97/97** (+1); test-count refs bumped in README / SUBMISSION /
+  SUBMISSION-FORM / REPRODUCTION.
+
 ### 2026-08-30 — SUBMISSION-FORM: `dev → main` wording realigned to what actually happened
 
 - `origin/main` was created with `git push origin dev:refs/heads/main` (not a `git merge`),

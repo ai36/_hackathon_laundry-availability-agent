@@ -5,17 +5,25 @@
  *   - the machine-id list is the **camera's** declared scope, not every machine in the frame;
  *   - the camera's `annotatedShot` (ids drawn on the view) goes in as a reference image;
  *   - the camera's `mask` (transparent over the panels to read, black elsewhere) goes in
- *     as a reference image + a prompt instruction;
- *   - any roster `promptFragment` for a scoped machine is appended as a per-machine note.
+ *     as a reference image + a prompt instruction.
  *
  * The A/B against `runBaseline` is exact: same frame, same machine list, same model — the
- * only difference is the annotated shot, the mask, and the fragments.
+ * only difference is the annotated shot and the mask.
+ *
+ * FROZEN (2026-08-30). This mode is the retired −13.7 pp dead-end, kept in-tree only so
+ * `--replay` reproduces the recorded 31.8 % (`docs/CHANGELOG.md`). Its request must stay
+ * byte-identical to what `data/cache/calibrated/` was recorded with on 2026-08-29:
+ *
+ *   - it does NOT read roster `promptFragment`s — none existed at recording time, and the
+ *     rules `npm run synthesize` writes later (D-0014) must not silently change a frozen
+ *     experiment's replay hash (that is `--mode=roi --fragments`' job);
+ *   - `extraImagePaths` are the **repo-relative** paths from `data/site-config.json`, so the
+ *     request hash is independent of where the checkout lives (an absolute-path hash could
+ *     only ever replay from the recording machine's directory).
  */
 import { existsSync } from "node:fs";
-import { join } from "node:path";
 
 import { frameImagePath } from "@/eval/dataset";
-import { loadRoster } from "@/eval/roster";
 import type { Camera } from "@/eval/site-config";
 import type { FramePrediction, MachinePrediction } from "@/eval/types";
 
@@ -23,11 +31,14 @@ import { cameraClassifyPrompt } from "./camera-classify";
 import { parseAssessments } from "./parse";
 import type { VisionClient } from "./types";
 
-/** Repo-relative calibration asset → absolute path, or undefined if the file is absent. */
+/**
+ * A camera's calibration asset, kept repo-relative (hash portability — see header), or
+ * undefined if unset / absent on disk. Eval commands run from the repo root, so the
+ * relative path also reads fine when `--live` actually loads the file.
+ */
 function assetPath(rel?: string): string | undefined {
   if (!rel) return undefined;
-  const abs = join(process.cwd(), rel);
-  return existsSync(abs) ? abs : undefined;
+  return existsSync(rel) ? rel : undefined;
 }
 
 export async function runCalibrated(
@@ -37,13 +48,6 @@ export async function runCalibrated(
 ): Promise<FramePrediction> {
   const machineIds = camera.machineIds;
 
-  const fragments: Record<string, string> = {};
-  for (const m of loadRoster().machines) {
-    if (m.promptFragment?.trim() && machineIds.includes(m.machineId)) {
-      fragments[m.machineId] = m.promptFragment.trim();
-    }
-  }
-
   const annotated = assetPath(camera.annotatedShot);
   const mask = assetPath(camera.mask);
   const extraImagePaths = [annotated, mask].filter((p): p is string => !!p);
@@ -51,9 +55,9 @@ export async function runCalibrated(
   const res = await vision.analyze({
     cacheKey: `calibrated:${frameId}:${machineIds.join(",")}`,
     imagePath: frameImagePath(frameId),
+    // No `fragments`: frozen to the recorded 2026-08-29 configuration — see header.
     prompt: cameraClassifyPrompt({
       machineIds,
-      fragments,
       hasAnnotatedShot: !!annotated,
       hasMask: !!mask,
     }),

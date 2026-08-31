@@ -15,7 +15,7 @@ Written for someone starting from a clean environment.
 ```bash
 # from the project root
 npm ci
-git config core.hooksPath .githooks   # enables the dataset privacy pre-commit gate
+git config core.hooksPath .githooks   # dataset privacy pre-commit gate (git checkout only — skip if you unpacked the zip)
 cp .env.example .env                   # then put your ANTHROPIC_API_KEY in .env (not needed for --replay)
 ```
 
@@ -67,7 +67,7 @@ npm start        # serve the production build
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint (flat config)
 npm run format:check # prettier
-npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations, calibration-config guard, requestHash, camera-classify, calibrated + ROI eval, prompt-synthesis, feedback loop (expect: 96/96 pass)
+npm test             # tsx --test — config, scoring, parser, corrections, roster, site-config, overrides, reservations, calibration-config guard, requestHash, camera-classify, calibrated + ROI eval, prompt-synthesis, feedback loop, calibrated replay-invariant pin (expect: 97/97 pass)
 npm run check:data   # dataset privacy gate (also runs as the pre-commit hook)
 ```
 

@@ -1,15 +1,17 @@
 /**
  * Camera-aware classify prompt used by the eval's `--mode=calibrated` (`src/agent/
- * calibrated.ts`) and by `POST /api/refresh` (D-0015 / D-0016). It sends the camera's
- * `annotatedShot` and `mask` as extra images (`VisionRequest.extraImagePaths`, annotated
- * first, then mask) and this text describes them in that order.
+ * calibrated.ts`). It sends the camera's `annotatedShot` and `mask` as extra images
+ * (`VisionRequest.extraImagePaths`, annotated first, then mask) and this text describes
+ * them in that order. (`POST /api/refresh` no longer uses it — reverted to `baselinePrompt`
+ * on 2026-08-29.)
  *
  * NOTE (2026-08-29): `--mode=calibrated` is a **retired dead-end** (−13.7 pp — see
  * `docs/CHANGELOG.md`) and `camera.mask` was afterwards repainted as a colour-coded region
  * map for `--mode=roi`. This prompt still calls it a "transparent analysis mask" because the
- * committed `data/cache/calibrated/` was recorded against the earlier transparent masks and
- * `--replay` is path-keyed, so it reproduces regardless. Do not re-run `--mode=calibrated
- * --live` expecting the recorded numbers.
+ * committed `data/cache/calibrated/` was recorded against the earlier transparent masks;
+ * `--replay` reads those recorded responses, so it reproduces. Do not re-run
+ * `--mode=calibrated --live` expecting the recorded numbers. This prompt text itself is
+ * FROZEN — the replay hash folds it in (see `calibrated.ts`, 2026-08-30).
  */
 
 export interface CameraClassifyInput {
