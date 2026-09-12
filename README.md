@@ -1,7 +1,28 @@
-# laundry3
+# Laundry Availability Agent
 
-A project for the **micro1 Agentic Workflows Hackathon**. Submission deadline:
-2026-08-31 11:00 America/Los_Angeles (Portland time, PDT / UTC-7).
+A vision agent that reads shared laundry-room cameras and publishes per-machine
+availability, so a tenant checks before carrying a load downstairs.
+
+Built for the **micro1 Agentic Workflows Hackathon**, August 2026. The version that was
+judged is tagged
+[`submission-2026-08-30`](https://github.com/ai36/_hackathon_laundry-availability-agent/releases/tag/submission-2026-08-30).
+Everything after that tag is presentation only — this heading, a license, and repository
+metadata. No code, data, prompts, or measured results were changed. What pre-dated the
+hackathon is listed under [What existed before the hackathon](#what-existed-before-the-hackathon).
+
+**Demo video (5 min):** https://youtu.be/EMivkaOQepg
+
+![Laundry Availability Agent — tenant view: per-kind free counts, per-machine state, tap a free machine to reserve](docs/assets/portal-top.jpg)
+
+| Configuration | Per-machine accuracy | Harmful errors |
+| --- | --- | --- |
+| Baseline — one whole-frame vision prompt | 45.5% | 9.1% |
+| **Correction loop — ROI + prompt fragments** | **63.6%** | **4.5%** |
+| Loop + integrator overrides | 72.7% | 4.5% |
+
+n = 22 determinate observations across 5 frozen frames; the same cases score the baseline
+and every iteration. Full method, negative results, and the limits of this number:
+[`docs/EVALUATION.md`](docs/EVALUATION.md) and **Honest gap** below.
 
 ## The intended user & the bottleneck
 
