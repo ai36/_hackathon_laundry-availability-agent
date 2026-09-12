@@ -12,6 +12,19 @@ Entry format:
 
 ## Log
 
+### 2026-08-30 — SUBMITTED
+
+- The owner recorded the solution video from `docs/VIDEO-SCRIPT.md`, uploaded it unlisted,
+  and submitted the project on the hackathon platform: Title + Description (the
+  `SUBMISSION-FORM.md` §2-ALT short version), the video URL, and the source archive
+  `laundry3-275f98a.zip` (built from `main` HEAD `275f98a`; `dev` == `main` at submission).
+- Final pre-submission state: two full judge simulations from the zip (clean directory, no
+  API key) — all six `--replay` numbers (45.5 / 31.8 / 40.9 / 63.6 / 68.2 / 72.7),
+  `synthesize --replay` (3 rules, $0), `npm test` 97/97, `npm run build`, and the key-free
+  portal walkthrough (`/tenant`, `/integrator`, `/integrator/settings`, `/api/room` → 200;
+  `POST /api/corrections` → re-fused room) all pass from the archive alone.
+- Project record closes here; anything after this entry is post-submission.
+
 ### 2026-08-30 — Judge simulation from the zip → fixed a real reproducibility defect (calibrated replay)
 
 - **Final pre-submission check, done as a judge would:** extracted `laundry3-09e8bff.zip`
